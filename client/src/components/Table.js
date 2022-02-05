@@ -4,7 +4,7 @@ import { Hand } from "./Hand";
 
 export function Table() {
   return (
-    <div className="relative bg-gray-400 border-8 border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center">
+    <div className="relative bg-gray-400 border-8 border-slate-700 rounded-full w-2/3 h-3/5 flex items-center justify-center">
       <Hand style={{ bottom: "0%", left: "50%", position: "absolute" }} position={0}/>
       <Hand style={{ bottom: "0%", left: "25%", position: "absolute" }} position={1}/>
       <Hand style={{ bottom: "0%", left: "75%", position: "absolute" }} position={2}/>

@@ -48,6 +48,7 @@ export function evalutateRaw(hand, board) {
         count = 0;
       }
     }
+    if (straightFlush >= 0) break;
   }
   if (straightFlush >= 0) {
     const result = {

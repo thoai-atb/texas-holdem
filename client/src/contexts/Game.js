@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { findWinner } from "../utilities/comparator";
 import { generateDeck, dealCards } from "../utilities/dealer";
 import { evaluate } from "../utilities/evaluator";
 
@@ -10,19 +9,31 @@ export function GameProvider({ children }) {
   const [players, setPlayers] = React.useState([]);
   const [board, setBoard] = React.useState([]);
   const [inspection, setInspection] = React.useState();
+  const [pot, setPot] = React.useState(0);
 
   useEffect(() => {
-    const newDeck = generateDeck();
-    let newPlayers = [];
-    for (let i = 0; i < 9; i++) {
-      newPlayers.push({
-        name: "Player " + (i + 1),
-        cards: dealCards(newDeck, 2),
-      });
+    // eslint-disable-next-line no-unused-vars
+    let newDeck, newPlayers, newBoard, winner;
+    let count = 0;
+    while (true) {
+      // eslint-disable-next-line no-unused-vars
+      count++;
+      newDeck = generateDeck();
+      newPlayers = [];
+      for (let i = 0; i < 9; i++) {
+        newPlayers.push({
+          name: "Player " + (i + 1),
+          stack: 1000,
+          cards: dealCards(newDeck, 2),
+        });
+      }
+      newBoard = dealCards(newDeck, 5);
+      // winner = findWinner(newPlayers, newBoard);
+      // if (winner.type === "straight flush") break;
+      break;
     }
-    let newBoard = dealCards(newDeck, 5);
-    let winner = findWinner(newPlayers, newBoard);
-    setInspection(winner);
+    // setInspection(winner);
+    setPot(0);
     setDeck(newDeck);
     setBoard(newBoard);
     setPlayers(newPlayers);
@@ -34,7 +45,7 @@ export function GameProvider({ children }) {
     setInspection(newInspection);
   };
 
-  const value = { deck, board, players, inspect, inspection };
+  const value = { deck, board, players, inspect, inspection, pot };
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }
 
