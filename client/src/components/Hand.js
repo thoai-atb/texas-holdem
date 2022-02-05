@@ -1,12 +1,13 @@
 import React from "react";
 import { Card } from "./Card";
 import { useGame } from "../contexts/Game";
+import { indexFromPosition } from "../utilities/position_converter";
 
 export function Hand({ style, position }) {
-  const game = useGame();
-  const { players, inspect, inspection } = game;
-  if (!players || !players[position]) return null;
-  const thisPlayer = players[position];
+  const { players, inspect, inspection, seatIndex, turnIndex } = useGame();
+  const positionIndex = indexFromPosition(position, seatIndex);
+  if (!players || !players[positionIndex]) return null;
+  const handPlayer = players[positionIndex];
   const onClick = () => {
     inspect(position);
   };
@@ -16,7 +17,7 @@ export function Hand({ style, position }) {
       style={style}
       onClick={onClick}
     >
-      <div className="">
+      <div className={position === 0 ? " scale-125" : ""}>
         <div
           className={
             "flex flex-row" +
@@ -24,14 +25,23 @@ export function Hand({ style, position }) {
               ? inspection.position === position
                 ? ""
                 : " opacity-50"
-              : "")
+              : "") +
+            (turnIndex === positionIndex ? " border-2 border-yellow-400" : "")
           }
         >
-          {players[position].cards.map((card, index) => (
+          {players[positionIndex].cards.map((card, index) => (
             <Card key={index} card={card} />
           ))}
+          {new Array(2 - players[positionIndex].cards.length)
+            .fill(null)
+            .map((_, index) => (
+              <Card key={index} card={null} />
+            ))}
         </div>
-        <div className="bg-black text-center text-white text-xl">${thisPlayer.stack}</div>
+        <div className={"bg-black text-center text-white text-xl rounded-lg"}>
+          <div>${handPlayer.stack}</div>
+          <div>{position === 0 ? "You" : "Player " + positionIndex}</div>
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,9 @@ export function Board() {
         {board.map((card, index) => (
           <Card card={card} key={index} />
         ))}
+        {new Array(5 - board.length).fill(null).map((_, index) => (
+          <Card key={index} card={null} />
+        ))}
       </div>
       <div className="absolute w-full flex justify-center bg-stone-900 rounded-md">
         {inspection && (
