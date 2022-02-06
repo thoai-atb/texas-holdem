@@ -8,7 +8,7 @@ export function DealerButton() {
   let style;
   switch (positionFromIndex(buttonIndex, seatIndex)) {
     case 0:
-      style = { bottom: "10%", left: "58%" };
+      style = { bottom: "10%", left: "59%" };
       break;
     case 1:
       style = { bottom: "10%", left: "32%" };
@@ -37,14 +37,13 @@ export function DealerButton() {
     default:
       break;
   }
-  console.log(style);
   return (
     <div className="absolute w-full h-full pointer-events-none">
       <div
         className="absolute bg-white rounded-full w-9 h-9 flex items-center justify-center font-bold border border-black"
         style={style}
       >
-        D
+        {buttonIndex}
       </div>
     </div>
   );

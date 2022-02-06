@@ -66,26 +66,44 @@ io.on("connection", (socket) => {
 
   // PLAYER ACTION
   socket.on("player_action", (action) => {
-    console.log("Player action: ", action);
-    switch (action) {
-      case "bet":
+    switch (action.type) {
+      case "fold":
         if (seatIndex === game.state.turnIndex) {
-          game.nextTurn();
+          game.fold();
           broadcast();
         }
         break;
-      case "fold":
+      case "check":
+        if (seatIndex === game.state.turnIndex) {
+          game.check();
+          broadcast();
+        }
         break;
       case "call":
+        if (seatIndex === game.state.turnIndex) {
+          game.call();
+          broadcast();
+        }
+        break;
+      case "bet":
+        if (seatIndex === game.state.turnIndex) {
+          game.bet();
+          broadcast();
+        }
         break;
       case "raise":
+        if (seatIndex === game.state.turnIndex) {
+          game.raise();
+          broadcast();
+        }
+        break;
+      case "ready":
+        game.setReady(seatIndex);
+        game.checkToStart();
+        broadcast();
         break;
       default:
         break;
-    }
-    if (!game.state.playing) {
-      game.startGame();
-      broadcast();
     }
   });
 });
@@ -104,7 +122,7 @@ rl.createInterface({
       console.log("Available Seats: ", availableSeats);
       break;
     case "start":
-      game.startGame();
+      game.checkToStart();
       break;
   }
 });

@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
-import { evaluate } from "../utilities/evaluator";
 import { socket } from "../socket/socket";
+import { evaluate } from "../utilities/evaluator";
+import { positionFromIndex } from "../utilities/position_converter";
 
 const GameContext = React.createContext({});
 
 export function GameProvider({ children }) {
   const [deck, setDeck] = React.useState([]);
   const [players, setPlayers] = React.useState([]);
+  const [bets, setBets] = React.useState([]);
   const [board, setBoard] = React.useState([]);
   const [inspection, setInspection] = React.useState();
   const [pot, setPot] = React.useState(0);
@@ -14,22 +16,32 @@ export function GameProvider({ children }) {
   const [turnIndex, setTurnIndex] = React.useState(0);
   const [buttonIndex, setButtonIndex] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [currentBetSize, setCurrentBetSize] = React.useState(0);
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {
       setDeck(gameState.deck);
       setPlayers(gameState.players);
+      setBets(gameState.bets);
       setBoard(gameState.board);
       setTurnIndex(gameState.turnIndex);
       setButtonIndex(gameState.buttonIndex);
       setIsPlaying(gameState.playing);
+      setCurrentBetSize(gameState.currentBetSize);
+      setPot(gameState.pot);
+
+      if (gameState.winner)
+        setInspection({
+          ...gameState.winner,
+          position: positionFromIndex(gameState.winner.index, seatIndex),
+        });
+      else setInspection(null);
     });
     socket.on("seat_index", (index) => {
       console.log("You are in seat: ", index);
       setSeatIndex(index);
     });
-    setPot(0);
-  }, []);
+  }, [seatIndex]);
 
   const takeAction = (action) => {
     if (isPlaying && turnIndex !== seatIndex) return;
@@ -46,11 +58,14 @@ export function GameProvider({ children }) {
     deck,
     board,
     players,
+    bets,
     inspection,
     pot,
     seatIndex,
     turnIndex,
     buttonIndex,
+    isPlaying,
+    currentBetSize,
     takeAction,
     inspect,
   };

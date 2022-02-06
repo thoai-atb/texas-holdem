@@ -10,10 +10,12 @@ Array.prototype.count = function (filter) {
 };
 
 function findWinner(players, board) {
-  const results = players.map((player, position) => ({
-    ...evaluate(player.cards, board),
-    position: position,
-  }));
+  const results = players
+    .filter((player) => player?.cards.length === 2 && !player.folded)
+    .map((player) => ({
+      ...evaluate(player.cards, board),
+      index: player.seatIndex,
+    }));
   const sorted = results.sort((a, b) => b.strength - a.strength);
   return sorted[0];
 }

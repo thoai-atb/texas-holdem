@@ -4,12 +4,12 @@ import { useGame } from "../contexts/Game";
 import { indexFromPosition } from "../utilities/position_converter";
 
 export function Hand({ style, position }) {
-  const { players, inspect, inspection, seatIndex, turnIndex } = useGame();
+  const { players, inspection, seatIndex, turnIndex, isPlaying } = useGame();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
   const onClick = () => {
-    inspect(position);
+    // inspect(position);
   };
   return (
     <div
@@ -17,7 +17,14 @@ export function Hand({ style, position }) {
       style={style}
       onClick={onClick}
     >
-      <div className={position === 0 ? " scale-125" : ""}>
+      <div
+        className={
+          (position === 0 ? " scale-125 box-border" : "") +
+          (isPlaying && (handPlayer.cards.length === 0 || handPlayer.folded)
+            ? " opacity-50"
+            : "")
+        }
+      >
         <div
           className={
             "flex flex-row" +
@@ -25,8 +32,7 @@ export function Hand({ style, position }) {
               ? inspection.position === position
                 ? ""
                 : " opacity-50"
-              : "") +
-            (turnIndex === positionIndex ? " border-2 border-yellow-400" : "")
+              : "")
           }
         >
           {players[positionIndex].cards.map((card, index) => (
@@ -38,9 +44,23 @@ export function Hand({ style, position }) {
               <Card key={index} card={null} />
             ))}
         </div>
-        <div className={"bg-black text-center text-white text-xl rounded-lg"}>
+        <div
+          className={
+            "bg-black text-center box-border text-white text-xl p-1 rounded-lg relative" +
+            (turnIndex === positionIndex ? " text-lime-300 font-bold" : "")
+          }
+        >
           <div>${handPlayer.stack}</div>
           <div>{position === 0 ? "You" : "Player " + positionIndex}</div>
+          {!isPlaying && handPlayer.ready && (
+            <div
+              className={
+                "absolute bottom-full w-full h-18 bg-white text-black rounded-md"
+              }
+            >
+              READY
+            </div>
+          )}
         </div>
       </div>
     </div>
