@@ -30,7 +30,7 @@ export function Hand({ style, position }) {
             : "")
         }
       >
-        <div className={"flex flex-row"}>
+        <div className={"flex flex-row translate-y-3"}>
           {players[positionIndex].cards.map((card, index) => (
             <Card key={index} card={card} />
           ))}
@@ -47,7 +47,7 @@ export function Hand({ style, position }) {
           }
         >
           <div>${handPlayer.stack}</div>
-          <div>{position === 0 ? "You" : "Player " + positionIndex}</div>
+          <div>{handPlayer.name}</div>
           {!isPlaying && handPlayer.ready && (
             <div
               className={

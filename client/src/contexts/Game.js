@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
-import { socket } from "../socket/socket";
 import { evaluate } from "../utilities/evaluator";
 import { positionFromIndex } from "../utilities/position_converter";
 
 const GameContext = React.createContext({});
 
-export function GameProvider({ children }) {
+export function GameProvider({ children, socket }) {
   const [deck, setDeck] = React.useState([]);
   const [players, setPlayers] = React.useState([]);
   const [bets, setBets] = React.useState([]);
@@ -43,7 +42,8 @@ export function GameProvider({ children }) {
       console.log("You are in seat: ", index);
       setSeatIndex(index);
     });
-  }, [seatIndex]);
+    socket.emit("info_request");
+  }, [seatIndex, socket]);
 
   const takeAction = (action) => {
     if (isPlaying && turnIndex !== seatIndex) return;

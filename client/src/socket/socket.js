@@ -1,2 +1,6 @@
 import io from "socket.io-client";
-export const socket = io.connect("http://localhost:8000");
+export const getSocket = (name, address) => {
+  return io(address, {
+    query: "name=" + name,
+  });
+};

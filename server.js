@@ -30,7 +30,7 @@ const connections = [];
 const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 
-const game = createGame();
+const game = createGame(broadcast);
 
 function broadcast() {
   io.sockets.emit("game_state", game.state);
@@ -38,7 +38,8 @@ function broadcast() {
 
 io.on("connection", (socket) => {
   // CONNECTION
-  console.log("New client connected");
+  const name = socket.handshake.query.name;
+  console.log(`${name} joined the table`);
   connections.push(socket);
 
   // SELECT SEAT
@@ -48,15 +49,19 @@ io.on("connection", (socket) => {
   )[0];
   playerData[seatIndex] = {
     seatIndex,
+    name,
     socketId: socket.id,
   };
-  game.addPlayer(seatIndex);
+  game.addPlayer(seatIndex, name);
   broadcast();
-  socket.emit("seat_index", seatIndex);
+  socket.on("info_request", () => {
+    socket.emit("seat_index", seatIndex);
+    socket.emit("game_state", game.state);
+  });
 
   // DISCONNECT
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    console.log(`${name} left the table`);
     connections.splice(connections.indexOf(socket), 1);
     playerData[seatIndex] = null;
     availableSeats.push(seatIndex);
@@ -112,6 +117,9 @@ rl.createInterface({
   input: process.stdin,
 }).on("line", (input) => {
   switch (input) {
+    case "broadcast":
+      broadcast();
+      break;
     case "connections":
       console.log("Number of connections: ", connections.length);
       break;
@@ -119,9 +127,9 @@ rl.createInterface({
       console.log("Players data: ", playerData);
       break;
     case "seats":
-      console.log("Available Seats: ", availableSeats);
+      console.log("Available seats: ", availableSeats);
       break;
-    case "fillbots":
+    case "fill_bots":
       for (let i = 0; i < 9; i++) {
         if (playerData[i] === null) {
           playerData[i] = {
@@ -129,7 +137,7 @@ rl.createInterface({
             socketId: "bot",
             isBot: true,
           };
-          game.addPlayer(i);
+          game.addBot(i, "Mr. Bot");
         }
       }
       for (const player of playerData) {

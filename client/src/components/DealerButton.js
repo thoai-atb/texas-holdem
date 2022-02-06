@@ -43,7 +43,8 @@ export function DealerButton() {
         className="absolute bg-white rounded-full w-9 h-9 flex items-center justify-center font-bold border border-black"
         style={style}
       >
-        {buttonIndex}
+        {/* {buttonIndex} */}
+        D
       </div>
     </div>
   );

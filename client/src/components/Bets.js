@@ -6,7 +6,7 @@ export function Bets() {
   return (
     <div className="absolute w-full h-full pointer-events-none">
       <Pot />
-      <Bet style={{ bottom: "22%", left: "50%" }} position={0} />
+      <Bet style={{ bottom: "23%", left: "50%" }} position={0} />
       <Bet style={{ bottom: "25%", left: "30%" }} position={1} />
       <Bet style={{ bottom: "35%", left: "16%" }} position={2} />
       <Bet style={{ top: "35%", left: "16%" }} position={3} />
@@ -25,6 +25,7 @@ function Bet({ style, position }) {
   const amount = bets[index];
   const betType = betTypes[index];
   if (amount === 0) return null;
+  if (!betType) return null;
   return (
     <div
       className="absolute w-0 h-0 flex items-center justify-center"

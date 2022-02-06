@@ -1,8 +1,9 @@
 const { findWinner } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
+const createBot = require("./bot");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
-function createGame() {
+function createGame(update) {
   const state = {
     players: new Array(9).fill(null),
     bets: new Array(9).fill(0),
@@ -21,15 +22,31 @@ function createGame() {
 
   // PLAYERS
 
-  const addPlayer = (seatIndex) => {
+  const addPlayer = (seatIndex, name) => {
     state.players[seatIndex] = {
       seatIndex,
+      name,
       stack: 1000,
       cards: [],
     };
     if (!state.playing)
       state.players.forEach((player) => {
-        if (player) player.ready = false;
+        if (player && !player.isBot) player.ready = false;
+      });
+  };
+
+  const addBot = (seatIndex, name) => {
+    state.players[seatIndex] = {
+      seatIndex,
+      name,
+      bot: createBot(),
+      isBot: true,
+      stack: 1000,
+      cards: [],
+    };
+    if (!state.playing)
+      state.players.forEach((player) => {
+        if (player && !player.isBot) player.ready = false;
       });
   };
 
@@ -40,7 +57,7 @@ function createGame() {
     state.players[seatIndex] = null;
     if (!state.playing)
       state.players.forEach((player) => {
-        if (player) player.ready = false;
+        if (player && !player.isBot) player.ready = false;
       });
   };
 
@@ -155,6 +172,7 @@ function createGame() {
   const nextTurn = () => {
     state.turnIndex = nextActiveIndex(state.turnIndex);
     if (state.turnIndex == state.completeActionSeat) nextRound();
+    else checkBotTurn();
   };
 
   const nextButton = () => {
@@ -189,6 +207,13 @@ function createGame() {
       default:
         break;
     }
+    checkBotTurn();
+  };
+
+  const checkBotTurn = () => {
+    if (!state.players[state.turnIndex].isBot) return;
+    let bot = state.players[state.turnIndex].bot;
+    bot.takeAction(game, update);
   };
 
   const showDown = () => {
@@ -198,7 +223,7 @@ function createGame() {
     state.playing = false;
     state.players.forEach((player) => {
       if (player) {
-        player.ready = false;
+        player.ready = player.isBot;
         player.folded = false;
       }
     });
@@ -226,14 +251,15 @@ function createGame() {
       deal(tempIndex, 2);
       tempIndex = nextIndex(tempIndex);
     }
-    tempIndex = nextIndex(tempIndex);
-    tempIndex = nextIndex(tempIndex);
-    tempIndex = nextIndex(tempIndex);
+    tempIndex = nextIndex(tempIndex); // TO SMALL BLIND
+    tempIndex = nextIndex(tempIndex); // TO BIG BLIND
+    tempIndex = nextIndex(tempIndex); // TO UTG
     state.turnIndex = tempIndex;
     state.completeActionSeat = tempIndex;
+    checkBotTurn();
   };
 
-  return {
+  const game = {
     state,
     startGame,
     setReady,
@@ -245,10 +271,13 @@ function createGame() {
     call,
     raise,
     addPlayer,
+    addBot,
     removePlayer,
     nextTurn,
     nextButton,
   };
+
+  return game;
 }
 
 module.exports = createGame;
