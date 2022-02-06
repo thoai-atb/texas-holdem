@@ -13,7 +13,7 @@ export function Card({ card }) {
     <div
       className={
         "transition duration-500 w-16 h-24 m-1 flex justify-center items-center select-none rounded-lg relative" +
-        (inspection ? (isInspected ? " -translate-y-6" : " ") : " ") +
+        (inspection ? (isInspected ? " -translate-y-5" : " ") : " ") +
         (card ? " bg-white" : " bg-transparent")
       }
     >

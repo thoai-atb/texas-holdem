@@ -32,7 +32,7 @@ export function DealerButton() {
       style = { bottom: "21%", right: "13%" };
       break;
     case 8:
-      style = { bottom: "13%", right: "31%" };
+      style = { bottom: "10%", right: "32%" };
       break;
     default:
       break;

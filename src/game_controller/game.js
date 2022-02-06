@@ -6,6 +6,7 @@ function createGame() {
   const state = {
     players: new Array(9).fill(null),
     bets: new Array(9).fill(0),
+    betTypes: new Array(9).fill(null),
     deck: [],
     board: [],
     pot: 0,
@@ -83,6 +84,7 @@ function createGame() {
   const call = () => {
     const toCall = state.currentBetSize - state.bets[state.turnIndex];
     state.bets[state.turnIndex] += toCall;
+    state.betTypes[state.turnIndex] = "call";
     state.players[state.turnIndex].stack -= toCall;
     nextTurn();
   };
@@ -93,6 +95,7 @@ function createGame() {
     state.players[state.turnIndex].stack -= betSize;
     state.currentBetSize = betSize;
     state.bets[state.turnIndex] = betSize;
+    state.betTypes[state.turnIndex] = "bet";
     state.completeActionSeat = state.turnIndex;
     nextTurn();
   };
@@ -103,6 +106,7 @@ function createGame() {
     const raiseSize = 10;
     state.players[state.turnIndex].stack -= raiseSize + toCall;
     state.bets[state.turnIndex] += raiseSize + toCall;
+    state.betTypes[state.turnIndex] = "raise";
     state.currentBetSize += raiseSize;
     state.completeActionSeat = state.turnIndex;
     nextTurn();
@@ -163,6 +167,7 @@ function createGame() {
     state.currentBetSize = 0;
     state.pot += state.bets.reduce((a, b) => a + b, 0);
     state.bets.fill(0);
+    state.betTypes.fill(null);
     state.completeActionSeat = state.turnIndex;
     if (countActivePlayers() == 1) {
       showDown();
@@ -212,9 +217,8 @@ function createGame() {
     state.deck = generateDeck();
     state.board = [];
     state.winner = null;
+    state.round = 0;
     nextButton();
-    console.log("Button Index", state.buttonIndex);
-    console.log("Players", state.players);
     let tempIndex = state.buttonIndex;
     deal(tempIndex, 2);
     tempIndex = nextIndex(tempIndex);

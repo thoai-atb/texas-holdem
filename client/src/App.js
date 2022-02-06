@@ -1,6 +1,6 @@
 import "./App.css";
 import { Table } from "./components/Table";
-import { Toolbar } from "./components/Toolbar";
+import { ActionBar } from "./components/ActionBar";
 import { GameProvider } from "./contexts/Game";
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
           <Table />
         </div>
         <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-          <Toolbar />
+          <ActionBar />
         </div>
       </div>
     </GameProvider>

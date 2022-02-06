@@ -2,7 +2,7 @@ import React from "react";
 import { useGame } from "../contexts/Game";
 import { indexFromPosition } from "../utilities/position_converter";
 
-export function Toolbar() {
+export function ActionBar() {
   const {
     takeAction,
     isPlaying,
@@ -78,8 +78,8 @@ export const ActionButton = ({ action, title, className, disable }) => {
     <button
       className={
         className +
-        " text-white cursor-pointer p-4 rounded-full uppercase m-8 text-4xl w-64 text-center" +
-        (disable ? " opacity-50" : " active:brightness-50")
+        " text-white p-4 rounded-full uppercase m-8 text-4xl w-64 text-center" +
+        (disable ? " opacity-50" : " active:brightness-50 cursor-pointer")
       }
       disabled={disable}
       onClick={action}

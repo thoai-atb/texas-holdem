@@ -121,6 +121,24 @@ rl.createInterface({
     case "seats":
       console.log("Available Seats: ", availableSeats);
       break;
+    case "fillbots":
+      for (let i = 0; i < 9; i++) {
+        if (playerData[i] === null) {
+          playerData[i] = {
+            seatIndex: i,
+            socketId: "bot",
+            isBot: true,
+          };
+          game.addPlayer(i);
+        }
+      }
+      for (const player of playerData) {
+        if (player.isBot) {
+          game.setReady(player.seatIndex);
+        }
+      }
+      broadcast();
+      break;
     case "start":
       game.checkToStart();
       break;

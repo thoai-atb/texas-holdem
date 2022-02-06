@@ -9,6 +9,7 @@ export function GameProvider({ children }) {
   const [deck, setDeck] = React.useState([]);
   const [players, setPlayers] = React.useState([]);
   const [bets, setBets] = React.useState([]);
+  const [betTypes, setBetTypes] = React.useState([]);
   const [board, setBoard] = React.useState([]);
   const [inspection, setInspection] = React.useState();
   const [pot, setPot] = React.useState(0);
@@ -23,6 +24,7 @@ export function GameProvider({ children }) {
       setDeck(gameState.deck);
       setPlayers(gameState.players);
       setBets(gameState.bets);
+      setBetTypes(gameState.betTypes);
       setBoard(gameState.board);
       setTurnIndex(gameState.turnIndex);
       setButtonIndex(gameState.buttonIndex);
@@ -59,6 +61,7 @@ export function GameProvider({ children }) {
     board,
     players,
     bets,
+    betTypes,
     inspection,
     pot,
     seatIndex,
