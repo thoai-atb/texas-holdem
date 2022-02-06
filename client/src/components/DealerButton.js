@@ -2,37 +2,41 @@ import React from "react";
 import { useGame } from "../contexts/Game";
 import { positionFromIndex } from "../utilities/position_converter";
 
-export function DealerButton() {
+export function DealerButton({ debugPosition = -1 }) {
   const { buttonIndex, seatIndex } = useGame();
   if (buttonIndex < 0) return null;
+  let position =
+    debugPosition < 0
+      ? positionFromIndex(buttonIndex, seatIndex)
+      : debugPosition;
   let style;
-  switch (positionFromIndex(buttonIndex, seatIndex)) {
+  switch (position) {
     case 0:
-      style = { bottom: "10%", left: "59%" };
+      style = { bottom: "9%", left: "57%" };
       break;
     case 1:
-      style = { bottom: "10%", left: "32%" };
+      style = { bottom: "8%", left: "32%" };
       break;
     case 2:
-      style = { bottom: "25%", left: "13%" };
+      style = { bottom: "19%", left: "13%" };
       break;
     case 3:
-      style = { top: "22%", left: "13%" };
+      style = { top: "19%", left: "13%" };
       break;
     case 4:
-      style = { top: "21%", left: "28%" };
+      style = { top: "9%", left: "32%" };
       break;
     case 5:
-      style = { top: "21%", right: "28%" };
+      style = { top: "9%", right: "32%" };
       break;
     case 6:
-      style = { top: "22%", right: "13%" };
+      style = { top: "19%", right: "13%" };
       break;
     case 7:
-      style = { bottom: "21%", right: "13%" };
+      style = { bottom: "19%", right: "13%" };
       break;
     case 8:
-      style = { bottom: "10%", right: "32%" };
+      style = { bottom: "8%", right: "32%" };
       break;
     default:
       break;
@@ -43,8 +47,7 @@ export function DealerButton() {
         className="absolute bg-white rounded-full w-9 h-9 flex items-center justify-center font-bold border border-black"
         style={style}
       >
-        {/* {buttonIndex} */}
-        D
+        {/* {buttonIndex} */}D
       </div>
     </div>
   );

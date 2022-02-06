@@ -3,7 +3,10 @@ const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const createBot = require("./bot");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
-function createGame(update) {
+const ROUND_TIME = 1000;
+const SHOWDOWN_TIME = 3000;
+
+function createGame(onUpdate) {
   const state = {
     players: new Array(9).fill(null),
     bets: new Array(9).fill(0),
@@ -95,11 +98,19 @@ function createGame(update) {
   };
 
   const check = () => {
-    if (state.currentBetSize === 0) nextTurn();
+    if (state.currentBetSize !== 0) return;
+    state.betTypes[state.turnIndex] = "check";
+    nextTurn();
   };
 
   const call = () => {
     const toCall = state.currentBetSize - state.bets[state.turnIndex];
+    if (toCall > state.players[state.turnIndex].stack) {
+      if (state.players[state.turnIndex].stack === 0) {
+        return;
+      }
+      toCall = state.players[state.turnIndex].stack;
+    }
     state.bets[state.turnIndex] += toCall;
     state.betTypes[state.turnIndex] = "call";
     state.players[state.turnIndex].stack -= toCall;
@@ -108,7 +119,8 @@ function createGame(update) {
 
   const bet = () => {
     if (state.currentBetSize > 0) return;
-    const betSize = 10;
+    if (state.players[state.turnIndex].stack === 0) return;
+    const betSize = Math.ceil(Math.random() * 50);
     state.players[state.turnIndex].stack -= betSize;
     state.currentBetSize = betSize;
     state.bets[state.turnIndex] = betSize;
@@ -120,13 +132,25 @@ function createGame(update) {
   const raise = () => {
     if (state.currentBetSize === 0) return;
     const toCall = state.currentBetSize - state.bets[state.turnIndex];
-    const raiseSize = 10;
+    if (toCall > state.players[state.turnIndex].stack) {
+      return;
+    }
+    const raiseSize = Math.ceil(Math.random() * 100);
     state.players[state.turnIndex].stack -= raiseSize + toCall;
     state.bets[state.turnIndex] += raiseSize + toCall;
     state.betTypes[state.turnIndex] = "raise";
     state.currentBetSize += raiseSize;
     state.completeActionSeat = state.turnIndex;
     nextTurn();
+  };
+
+  const blind = (position, size) => {
+    const blindSize = Math.min(size, state.players[position].stack);
+    state.players[position].stack -= blindSize;
+    state.bets[position] = blindSize;
+    state.betTypes[position] = "bet";
+    state.currentBetSize = Math.max(state.currentBetSize, blindSize);
+    state.completeActionSeat = position;
   };
 
   // TURNS
@@ -154,25 +178,15 @@ function createGame(update) {
     return index;
   };
 
-  const previousActiveIndex = (index) => {
-    if (
-      state.players.every((player) => !player?.cards?.length || player.folded)
-    )
-      return -1;
-    do {
-      index = (index - 1 + state.players.length) % state.players.length;
-    } while (
-      index < 0 ||
-      !state.players[index]?.cards?.length ||
-      state.players[index].folded
-    );
-    return index;
-  };
-
   const nextTurn = () => {
-    state.turnIndex = nextActiveIndex(state.turnIndex);
-    if (state.turnIndex == state.completeActionSeat) nextRound();
-    else checkBotTurn();
+    const nextIndex = nextActiveIndex(state.turnIndex);
+    if (nextIndex == state.completeActionSeat) {
+      state.turnIndex = -1;
+      setTimeout(() => nextRound(), ROUND_TIME);
+      return;
+    }
+    state.turnIndex = nextIndex;
+    checkBotTurn();
   };
 
   const nextButton = () => {
@@ -203,30 +217,41 @@ function createGame(update) {
         break;
       case 4:
         showDown();
-        break;
+        return;
       default:
         break;
     }
+    onUpdate();
     checkBotTurn();
   };
 
   const checkBotTurn = () => {
-    if (!state.players[state.turnIndex].isBot) return;
+    if (!state.players[state.turnIndex]?.isBot) return;
     let bot = state.players[state.turnIndex].bot;
-    bot.takeAction(game, update);
+    bot.takeAction(game, onUpdate);
   };
 
   const showDown = () => {
+    state.turnIndex = -1;
+    state.showDown = true;
     state.winner = findWinner(state.players, state.board);
+    onUpdate();
+    setTimeout(() => postShowDown(), SHOWDOWN_TIME);
+  };
+
+  const postShowDown = () => {
     state.players[state.winner.index].stack += state.pot;
     state.pot = 0;
     state.playing = false;
+    state.winner = null;
+    state.board = [];
     state.players.forEach((player) => {
       if (player) {
         player.ready = player.isBot;
-        player.folded = false;
+        player.cards = [];
       }
     });
+    onUpdate();
   };
 
   const startGame = () => {
@@ -241,7 +266,13 @@ function createGame(update) {
     state.playing = true;
     state.deck = generateDeck();
     state.board = [];
+    state.players.forEach((player) => {
+      if (player) {
+        player.folded = false;
+      }
+    });
     state.winner = null;
+    state.showDown = false;
     state.round = 0;
     nextButton();
     let tempIndex = state.buttonIndex;
@@ -252,10 +283,11 @@ function createGame(update) {
       tempIndex = nextIndex(tempIndex);
     }
     tempIndex = nextIndex(tempIndex); // TO SMALL BLIND
+    blind(tempIndex, 5);
     tempIndex = nextIndex(tempIndex); // TO BIG BLIND
+    blind(tempIndex, 10);
     tempIndex = nextIndex(tempIndex); // TO UTG
     state.turnIndex = tempIndex;
-    state.completeActionSeat = tempIndex;
     checkBotTurn();
   };
 

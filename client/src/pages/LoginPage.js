@@ -9,7 +9,10 @@ export default function LoginPage({ loginFunction }) {
       alert("Display name cannot be empty!");
       return;
     }
-    loginFunction(name, address);
+    const failHandler = () => {
+      setBusy(false);
+    };
+    loginFunction(name, address, failHandler);
     setBusy(true);
   };
   const onKeyDown = (event) => {

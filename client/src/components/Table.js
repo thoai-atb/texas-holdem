@@ -7,10 +7,11 @@ import { Hand } from "./Hand";
 export function Table() {
   return (
     <div className="relative bg-gray-400 border-8 border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center">
+      <div className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300"></div>
       <Board />
       <DealerButton />
       <Bets />
-      <Hand style={{ bottom: "-5%", left: "50%", position: "absolute" }} position={0}/>
+      <Hand style={{ bottom: "-10%", left: "50%", position: "absolute" }} position={0}/>
       <Hand style={{ bottom: "0%", left: "25%", position: "absolute" }} position={1}/>
       <Hand style={{ bottom: "20%", left: "5%", position: "absolute" }} position={2}/>
       <Hand style={{ top: "20%", left: "5%", position: "absolute" }} position={3}/>

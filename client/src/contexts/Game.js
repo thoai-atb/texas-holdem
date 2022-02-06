@@ -17,6 +17,7 @@ export function GameProvider({ children, socket }) {
   const [buttonIndex, setButtonIndex] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [currentBetSize, setCurrentBetSize] = React.useState(0);
+  const [showDown, setShowDown] = React.useState(false);
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {
@@ -30,6 +31,7 @@ export function GameProvider({ children, socket }) {
       setIsPlaying(gameState.playing);
       setCurrentBetSize(gameState.currentBetSize);
       setPot(gameState.pot);
+      setShowDown(gameState.showDown);
 
       if (gameState.winner)
         setInspection({
@@ -69,6 +71,7 @@ export function GameProvider({ children, socket }) {
     buttonIndex,
     isPlaying,
     currentBetSize,
+    showDown,
     takeAction,
     inspect,
   };

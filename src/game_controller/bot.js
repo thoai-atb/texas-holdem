@@ -6,7 +6,7 @@ const createBot = () => {
     setTimeout(() => {
       game[randomAction]();
       callback();
-    }, 1000);
+    }, 1000 + Math.random() * 1000);
   };
   return {
     takeAction,

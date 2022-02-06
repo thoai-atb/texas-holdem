@@ -1,6 +1,5 @@
 import React from "react";
 import { useGame } from "../contexts/Game";
-import { indexFromPosition } from "../utilities/position_converter";
 
 export function ActionBar() {
   const {
@@ -12,15 +11,14 @@ export function ActionBar() {
     bets,
     currentBetSize,
   } = useGame();
-  const positionIndex = indexFromPosition(0, seatIndex);
-  if (!players || !players[positionIndex]) return null;
-  const handPlayer = players[positionIndex];
-  const myBet = bets[positionIndex];
+  if (!players || !players[seatIndex]) return null;
+  const thisPlayer = players[seatIndex];
+  const myBet = bets[seatIndex];
   const toCall = currentBetSize - myBet;
   const disable = !isPlaying || seatIndex !== turnIndex;
   return (
     <div className="w-full flex items-center justify-center pointer-events-auto">
-      {!isPlaying && !handPlayer.ready && (
+      {!isPlaying && !thisPlayer.ready && (
         <ActionButton
           action={() => takeAction({ type: "ready" })}
           title="ready"
@@ -35,12 +33,12 @@ export function ActionBar() {
             disable={disable}
             className="bg-red-500"
           />
-          {toCall > 0 && (
+          {toCall > 0 && thisPlayer.stack > 0 && (
             <ActionButton
               action={() => takeAction({ type: "call" })}
-              title="call"
+              title={"call $" + Math.min(toCall, thisPlayer.stack)}
               disable={disable}
-              className="bg-lime-500"
+              className="bg-cyan-500"
             />
           )}
           {toCall === 0 && (
@@ -48,7 +46,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "check" })}
               title="check"
               disable={disable}
-              className="bg-lime-500"
+              className="bg-cyan-500"
             />
           )}
           {currentBetSize > 0 && (
@@ -56,7 +54,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "raise" })}
               title="raise"
               disable={disable}
-              className="bg-cyan-500"
+              className="bg-lime-500"
             />
           )}
           {currentBetSize === 0 && (
@@ -64,7 +62,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "bet" })}
               title="bet"
               disable={disable}
-              className="bg-cyan-500"
+              className="bg-lime-500"
             />
           )}
         </>

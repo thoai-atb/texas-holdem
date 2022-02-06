@@ -4,7 +4,8 @@ import { useGame } from "../contexts/Game";
 import { indexFromPosition } from "../utilities/position_converter";
 
 export function Hand({ style, position }) {
-  const { players, inspection, seatIndex, turnIndex, isPlaying } = useGame();
+  const { players, inspection, seatIndex, turnIndex, isPlaying, showDown } =
+    useGame();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
@@ -19,10 +20,8 @@ export function Hand({ style, position }) {
     >
       <div
         className={
+          "flex justify-center items-center flex-col " +
           (position === 0 ? " scale-125 box-border" : "") +
-          (isPlaying && (handPlayer.cards.length === 0 || handPlayer.folded)
-            ? " opacity-50"
-            : "") +
           (inspection
             ? inspection.position === position
               ? ""
@@ -30,21 +29,26 @@ export function Hand({ style, position }) {
             : "")
         }
       >
-        <div className={"flex flex-row translate-y-3"}>
-          {players[positionIndex].cards.map((card, index) => (
-            <Card key={index} card={card} />
-          ))}
-          {new Array(2 - players[positionIndex].cards.length)
-            .fill(null)
-            .map((_, index) => (
-              <Card key={index} card={null} />
+        {!handPlayer.folded && (
+          <div className={"flex flex-row translate-y-3"}>
+            {players[positionIndex].cards.map((card, index) => (
+              <Card
+                key={index}
+                card={card}
+                hidden={!showDown && position !== 0}
+              />
             ))}
-        </div>
+          </div>
+        )}
         <div
           className={
-            "bg-black text-center text-white text-xl pb-1 rounded-lg relative" +
-            (turnIndex === positionIndex ? " text-lime-300 font-bold" : "")
+            "bg-black text-center text-white text-xl pb-1 rounded-lg relative border-gray-800 transition duration-500" +
+            (turnIndex === positionIndex ? " bg-lime-300 text-gray-800 border-2 font-bold" : "")
           }
+          style={{
+            width: "9rem",
+            height: "3.8rem",
+          }}
         >
           <div>${handPlayer.stack}</div>
           <div>{handPlayer.name}</div>

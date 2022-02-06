@@ -9,7 +9,7 @@ import LoginPage from "./pages/LoginPage";
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [socket, setSocket] = useState(null);
-  const login = (name, address) => {
+  const login = (name, address, onFail) => {
     address = address || "http://localhost:8000";
     const socket = getSocket(name, address);
     socket.on("connect", () => {
@@ -17,6 +17,7 @@ function App() {
     });
     socket.on("connect_error", () => {
       alert("Can't connect to server!");
+      onFail();
     });
     socket.on("disconnect", () => {
       alert("Disconnected from server!");
