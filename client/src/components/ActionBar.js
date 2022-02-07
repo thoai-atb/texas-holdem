@@ -38,7 +38,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "call" })}
               title={"call $" + Math.min(toCall, thisPlayer.stack)}
               disable={disable}
-              className="bg-cyan-500"
+              className="bg-lime-500"
             />
           )}
           {toCall === 0 && (
@@ -46,7 +46,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "check" })}
               title="check"
               disable={disable}
-              className="bg-cyan-500"
+              className="bg-lime-500"
             />
           )}
           {currentBetSize > 0 && (
@@ -54,7 +54,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "raise" })}
               title="raise"
               disable={disable}
-              className="bg-lime-500"
+              className="bg-cyan-500"
             />
           )}
           {currentBetSize === 0 && (
@@ -62,7 +62,7 @@ export function ActionBar() {
               action={() => takeAction({ type: "bet" })}
               title="bet"
               disable={disable}
-              className="bg-lime-500"
+              className="bg-cyan-500"
             />
           )}
         </>

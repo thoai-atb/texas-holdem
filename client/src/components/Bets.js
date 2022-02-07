@@ -1,6 +1,7 @@
 import React from "react";
 import { useGame } from "../contexts/Game";
 import { indexFromPosition } from "../utilities/position_converter";
+import { AiOutlineCheckCircle } from "react-icons/ai";
 
 export function Bets() {
   return (
@@ -24,23 +25,29 @@ function Bet({ style, position }) {
   const index = indexFromPosition(position, seatIndex);
   const amount = bets[index];
   const betType = betTypes[index];
-  if (amount === 0) return null;
   if (!betType) return null;
   return (
     <div
       className="absolute w-0 h-0 flex items-center justify-center"
       style={style}
     >
-      <div
-        className={
-          "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-2 border-white border-dotted"
-        }
-        style={{
-          backgroundColor: colorFromAmount(amount),
-        }}
-      >
-        ${amount}
-      </div>
+      {amount > 0 && (
+        <div
+          className={
+            "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-2 border-white border-dotted"
+          }
+          style={{
+            backgroundColor: colorFromAmount(amount),
+          }}
+        >
+          ${amount}
+        </div>
+      )}
+      {betType === "check" && amount === 0 && (
+        <div className="text-5xl font- text-lime-200">
+          <AiOutlineCheckCircle />
+        </div>
+      )}
     </div>
   );
 }

@@ -66,6 +66,10 @@ io.on("connection", (socket) => {
     playerData[seatIndex] = null;
     availableSeats.push(seatIndex);
     game.removePlayer(seatIndex);
+    if (playerData.every((player) => player === null)) {
+      console.log("No players left, resetting game");
+      Object.assign(game, createGame(broadcast));
+    }
     broadcast();
   });
 
@@ -132,17 +136,7 @@ rl.createInterface({
     case "fill_bots":
       for (let i = 0; i < 9; i++) {
         if (playerData[i] === null) {
-          playerData[i] = {
-            seatIndex: i,
-            socketId: "bot",
-            isBot: true,
-          };
-          game.addBot(i, "Mr. Bot");
-        }
-      }
-      for (const player of playerData) {
-        if (player.isBot) {
-          game.setReady(player.seatIndex);
+          game.addBot("Mr. Bot");
         }
       }
       broadcast();

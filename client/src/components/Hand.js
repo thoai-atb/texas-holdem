@@ -4,11 +4,19 @@ import { useGame } from "../contexts/Game";
 import { indexFromPosition } from "../utilities/position_converter";
 
 export function Hand({ style, position }) {
-  const { players, inspection, seatIndex, turnIndex, isPlaying, showDown } =
-    useGame();
+  const {
+    players,
+    inspection,
+    seatIndex,
+    turnIndex,
+    isPlaying,
+    showDown,
+    betTypes,
+  } = useGame();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
+  const actionType = handPlayer.folded ? "fold" : betTypes[positionIndex];
   const onClick = () => {
     // inspect(position);
   };
@@ -42,15 +50,25 @@ export function Hand({ style, position }) {
         )}
         <div
           className={
-            "bg-black text-center text-white text-xl pb-1 rounded-lg relative border-gray-800 transition duration-500" +
-            (turnIndex === positionIndex ? " bg-lime-300 text-gray-800 border-2 font-bold" : "")
+            "bg-black text-center text-white text-xl pb-1 rounded-lg relative border-gray-800 transition duration-300" +
+            (turnIndex === positionIndex
+              ? " bg-lime-300 text-gray-800 border-2 font-bold"
+              : "")
           }
           style={{
             width: "9rem",
             height: "3.8rem",
           }}
         >
-          <div>${handPlayer.stack}</div>
+          <div>
+            ${handPlayer.stack}
+            <span style={{ fontSize: "1em" }}>
+              {turnIndex !== positionIndex &&
+                actionType &&
+                actionType !== "blind" &&
+                ` | ${actionType.toUpperCase()}`}
+            </span>
+          </div>
           <div>{handPlayer.name}</div>
           {!isPlaying && handPlayer.ready && (
             <div
