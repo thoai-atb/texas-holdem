@@ -74,6 +74,7 @@ export function GameProvider({ children, socket }) {
     showDown,
     takeAction,
     inspect,
+    socket,
   };
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }

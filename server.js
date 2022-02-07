@@ -29,6 +29,7 @@ const connections = [];
 
 const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
+var chatLogging = false;
 
 const game = createGame(broadcast);
 
@@ -115,13 +116,25 @@ io.on("connection", (socket) => {
         break;
     }
   });
+
+  // CHAT
+  socket.on("chat_message", (message) => {
+    if (message[0] === "/") {
+      const command = message.slice(1);
+      executeCommand(command, name);
+      return;
+    }
+    const chat = `<${name}> ${message}`;
+    if (chatLogging) console.log(chat);
+    io.sockets.emit("chat_message", chat);
+  });
 });
 
-rl.createInterface({
-  input: process.stdin,
-}).on("line", (input) => {
-  switch (input) {
+const executeCommand = (command, invoker = "Server") => {
+  let isAction = false;
+  switch (command) {
     case "broadcast":
+      isAction = true;
       broadcast();
       break;
     case "connections":
@@ -134,6 +147,7 @@ rl.createInterface({
       console.log("Available seats: ", availableSeats);
       break;
     case "fill_bots":
+      isAction = true;
       for (let i = 0; i < 9; i++) {
         if (playerData[i] === null) {
           game.addBot("Mr. Bot");
@@ -142,7 +156,20 @@ rl.createInterface({
       broadcast();
       break;
     case "start":
+      isAction = true;
       game.checkToStart();
       break;
+    case "toggle_chat_log":
+      isAction = true;
+      chatLogging = !chatLogging;
+      break;
+    default:
+      return;
   }
-});
+  const info = `${invoker}: ${command}`;
+  io.sockets.emit("chat_message", info);
+};
+
+rl.createInterface({
+  input: process.stdin,
+}).on("line", executeCommand);
