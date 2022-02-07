@@ -34,7 +34,7 @@ function App() {
   useEffect(() => {
     const keyDown = (e) => {
       if (!loggedIn) return;
-      if (e.key === "t" || e.key === "T") {
+      if (e.key === "t" || e.key === "T" || e.key === "`") {
         setChatHidden(false);
       }
     };
@@ -66,13 +66,11 @@ function App() {
               <ActionBar />
             </div>
             <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-              {
-                chatHint && (
-                  <div className="text-gray-800 opacity-50 tracking-wider uppercase text-2xl absolute top-4 text-center">
-                    {chatHint}
-                  </div>
-                )
-              }
+              {chatHint && (
+                <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
+                  {chatHint}
+                </div>
+              )}
               <Chat hidden={chatHidden} setHidden={setChatHidden} />
             </div>
           </GameProvider>

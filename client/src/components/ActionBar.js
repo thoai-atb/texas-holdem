@@ -41,7 +41,7 @@ export function ActionBar() {
               className="bg-lime-500"
             />
           )}
-          {toCall === 0 && (
+          {(toCall === 0 || thisPlayer.stack === 0) && (
             <ActionButton
               action={() => takeAction({ type: "check" })}
               title="check"
@@ -49,7 +49,7 @@ export function ActionBar() {
               className="bg-lime-500"
             />
           )}
-          {currentBetSize > 0 && (
+          {currentBetSize > 0 && thisPlayer.stack + myBet > currentBetSize && (
             <ActionButton
               action={() => takeAction({ type: "raise" })}
               title="raise"
@@ -57,7 +57,7 @@ export function ActionBar() {
               className="bg-cyan-500"
             />
           )}
-          {currentBetSize === 0 && (
+          {currentBetSize === 0 && thisPlayer.stack > 0 && (
             <ActionButton
               action={() => takeAction({ type: "bet" })}
               title="bet"

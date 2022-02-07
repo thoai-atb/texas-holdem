@@ -1,10 +1,32 @@
 const createBot = () => {
   const takeAction = (game, callback) => {
     const availableActions = getAvailableActions(game.state);
-    const randomAction =
-      availableActions[Math.floor(Math.random() * availableActions.length)];
+    const foldAction = availableActions.filter((action) => action === "fold");
+    const passiveAction = availableActions.filter(
+      (action) => action === "check" || action === "call"
+    );
+    const agressiveAction = availableActions.filter(
+      (action) => action === "bet" || action === "raise"
+    );
+    const poolOfActions = [
+      ...foldAction,
+      ...passiveAction,
+      ...passiveAction,
+      ...passiveAction,
+      ...passiveAction,
+      ...agressiveAction,
+    ];
+    const id = game.state.id;
     setTimeout(() => {
-      game[randomAction]();
+      if (game.state.id !== id) {
+        return;
+      }
+      let accepted = false;
+      while (!accepted) {
+        const randomAction =
+          poolOfActions[Math.floor(Math.random() * poolOfActions.length)];
+        accepted = game[randomAction]();
+      }
       callback();
     }, 1000 + Math.random() * 1000);
   };

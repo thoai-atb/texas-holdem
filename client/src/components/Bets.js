@@ -44,7 +44,7 @@ function Bet({ style, position }) {
         </div>
       )}
       {betType === "check" && amount === 0 && (
-        <div className="text-5xl font- text-lime-200">
+        <div className="text-5xl text-slate-700">
           <AiOutlineCheckCircle />
         </div>
       )}

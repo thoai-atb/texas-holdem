@@ -8,6 +8,9 @@ const SHOWDOWN_TIME = 5000;
 
 function createGame(onUpdate) {
   const state = {
+    id:
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15), // TO IDENTIFY GAMES WHEN RESETTING
     players: new Array(9).fill(null),
     bets: new Array(9).fill(0),
     betTypes: new Array(9).fill(null),
@@ -43,7 +46,7 @@ function createGame(onUpdate) {
     if (seatIndex === -1) return false;
     setBot(seatIndex, name);
     return true;
-  }
+  };
 
   const setBot = (seatIndex, name) => {
     state.players[seatIndex] = {
@@ -106,22 +109,26 @@ function createGame(onUpdate) {
   const fold = () => {
     state.players[state.turnIndex].folded = true;
     if (state.completeActionSeat === state.turnIndex) {
-      state.completeActionSeat = nextActiveIndex(state.completeActionSeat);
+      nextTurn(true);
+      return true;
     }
     nextTurn();
+    return true;
   };
 
   const check = () => {
-    if (state.currentBetSize > state.bets[state.turnIndex]) return;
+    if (state.players[state.turnIndex].stack > 0)
+      if (state.currentBetSize > state.bets[state.turnIndex]) return false;
     state.betTypes[state.turnIndex] = "check";
     nextTurn();
+    return true;
   };
 
   const call = () => {
-    const toCall = state.currentBetSize - state.bets[state.turnIndex];
+    var toCall = state.currentBetSize - state.bets[state.turnIndex];
     if (toCall > state.players[state.turnIndex].stack) {
       if (state.players[state.turnIndex].stack === 0) {
-        return;
+        return false;
       }
       toCall = state.players[state.turnIndex].stack;
     }
@@ -129,25 +136,30 @@ function createGame(onUpdate) {
     state.betTypes[state.turnIndex] = "call";
     state.players[state.turnIndex].stack -= toCall;
     nextTurn();
+    return true;
   };
 
   const bet = () => {
-    if (state.currentBetSize > 0) return;
-    if (state.players[state.turnIndex].stack === 0) return;
-    const betSize = Math.ceil(Math.random() * 50);
+    if (state.currentBetSize > 0) return false;
+    if (state.players[state.turnIndex].stack === 0) return false;
+    const betSize = Math.ceil(
+      Math.random() * 50,
+      state.players[state.turnIndex].stack
+    );
     state.players[state.turnIndex].stack -= betSize;
     state.currentBetSize = betSize;
     state.bets[state.turnIndex] = betSize;
     state.betTypes[state.turnIndex] = "bet";
     state.completeActionSeat = state.turnIndex;
     nextTurn();
+    return true;
   };
 
   const raise = () => {
-    if (state.currentBetSize === 0) return;
+    if (state.currentBetSize === 0) return false;
     const toCall = state.currentBetSize - state.bets[state.turnIndex];
     if (toCall > state.players[state.turnIndex].stack) {
-      return;
+      return false;
     }
     const raiseSize = Math.ceil(Math.random() * 100);
     state.players[state.turnIndex].stack -= raiseSize + toCall;
@@ -156,6 +168,7 @@ function createGame(onUpdate) {
     state.currentBetSize += raiseSize;
     state.completeActionSeat = state.turnIndex;
     nextTurn();
+    return true;
   };
 
   const blind = (position, size) => {
@@ -164,6 +177,7 @@ function createGame(onUpdate) {
     state.bets[position] = blindSize;
     state.betTypes[position] = "blind";
     state.currentBetSize = Math.max(state.currentBetSize, blindSize);
+    return true;
   };
 
   // TURNS
@@ -191,9 +205,11 @@ function createGame(onUpdate) {
     return index;
   };
 
-  const nextTurn = () => {
+  const nextTurn = (carryCompleteActionSeat) => {
     const nextIndex = nextActiveIndex(state.turnIndex);
-    if (nextIndex == state.completeActionSeat) {
+    if (carryCompleteActionSeat) {
+      state.completeActionSeat = nextIndex;
+    } else if (nextIndex == state.completeActionSeat) {
       state.turnIndex = -1;
       setTimeout(() => nextRound(), ROUND_TIME);
       return;
@@ -257,7 +273,8 @@ function createGame(onUpdate) {
   };
 
   const postShowDown = () => {
-    state.players[state.winner.index].stack += state.pot;
+    if (state.winner?.index && state.players[state.winner.index])
+      state.players[state.winner.index].stack += state.pot;
     state.pot = 0;
     state.playing = false;
     state.winner = null;
