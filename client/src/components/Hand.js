@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "./Card";
 import { useGame } from "../contexts/Game";
 import { indexFromPosition } from "../utilities/position_converter";
+import { ChatBubble } from "./ChatBubble";
 
 export function Hand({ style, position }) {
   const {
@@ -28,8 +29,8 @@ export function Hand({ style, position }) {
     >
       <div
         className={
-          "flex justify-center items-center flex-col " +
-          (position === 0 ? " scale-125 box-border" : "") +
+          "flex justify-center items-center flex-col box-border relative overflow-x-visible" +
+          (position === 0 ? " scale-125" : "") +
           (inspection
             ? inspection.position === position
               ? ""
@@ -39,7 +40,7 @@ export function Hand({ style, position }) {
       >
         {!handPlayer.folded && (
           <div className={"flex flex-row translate-y-3"}>
-            {players[positionIndex].cards.map((card, index) => (
+            {handPlayer.cards.map((card, index) => (
               <Card
                 key={index}
                 card={card}
@@ -80,6 +81,16 @@ export function Hand({ style, position }) {
             </div>
           )}
         </div>
+        <ChatBubble
+          seatIndex={positionIndex}
+          offset={(() => {
+            if (handPlayer.folded || !handPlayer.cards.length) {
+              if (!isPlaying && handPlayer.ready) return 3;
+              return 1.5;
+            }
+            return 0.3;
+          })()}
+        />
       </div>
     </div>
   );

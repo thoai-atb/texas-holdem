@@ -7,7 +7,7 @@ import { Hand } from "./Hand";
 export function Table() {
   return (
     <div className="relative bg-gray-400 border-8 border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center">
-      <div className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300"></div>
+      <div className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300"></div> {/* <-- pot decoration */}
       <Board />
       <DealerButton />
       <Bets />

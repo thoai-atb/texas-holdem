@@ -9,7 +9,7 @@ export function Chat({ hidden, setHidden }) {
   const scrollRef = React.useRef(null);
 
   useEffect(() => {
-    const chatMesssageHandler = (message) => {
+    const chatMesssageHandler = ({ desc: message }) => {
       setMessages((messages) => [...messages, message]);
     };
     socket.on("chat_message", chatMesssageHandler);
@@ -21,7 +21,7 @@ export function Chat({ hidden, setHidden }) {
   useEffect(() => {
     if (scrollRef?.current)
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
+  }, [messages, hidden]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -64,9 +64,9 @@ export function Chat({ hidden, setHidden }) {
               if (e.key === "Escape") {
                 setHidden(true);
               } else if (e.key === "Enter") {
-                if (!message) setHidden(true);
                 sendMessage();
                 setMessage("");
+                setHidden(true);
               } else e.stopPropagation();
             }}
             ref={inputRef}

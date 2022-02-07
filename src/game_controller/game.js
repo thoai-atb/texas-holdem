@@ -3,7 +3,7 @@ const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const createBot = require("./bot");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
-const ROUND_TIME = 1000;
+const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 5000;
 
 function createGame(onUpdate) {
@@ -161,7 +161,7 @@ function createGame(onUpdate) {
     if (toCall > state.players[state.turnIndex].stack) {
       return false;
     }
-    const raiseSize = Math.ceil(Math.random() * 100);
+    const raiseSize = Math.ceil(Math.random() * 100, state.players[state.turnIndex].stack - toCall);
     state.players[state.turnIndex].stack -= raiseSize + toCall;
     state.bets[state.turnIndex] += raiseSize + toCall;
     state.betTypes[state.turnIndex] = "raise";
@@ -283,6 +283,7 @@ function createGame(onUpdate) {
       if (player) {
         player.ready = player.isBot;
         player.cards = [];
+        player.folded = false;
       }
     });
     onUpdate();

@@ -86,6 +86,5 @@ var colors = [
 
 const colorFromAmount = (amount) => {
   let colorName = colors[amount % colors.length];
-  console.log(colorName);
   return colorName;
 };

@@ -126,7 +126,11 @@ io.on("connection", (socket) => {
     }
     const chat = `<${name}> ${message}`;
     if (chatLogging) console.log(chat);
-    io.sockets.emit("chat_message", chat);
+    io.sockets.emit("chat_message", {
+      desc: chat,
+      content: message,
+      senderID: seatIndex,
+    });
   });
 });
 
@@ -167,7 +171,11 @@ const executeCommand = (command, invoker = "Server") => {
       return;
   }
   const info = `${invoker}: ${command}`;
-  io.sockets.emit("chat_message", info);
+  io.sockets.emit("chat_message", {
+    desc: info,
+    content: command,
+  });
+  console.log(info);
 };
 
 rl.createInterface({

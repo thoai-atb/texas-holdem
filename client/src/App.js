@@ -53,11 +53,7 @@ function App() {
     <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
       {!loggedIn && <LoginPage loginFunction={login} />}
       {loggedIn && (
-        <div
-          className="bg-gray-200 pointer-events-auto"
-          tabIndex={0}
-          ref={containerRef}
-        >
+        <div>
           <GameProvider socket={socket}>
             <div className="absolute w-full h-full justify-center items-center flex pb-28">
               <Table />
