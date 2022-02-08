@@ -11,7 +11,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [socket, setSocket] = useState(null);
   const [chatHidden, setChatHidden] = useState(true);
-  const [chatHint, setChatHint] = useState("Press T to chat");
+  const [chatHint, setChatHint] = useState("- Press T to chat -");
   const containerRef = useRef(null);
 
   const login = (name, address, onFail) => {

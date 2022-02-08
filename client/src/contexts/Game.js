@@ -18,6 +18,8 @@ export function GameProvider({ children, socket }) {
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [currentBetSize, setCurrentBetSize] = React.useState(0);
   const [showDown, setShowDown] = React.useState(false);
+  const [availableActions, setAvailableActions] = React.useState([]);
+  const [bigblindSize, setBigblindSize] = React.useState(0);
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {
@@ -32,6 +34,8 @@ export function GameProvider({ children, socket }) {
       setCurrentBetSize(gameState.currentBetSize);
       setPot(gameState.pot);
       setShowDown(gameState.showDown);
+      setAvailableActions(gameState.availableActions);
+      setBigblindSize(gameState.bigblindSize);
 
       if (gameState.winner)
         setInspection({
@@ -59,6 +63,7 @@ export function GameProvider({ children, socket }) {
   };
 
   const value = {
+    socket,
     deck,
     board,
     players,
@@ -72,9 +77,10 @@ export function GameProvider({ children, socket }) {
     isPlaying,
     currentBetSize,
     showDown,
+    availableActions,
+    bigblindSize,
     takeAction,
     inspect,
-    socket,
   };
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }

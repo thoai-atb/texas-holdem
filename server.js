@@ -40,7 +40,12 @@ function broadcast() {
 io.on("connection", (socket) => {
   // CONNECTION
   const name = socket.handshake.query.name;
-  console.log(`${name} joined the table`);
+  const info = `${name} joined the table`;
+  io.sockets.emit("chat_message", {
+    desc: info,
+    content: info,
+  });
+  console.log(info);
   connections.push(socket);
 
   // SELECT SEAT
@@ -62,7 +67,12 @@ io.on("connection", (socket) => {
 
   // DISCONNECT
   socket.on("disconnect", () => {
-    console.log(`${name} left the table`);
+    const info = `${name} left the table`;
+    console.log(info);
+    io.sockets.emit("chat_message", {
+      desc: info,
+      content: info,
+    });
     connections.splice(connections.indexOf(socket), 1);
     playerData[seatIndex] = null;
     availableSeats.push(seatIndex);
@@ -97,13 +107,13 @@ io.on("connection", (socket) => {
         break;
       case "bet":
         if (seatIndex === game.state.turnIndex) {
-          game.bet();
+          game.bet(action.size);
           broadcast();
         }
         break;
       case "raise":
         if (seatIndex === game.state.turnIndex) {
-          game.raise();
+          game.raise(action.size);
           broadcast();
         }
         break;

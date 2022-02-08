@@ -1,13 +1,23 @@
 const createBot = () => {
   const takeAction = (game, callback) => {
-    const availableActions = getAvailableActions(game.state);
-    const foldAction = availableActions.filter((action) => action === "fold");
+    const availableActions = game.state.availableActions;
+    const foldAction = availableActions.filter(
+      (action) => action.type === "fold"
+    );
     const passiveAction = availableActions.filter(
-      (action) => action === "check" || action === "call"
+      (action) => action.type === "check" || action.type === "call"
     );
     const agressiveAction = availableActions.filter(
-      (action) => action === "bet" || action === "raise"
+      (action) => action.type === "bet" || action.type === "raise"
     );
+
+    // CHECK IF ONLY ONE OPTION IS CHECK (ALREADY ALL IN)
+    if (!foldAction.length && !agressiveAction.length) {
+      game[passiveAction[0].type]();
+      callback();
+      return;
+    }
+
     const poolOfActions = [
       ...foldAction,
       ...passiveAction,
@@ -25,7 +35,12 @@ const createBot = () => {
       while (!accepted) {
         const randomAction =
           poolOfActions[Math.floor(Math.random() * poolOfActions.length)];
-        accepted = game[randomAction]();
+        let size =
+          randomAction.size ||
+          Math.floor(
+            Math.random() * (randomAction.maxSize + 1 - randomAction.minSize)
+          ) + randomAction.minSize;
+        accepted = game[randomAction.type](size);
       }
       callback();
     }, 1000 + Math.random() * 1000);
@@ -33,20 +48,6 @@ const createBot = () => {
   return {
     takeAction,
   };
-};
-
-const getAvailableActions = (state) => {
-  const availableActions = [];
-  if (state.currentBetSize > 0) {
-    availableActions.push("raise");
-    availableActions.push("call");
-    availableActions.push("fold");
-  }
-  if (state.currentBetSize === 0) {
-    availableActions.push("bet");
-    availableActions.push("check");
-  }
-  return availableActions;
 };
 
 module.exports = createBot;

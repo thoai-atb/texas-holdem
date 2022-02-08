@@ -24,6 +24,11 @@ function createGame(onUpdate) {
     winner: null,
     currentBetSize: 0,
     round: 0, // 0 = preflop, 1 = flop, 2 = turn, 3 = river
+    availableActions: [
+      /* type: "bet", maxSize: "1000" */
+    ],
+    bigblindSize: 10,
+    minRaiseSize: 0,
   };
 
   // PLAYERS
@@ -107,6 +112,8 @@ function createGame(onUpdate) {
   };
 
   const fold = () => {
+    if (!state.availableActions.find((action) => action.type === "fold"))
+      return false;
     state.players[state.turnIndex].folded = true;
     if (state.completeActionSeat === state.turnIndex) {
       nextTurn(true);
@@ -117,21 +124,19 @@ function createGame(onUpdate) {
   };
 
   const check = () => {
-    if (state.players[state.turnIndex].stack > 0)
-      if (state.currentBetSize > state.bets[state.turnIndex]) return false;
+    if (!state.availableActions.find((action) => action.type === "check"))
+      return false;
     state.betTypes[state.turnIndex] = "check";
     nextTurn();
     return true;
   };
 
   const call = () => {
-    var toCall = state.currentBetSize - state.bets[state.turnIndex];
-    if (toCall > state.players[state.turnIndex].stack) {
-      if (state.players[state.turnIndex].stack === 0) {
-        return false;
-      }
-      toCall = state.players[state.turnIndex].stack;
-    }
+    const callAction = state.availableActions.find(
+      (action) => action.type === "call"
+    );
+    if (!callAction) return false;
+    const toCall = callAction.size;
     state.bets[state.turnIndex] += toCall;
     state.betTypes[state.turnIndex] = "call";
     state.players[state.turnIndex].stack -= toCall;
@@ -139,33 +144,38 @@ function createGame(onUpdate) {
     return true;
   };
 
-  const bet = () => {
-    if (state.currentBetSize > 0) return false;
-    if (state.players[state.turnIndex].stack === 0) return false;
-    const betSize = Math.ceil(
-      Math.random() * 50,
-      state.players[state.turnIndex].stack
+  const bet = (betSize) => {
+    const betAction = state.availableActions.find(
+      (action) => action.type === "bet"
     );
+    if (!betAction) return false;
+    if (!betSize) return false;
+    if (betSize > betAction.maxSize) return false;
+    if (betSize < betAction.minSize) return false;
     state.players[state.turnIndex].stack -= betSize;
     state.currentBetSize = betSize;
     state.bets[state.turnIndex] = betSize;
+    state.minRaiseSize = betSize;
     state.betTypes[state.turnIndex] = "bet";
     state.completeActionSeat = state.turnIndex;
     nextTurn();
     return true;
   };
 
-  const raise = () => {
-    if (state.currentBetSize === 0) return false;
+  const raise = (raiseSize) => {
+    const raiseAction = state.availableActions.find(
+      (action) => action.type === "raise"
+    );
+    if (!raiseAction) return false;
+    if (!raiseSize) return false;
+    if (raiseSize > raiseAction.maxSize) return false;
+    if (raiseSize < raiseAction.minSize) return false;
     const toCall = state.currentBetSize - state.bets[state.turnIndex];
-    if (toCall > state.players[state.turnIndex].stack) {
-      return false;
-    }
-    const raiseSize = Math.ceil(Math.random() * 100, state.players[state.turnIndex].stack - toCall);
     state.players[state.turnIndex].stack -= raiseSize + toCall;
     state.bets[state.turnIndex] += raiseSize + toCall;
     state.betTypes[state.turnIndex] = "raise";
     state.currentBetSize += raiseSize;
+    state.minRaiseSize = raiseSize;
     state.completeActionSeat = state.turnIndex;
     nextTurn();
     return true;
@@ -177,6 +187,7 @@ function createGame(onUpdate) {
     state.bets[position] = blindSize;
     state.betTypes[position] = "blind";
     state.currentBetSize = Math.max(state.currentBetSize, blindSize);
+    state.minRaiseSize = size;
     return true;
   };
 
@@ -215,7 +226,7 @@ function createGame(onUpdate) {
       return;
     }
     state.turnIndex = nextIndex;
-    checkBotTurn();
+    prepareTurn();
   };
 
   const nextButton = () => {
@@ -248,7 +259,7 @@ function createGame(onUpdate) {
         break;
     }
     onUpdate();
-    checkBotTurn();
+    prepareTurn();
   };
 
   const collectBets = () => {
@@ -256,12 +267,54 @@ function createGame(onUpdate) {
     state.pot += state.bets.reduce((a, b) => a + b, 0);
     state.bets.fill(0);
     state.betTypes.fill(null);
+    state.minRaiseSize = 0;
   };
 
-  const checkBotTurn = () => {
+  const prepareTurn = () => {
+    // CALCULATE AVAILABLE ACTIONS
+    availableActions = [];
+    const lastBet = state.bets[state.turnIndex];
+    const toCall = state.currentBetSize - lastBet;
+    const stack = state.players[state.turnIndex].stack;
+    if (toCall > 0 && stack > 0) {
+      availableActions.push({
+        type: "fold", // can fold if not calling
+      });
+      availableActions.push({
+        type: "call",
+        size: Math.min(toCall, stack), // effective stack call size
+      });
+    }
+    if (toCall === 0 || stack === 0) {
+      availableActions.push({
+        type: "check",
+      });
+    }
+    if (state.currentBetSize > 0 && stack + lastBet > state.currentBetSize) {
+      availableActions.push({
+        type: "raise",
+        minSize: Math.min(
+          state.minRaiseSize,
+          stack + lastBet - state.currentBetSize // effective stack raise size
+        ),
+        maxSize: stack + lastBet - state.currentBetSize,
+      });
+    }
+    if (state.currentBetSize === 0 && stack > 0) {
+      availableActions.push({
+        type: "bet",
+        minSize: Math.min(state.bigblindSize, stack), // effective stack bet size
+        maxSize: stack,
+      });
+    }
+    state.availableActions = availableActions;
+    onUpdate();
+
+    // CHECK FOR BOT TURN
     if (!state.players[state.turnIndex]?.isBot) return;
     let bot = state.players[state.turnIndex].bot;
     bot.takeAction(game, onUpdate);
+    onUpdate();
   };
 
   const showDown = () => {
@@ -311,20 +364,22 @@ function createGame(onUpdate) {
     state.round = 0;
     nextButton();
     let tempIndex = state.buttonIndex;
-    deal(tempIndex, 2);
+    if (state.players[tempIndex].stack >= state.bigblindSize)
+      deal(tempIndex, 2);
     tempIndex = nextIndex(tempIndex);
     while (tempIndex != state.buttonIndex) {
-      deal(tempIndex, 2);
+      if (state.players[tempIndex].stack >= state.bigblindSize)
+        deal(tempIndex, 2);
       tempIndex = nextIndex(tempIndex);
     }
     tempIndex = nextIndex(tempIndex); // TO SMALL BLIND
-    blind(tempIndex, 5);
+    blind(tempIndex, state.bigblindSize / 2);
     tempIndex = nextIndex(tempIndex); // TO BIG BLIND
-    blind(tempIndex, 10);
+    blind(tempIndex, state.bigblindSize);
     tempIndex = nextIndex(tempIndex); // TO UTG
     state.turnIndex = tempIndex;
     state.completeActionSeat = tempIndex;
-    checkBotTurn();
+    prepareTurn();
   };
 
   const game = {
