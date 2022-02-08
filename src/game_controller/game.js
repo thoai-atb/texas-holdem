@@ -69,6 +69,13 @@ function createGame(onUpdate) {
       });
   };
 
+  const clearBots = () => {
+    const ids = state.players.filter((player) => player && player.isBot);
+    ids.forEach((id) => {
+      removePlayer(id.seatIndex);
+    });
+  };
+
   const removePlayer = (seatIndex) => {
     if (state.turnIndex === seatIndex) {
       fold();
@@ -396,6 +403,7 @@ function createGame(onUpdate) {
     addPlayer,
     setBot,
     addBot,
+    clearBots,
     removePlayer,
     nextTurn,
     nextButton,

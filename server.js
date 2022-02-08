@@ -169,6 +169,16 @@ const executeCommand = (command, invoker = "Server") => {
       }
       broadcast();
       break;
+    case "add_bot":
+      isAction = true;
+      game.addBot("Bot " + Math.floor(Math.random() * 100));
+      broadcast();
+      break;
+    case "clear_bots":
+      isAction = true;
+      game.clearBots();
+      broadcast();
+      break;
     case "start":
       isAction = true;
       game.checkToStart();

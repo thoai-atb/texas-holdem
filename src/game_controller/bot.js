@@ -13,7 +13,7 @@ const createBot = () => {
 
     // CHECK IF ONLY ONE OPTION IS CHECK (ALREADY ALL IN)
     if (!foldAction.length && !agressiveAction.length) {
-      game[passiveAction[0].type]();
+      if (passiveAction.length) game[passiveAction[0].type]();
       callback();
       return;
     }
@@ -37,9 +37,7 @@ const createBot = () => {
           poolOfActions[Math.floor(Math.random() * poolOfActions.length)];
         let size =
           randomAction.size ||
-          Math.floor(
-            Math.random() * (randomAction.maxSize + 1 - randomAction.minSize)
-          ) + randomAction.minSize;
+          Math.floor(Math.random() * 2 * randomAction.minSize);
         accepted = game[randomAction.type](size);
       }
       callback();

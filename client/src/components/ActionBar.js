@@ -237,11 +237,13 @@ export const ActionButton = ({
           <div className="flex items-center justify-center text-white h-full hover:text-slate-700 cursor-pointer active:scale-95">
             <AiOutlinePlusCircle onClick={plusButtonHandler} />
           </div>
-          <div
-            className="flex items-center justify-center text-white rounded-full h-full hover:text-slate-700 text-4xl cursor-pointer active:scale-95"
-            title="Confirm"
-          >
-            <AiFillCheckCircle onClick={confirm} />
+          <div className="w-11 h-0 relative">
+            <div
+              className="absolute flex items-center justify-center text-white rounded-full h-full hover:text-slate-700 text-7xl cursor-pointer active:scale-95"
+              title="Confirm"
+            >
+              <AiFillCheckCircle onClick={confirm} />
+            </div>
           </div>
         </>
       )}
