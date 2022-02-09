@@ -32,13 +32,13 @@ const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
-const game = createGame(broadcast, info);
+const game = createGame(broadcast, infoFunction);
 
 function broadcast() {
   io.sockets.emit("game_state", game.state);
 }
 
-function info(desc, content) {
+function infoFunction(desc, content) {
   io.sockets.emit("chat_message", {
     desc,
     content,
@@ -87,7 +87,7 @@ io.on("connection", (socket) => {
     game.removePlayer(seatIndex);
     if (playerData.every((player) => player === null)) {
       console.log("No players left, resetting game");
-      Object.assign(game, createGame(broadcast));
+      Object.assign(game, createGame(broadcast, infoFunction));
     }
     broadcast();
   });
@@ -191,6 +191,10 @@ const executeCommand = (command, invoker = "Server") => {
       game.clearBots();
       broadcast();
       break;
+    case "kick_brokes":
+      isAction = true;
+      game.removeBrokePlayers();
+      broadcast();
     case "start":
       isAction = true;
       game.checkToStart();
@@ -202,6 +206,10 @@ const executeCommand = (command, invoker = "Server") => {
     case "kick":
       isAction = true;
       game.removePlayerByName(arg);
+      broadcast();
+    case "toggle_debug":
+      isAction = true;
+      game.state.debugMode = !game.state.debugMode;
       broadcast();
       break;
     default:

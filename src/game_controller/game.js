@@ -4,7 +4,7 @@ const createBot = require("./bot");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
 const ROUND_TIME = 1500;
-const SHOWDOWN_TIME = 5000;
+const SHOWDOWN_TIME = 6000;
 
 function createGame(onUpdate, onInfo) {
   const state = {
@@ -29,6 +29,7 @@ function createGame(onUpdate, onInfo) {
     ],
     bigblindSize: 10,
     minRaiseSize: 0,
+    debugMode: false,
   };
 
   // PLAYERS
@@ -100,6 +101,15 @@ function createGame(onUpdate, onInfo) {
     }
   };
 
+  const removeBrokePlayers = () => {
+    const ids = state.players.filter(
+      (player) => player && player.stack < state.bigblindSize
+    );
+    ids.forEach((id) => {
+      removePlayer(id.seatIndex);
+    });
+  };
+
   const setReady = (seatIndex) => {
     state.players[seatIndex].ready = true;
   };
@@ -130,6 +140,7 @@ function createGame(onUpdate, onInfo) {
       return false;
     state.players[state.turnIndex].folded = true;
     if (state.completeActionSeat === state.turnIndex) {
+      // OPEN ACTION FOLDED
       nextTurn(true);
       return true;
     }
@@ -232,6 +243,11 @@ function createGame(onUpdate, onInfo) {
   };
 
   const nextTurn = (carryCompleteActionSeat) => {
+    if (countActivePlayers() == 1) {
+      state.turnIndex = -1;
+      setTimeout(() => nextRound(), ROUND_TIME);
+      return;
+    }
     const nextIndex = nextActiveIndex(state.turnIndex);
     if (carryCompleteActionSeat) {
       state.completeActionSeat = nextIndex;
@@ -341,7 +357,9 @@ function createGame(onUpdate, onInfo) {
     } with ${state.winner.type.toUpperCase()} ${state.winner.cards
       .map((c) => c.value + c.suit)
       .join(" ")}`;
-    onInfo(info, info);
+    if (!onInfo) {
+      console.log(onInfo);
+    } else onInfo(info, info);
     onUpdate();
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };
@@ -419,6 +437,7 @@ function createGame(onUpdate, onInfo) {
     clearBots,
     removePlayerByName,
     removePlayer,
+    removeBrokePlayers,
     nextTurn,
     nextButton,
   };
