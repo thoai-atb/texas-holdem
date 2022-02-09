@@ -38,13 +38,19 @@ export function Hand({ style, position }) {
             : "")
         }
       >
-        {!handPlayer.folded && (
-          <div className={"flex flex-row translate-y-3"}>
+        {(!handPlayer.folded || position === 0) && (
+          <div
+            className={
+              "flex flex-row translate-y-3" +
+              (handPlayer.folded ? " opacity-50" : "")
+            }
+          >
             {handPlayer.cards.map((card, index) => (
               <Card
                 key={index}
                 card={card}
                 hidden={!showDown && position !== 0}
+                // hidden={false}
               />
             ))}
           </div>

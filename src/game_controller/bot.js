@@ -28,9 +28,8 @@ const createBot = () => {
     ];
     const id = game.state.id;
     setTimeout(() => {
-      if (game.state.id !== id) {
-        return;
-      }
+      if (game.state.id !== id) return;
+      // if (!game.state.players[game.state.seatIndex]) return;
       let accepted = false;
       while (!accepted) {
         const randomAction =

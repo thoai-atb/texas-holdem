@@ -38,11 +38,11 @@ export function Chat({ hidden, setHidden }) {
   return (
     <>
       <div
-        className="absolute w-full h-full flex items-center justify-center bg-black opacity-20 pointer-events-auto"
+        className="absolute w-full h-full bg-black opacity-25 pointer-events-auto"
         onClick={() => setHidden(true)}
       ></div>
       <div
-        className="w-96 bg-black opacity-80 z-10 rounded-2xl flex flex-col pointer-events-auto"
+        className="w-96 bg-black opacity-80 z-10 rounded-2xl absolute bottom-2 right-2 flex flex-col pointer-events-auto"
         style={{ width: "40rem", height: "40rem" }}
       >
         <div
@@ -50,9 +50,15 @@ export function Chat({ hidden, setHidden }) {
           ref={scrollRef}
         >
           {messages.map((message, index) => (
-            <div key={index} className="flex items-center p-2 text-xl">
-              <div className="w-4 h-4 rounded-full bg-gray-200 mr-2"></div>
-              <div className="text-white">{message}</div>
+            <div
+              key={index}
+              className={
+                "flex items-center p-2 text-lg" +
+                (message[0] === "<" ? " text-white" : " text-gray-400")
+              }
+            >
+              {/* <span className="w-2 h-2 rounded-full bg-gray-200 mr-2"></span> */}
+              <div className="">{message}</div>
             </div>
           ))}
         </div>

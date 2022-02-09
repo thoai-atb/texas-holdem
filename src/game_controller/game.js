@@ -6,7 +6,7 @@ const createBot = require("./bot");
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 5000;
 
-function createGame(onUpdate) {
+function createGame(onUpdate, onInfo) {
   const state = {
     id:
       Math.random().toString(36).substring(2, 15) +
@@ -74,6 +74,13 @@ function createGame(onUpdate) {
     ids.forEach((id) => {
       removePlayer(id.seatIndex);
     });
+  };
+
+  const removePlayerByName = (name) => {
+    const seatIndex = state.players.findIndex((player) => player.name === name);
+    if (seatIndex === -1) return false;
+    removePlayer(seatIndex);
+    return true;
   };
 
   const removePlayer = (seatIndex) => {
@@ -189,7 +196,8 @@ function createGame(onUpdate) {
   };
 
   const blind = (position, size) => {
-    const blindSize = Math.min(size, state.players[position].stack);
+    if (state.players[position].stack < size) return false;
+    const blindSize = size;
     state.players[position].stack -= blindSize;
     state.bets[position] = blindSize;
     state.betTypes[position] = "blind";
@@ -328,13 +336,18 @@ function createGame(onUpdate) {
     state.turnIndex = -1;
     state.showDown = true;
     state.winner = findWinner(state.players, state.board);
+    const info = `${state.players[state.winner.index].name} won $${
+      state.pot
+    } with ${state.winner.type.toUpperCase()} ${state.winner.cards
+      .map((c) => c.value + c.suit)
+      .join(" ")}`;
+    onInfo(info, info);
     onUpdate();
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };
 
   const postShowDown = () => {
-    if (state.winner?.index && state.players[state.winner.index])
-      state.players[state.winner.index].stack += state.pot;
+    state.players[state.winner.index].stack += state.pot;
     state.pot = 0;
     state.playing = false;
     state.winner = null;
@@ -404,6 +417,7 @@ function createGame(onUpdate) {
     setBot,
     addBot,
     clearBots,
+    removePlayerByName,
     removePlayer,
     nextTurn,
     nextButton,

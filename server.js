@@ -3,6 +3,7 @@ const socket = require("socket.io");
 const cors = require("cors");
 const createGame = require("./src/game_controller/game");
 const rl = require("readline");
+const { generateBotName } = require("./src/game_controller/utils");
 
 const app = express();
 
@@ -29,12 +30,19 @@ const connections = [];
 
 const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
-var chatLogging = false;
+var chatLogging = true;
 
-const game = createGame(broadcast);
+const game = createGame(broadcast, info);
 
 function broadcast() {
   io.sockets.emit("game_state", game.state);
+}
+
+function info(desc, content) {
+  io.sockets.emit("chat_message", {
+    desc,
+    content,
+  });
 }
 
 io.on("connection", (socket) => {
@@ -145,8 +153,12 @@ io.on("connection", (socket) => {
 });
 
 const executeCommand = (command, invoker = "Server") => {
-  let isAction = false;
-  switch (command) {
+  let isAction;
+  const args = command.split(" ");
+  const action = args[0];
+  const arg = args.slice(1).join(" ");
+
+  switch (action) {
     case "broadcast":
       isAction = true;
       broadcast();
@@ -164,14 +176,14 @@ const executeCommand = (command, invoker = "Server") => {
       isAction = true;
       for (let i = 0; i < 9; i++) {
         if (playerData[i] === null) {
-          game.addBot("Mr. Bot");
+          game.addBot(generateBotName());
         }
       }
       broadcast();
       break;
     case "add_bot":
       isAction = true;
-      game.addBot("Bot " + Math.floor(Math.random() * 100));
+      game.addBot(generateBotName());
       broadcast();
       break;
     case "clear_bots":
@@ -186,6 +198,11 @@ const executeCommand = (command, invoker = "Server") => {
     case "toggle_chat_log":
       isAction = true;
       chatLogging = !chatLogging;
+      break;
+    case "kick":
+      isAction = true;
+      game.removePlayerByName(arg);
+      broadcast();
       break;
     default:
       return;
