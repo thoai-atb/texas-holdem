@@ -1,13 +1,16 @@
 import React from "react";
 import { Card } from "./Card";
 import { useGame } from "../contexts/Game";
-import { indexFromPosition } from "../utilities/position_converter";
+import {
+  indexFromPosition,
+  positionFromIndex,
+} from "../utilities/position_converter";
 import { ChatBubble } from "./ChatBubble";
 
 export function Hand({ style, position }) {
   const {
     players,
-    inspection,
+    winners,
     seatIndex,
     turnIndex,
     isPlaying,
@@ -18,21 +21,20 @@ export function Hand({ style, position }) {
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
   const actionType = handPlayer.folded ? "fold" : betTypes[positionIndex];
-  const onClick = () => {
-    // inspect(position);
-  };
   return (
     <div
       className={"w-0 h-0 flex justify-center items-center cursor-pointer"}
       style={style}
-      onClick={onClick}
     >
       <div
         className={
           "flex justify-center items-center flex-col box-border relative overflow-x-visible" +
           (position === 0 ? " scale-125" : "") +
-          (inspection
-            ? inspection.position === position
+          (winners.length > 0
+            ? winners.some(
+                (winner) =>
+                  positionFromIndex(winner.index, seatIndex) === position
+              )
               ? ""
               : " opacity-50"
             : "")

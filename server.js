@@ -203,6 +203,10 @@ const executeCommand = (command, invoker = "Server") => {
       isAction = true;
       chatLogging = !chatLogging;
       break;
+    case "toggle_bot_speed":
+      isAction = true;
+      game.state.botSpeed = 1000 - game.state.botSpeed;
+      break;
     case "kick":
       isAction = true;
       game.removePlayerByName(arg);
@@ -210,6 +214,11 @@ const executeCommand = (command, invoker = "Server") => {
     case "toggle_debug":
       isAction = true;
       game.state.debugMode = !game.state.debugMode;
+      broadcast();
+      break;
+    case "support":
+      isAction = true;
+      game.fillMoney(arg);
       broadcast();
       break;
     default:

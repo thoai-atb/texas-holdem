@@ -3,7 +3,7 @@ import { useGame } from "../contexts/Game";
 import { Card } from "./Card";
 
 export function Board() {
-  const { board, inspection } = useGame();
+  const { board, winners } = useGame();
   if (!board) return null;
   return (
     <div className="relative clear-both">
@@ -16,9 +16,9 @@ export function Board() {
         ))}
       </div>
       <div className="absolute w-full flex justify-center bg-stone-900 rounded-md">
-        {inspection && (
+        {winners.length > 0 && (
           <div className="text-4xl text-center text-white clear-both">
-            {inspection.type.toUpperCase()}
+            {winners[0].type.toUpperCase()}
           </div>
         )}
       </div>

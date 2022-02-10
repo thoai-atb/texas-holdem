@@ -9,7 +9,7 @@ Array.prototype.count = function (filter) {
   return count;
 };
 
-function findWinner(players, board) {
+function findWinners(players, board) {
   const results = players
     .filter((player) => player?.cards.length === 2 && !player.folded)
     .map((player) => ({
@@ -17,7 +17,17 @@ function findWinner(players, board) {
       index: player.seatIndex,
     }));
   const sorted = results.sort((a, b) => b.strength - a.strength);
-  return sorted[0];
+  // find the winners
+  const winners = [];
+  let winner = sorted[0];
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].strength === winner.strength) {
+      winners.push(sorted[i]);
+    } else {
+      break;
+    }
+  }
+  return winners;
 }
 
 function evaluate(hand, board) {
@@ -463,6 +473,6 @@ const convertToMatrix = (cards) => {
 };
 
 module.exports = {
-  findWinner,
+  findWinners,
   evaluate,
 };

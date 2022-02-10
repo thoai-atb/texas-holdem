@@ -27,7 +27,7 @@ const createBot = () => {
       // if (!game.state.players[game.state.turnIndex]) return;
       relativeThinking(game, foldAction, passiveAction, agressiveAction);
       callback();
-    }, 1000 + Math.random() * 1000);
+    }, game.state.botSpeed + Math.random() * game.state.botSpeed);
   };
 
   const relativeThinking = (

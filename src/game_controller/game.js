@@ -1,4 +1,4 @@
-const { findWinner } = require("../texas_holdem/evaluator");
+const { findWinners } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const createBot = require("./bot");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
@@ -21,7 +21,7 @@ function createGame(onUpdate, onInfo) {
     turnIndex: -1,
     buttonIndex: -1,
     completeActionSeat: -1,
-    winner: null,
+    winners: [],
     currentBetSize: 0,
     round: 0, // 0 = preflop, 1 = flop, 2 = turn, 3 = river
     availableActions: [
@@ -30,6 +30,8 @@ function createGame(onUpdate, onInfo) {
     bigblindSize: 10,
     minRaiseSize: 0,
     debugMode: false,
+    winAmount: 0,
+    botSpeed: 1000,
   };
 
   // PLAYERS
@@ -78,7 +80,9 @@ function createGame(onUpdate, onInfo) {
   };
 
   const removePlayerByName = (name) => {
-    const seatIndex = state.players.findIndex((player) => player.name === name);
+    const seatIndex = state.players.findIndex(
+      (player) => player && player.name === name
+    );
     if (seatIndex === -1) return false;
     removePlayer(seatIndex);
     return true;
@@ -108,6 +112,18 @@ function createGame(onUpdate, onInfo) {
     ids.forEach((id) => {
       removePlayer(id.seatIndex);
     });
+  };
+
+  const fillMoney = (name) => {
+    const seatIndex = state.players.findIndex(
+      (player) => player && player.name === name
+    );
+    if (seatIndex === -1) return false;
+    state.players[seatIndex].stack = Math.max(
+      state.players[seatIndex].stack,
+      1000
+    );
+    return true;
   };
 
   const setReady = (seatIndex) => {
@@ -351,24 +367,32 @@ function createGame(onUpdate, onInfo) {
   const showDown = () => {
     state.turnIndex = -1;
     state.showDown = true;
-    state.winner = findWinner(state.players, state.board);
-    const info = `${state.players[state.winner.index].name} won $${
-      state.pot
-    } with ${state.winner.type.toUpperCase()} ${state.winner.cards
-      .map((c) => c.value + c.suit)
-      .join(" ")}`;
-    if (!onInfo) {
-      console.log(onInfo);
-    } else onInfo(info, info);
+    state.winners = findWinners(state.players, state.board);
+    const winAmount = Math.floor(state.pot / state.winners.length);
+    state.winAmount = winAmount;
+
+    for (let winner of state.winners) {
+      const info = `${
+        state.players[winner.index].name
+      } won $${winAmount} with ${winner.type.toUpperCase()} ${winner.cards
+        .map((c) => c.value + c.suit)
+        .join(" ")}`;
+      if (!onInfo) {
+        console.log(onInfo);
+      } else onInfo(info, info);
+    }
+
     onUpdate();
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };
 
   const postShowDown = () => {
-    state.players[state.winner.index].stack += state.pot;
+    state.winners.forEach(
+      (winner) => (state.players[winner.index].stack += state.winAmount)
+    );
     state.pot = 0;
     state.playing = false;
-    state.winner = null;
+    state.winners = [];
     state.board = [];
     state.players.forEach((player) => {
       if (player) {
@@ -397,7 +421,7 @@ function createGame(onUpdate, onInfo) {
         player.folded = false;
       }
     });
-    state.winner = null;
+    state.winners = [];
     state.showDown = false;
     state.round = 0;
     nextButton();
@@ -438,6 +462,7 @@ function createGame(onUpdate, onInfo) {
     removePlayerByName,
     removePlayer,
     removeBrokePlayers,
+    fillMoney,
     nextTurn,
     nextButton,
   };

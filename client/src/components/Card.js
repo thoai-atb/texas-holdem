@@ -2,18 +2,19 @@ import React from "react";
 import { useGame } from "../contexts/Game";
 
 export function Card({ card, hidden }) {
-  const { inspection } = useGame();
-  const isInspected =
-    inspection &&
+  const { winners } = useGame();
+  const hands = winners.map((winner) => winner.cards);
+  const showDown = winners.length > 0;
+  const highLight =
     card &&
-    inspection.cards?.some(
-      (c) => c.suit === card.suit && c.value === card.value
+    hands.some((hand) =>
+      hand.some((c) => c.suit === card.suit && c.value === card.value)
     );
   return (
     <div
       className={
         "transition duration-500 w-16 h-24 m-0.5 flex justify-center items-center select-none rounded-lg relative" +
-        (inspection ? (isInspected ? " -translate-y-5" : " ") : " ") +
+        (showDown ? (highLight ? " -translate-y-5" : " ") : " ") +
         (card ? " bg-white" : " bg-transparent")
       }
     >
@@ -29,9 +30,7 @@ export function Card({ card, hidden }) {
         </div>
       )}
       {hidden && (
-        <div className="w-5/6 h-5/6 rounded-lg bg-gradient-to-r from-gray-200 to-rose-400">
-          
-        </div>
+        <div className="w-5/6 h-5/6 rounded-lg bg-gradient-to-r from-gray-200 to-rose-400"></div>
       )}
     </div>
   );

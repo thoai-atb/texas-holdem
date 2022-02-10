@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { evaluate } from "../utilities/evaluator";
-import { positionFromIndex } from "../utilities/position_converter";
 
 const GameContext = React.createContext({});
 
@@ -10,7 +8,7 @@ export function GameProvider({ children, socket }) {
   const [bets, setBets] = React.useState([]);
   const [betTypes, setBetTypes] = React.useState([]);
   const [board, setBoard] = React.useState([]);
-  const [inspection, setInspection] = React.useState();
+  const [winners, setWinners] = React.useState([]);
   const [pot, setPot] = React.useState(0);
   const [seatIndex, setSeatIndex] = React.useState(0);
   const [turnIndex, setTurnIndex] = React.useState(0);
@@ -36,13 +34,7 @@ export function GameProvider({ children, socket }) {
       setShowDown(gameState.showDown);
       setAvailableActions(gameState.availableActions);
       setBigblindSize(gameState.bigblindSize);
-
-      if (gameState.winner)
-        setInspection({
-          ...gameState.winner,
-          position: positionFromIndex(gameState.winner.index, seatIndex),
-        });
-      else setInspection(null);
+      setWinners(gameState.winners);
     });
     socket.on("seat_index", (index) => {
       console.log("You are in seat: ", index);
@@ -56,12 +48,6 @@ export function GameProvider({ children, socket }) {
     socket.emit("player_action", action);
   };
 
-  const inspect = (position) => {
-    const newInspection = evaluate(players[position].cards, board);
-    newInspection.position = position;
-    setInspection(newInspection);
-  };
-
   const value = {
     socket,
     deck,
@@ -69,7 +55,6 @@ export function GameProvider({ children, socket }) {
     players,
     bets,
     betTypes,
-    inspection,
     pot,
     seatIndex,
     turnIndex,
@@ -79,8 +64,8 @@ export function GameProvider({ children, socket }) {
     showDown,
     availableActions,
     bigblindSize,
+    winners,
     takeAction,
-    inspect,
   };
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }

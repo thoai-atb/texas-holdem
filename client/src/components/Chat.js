@@ -5,6 +5,7 @@ export function Chat({ hidden, setHidden }) {
   const { socket } = useGame();
   const [message, setMessage] = React.useState("");
   const [messages, setMessages] = React.useState([]);
+  const [typedMessages, setTypedMessages] = React.useState([]);
   const inputRef = React.useRef(null);
   const scrollRef = React.useRef(null);
 
@@ -30,7 +31,11 @@ export function Chat({ hidden, setHidden }) {
   });
 
   const sendMessage = () => {
-    if (message) socket.emit("chat_message", message);
+    if (!message) return;
+    socket.emit("chat_message", message);
+    setTypedMessages((typedMessages) =>
+      message !== typedMessages[0] ? [message, ...typedMessages] : typedMessages
+    );
   };
 
   if (hidden) return null;
@@ -73,6 +78,11 @@ export function Chat({ hidden, setHidden }) {
                 sendMessage();
                 setMessage("");
                 setHidden(true);
+              } else if (e.key === "ArrowUp") {
+                const message = typedMessages[0];
+                setMessage(message);
+                // e.target.setSelectionRange(message.length, message.length);
+              } else if (e.key === "ArrowDown") {
               } else e.stopPropagation();
             }}
             ref={inputRef}
