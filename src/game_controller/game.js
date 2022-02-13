@@ -90,7 +90,7 @@ function createGame(onUpdate, onInfo) {
 
   const removePlayer = (seatIndex) => {
     if (state.turnIndex === seatIndex) {
-      fold();
+      fold() || nextTurn();
     }
     state.players[seatIndex] = null;
     if (!state.playing)

@@ -191,7 +191,7 @@ const executeCommand = (command, invoker = "Server") => {
       game.clearBots();
       broadcast();
       break;
-    case "kick_brokes":
+    case "clear":
       isAction = true;
       game.removeBrokePlayers();
       broadcast();

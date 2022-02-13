@@ -21,6 +21,7 @@ export function GameProvider({ children, socket }) {
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {
+      console.log("game state update");
       setDeck(gameState.deck);
       setPlayers(gameState.players);
       setBets(gameState.bets);

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { getSocket } from "./socket/socket";
 import LoginPage from "./pages/LoginPage";
 import { Chat } from "./components/Chat";
+import MenuBar from "./components/MenuBar";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -60,6 +61,9 @@ function App() {
             </div>
             <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
               <ActionBar />
+            </div>
+            <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+              <MenuBar />
             </div>
             <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
               {chatHint && (
