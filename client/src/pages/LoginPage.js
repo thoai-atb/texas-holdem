@@ -2,7 +2,7 @@ import React from "react";
 
 export default function LoginPage({ loginFunction }) {
   const [name, setName] = React.useState("");
-  const [address, setAddress] = React.useState("25.42.130.154:8000");
+  const [address, setAddress] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const login = () => {
     if (!name) {
@@ -12,7 +12,7 @@ export default function LoginPage({ loginFunction }) {
     const failHandler = () => {
       setBusy(false);
     };
-    loginFunction(name, address, failHandler);
+    loginFunction(name, address || "/", failHandler);
     setBusy(true);
   };
   const onKeyDown = (event) => {

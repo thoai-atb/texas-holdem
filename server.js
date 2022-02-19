@@ -4,6 +4,7 @@ const cors = require("cors");
 const createGame = require("./src/game_controller/game");
 const rl = require("readline");
 const { generateBotName } = require("./src/game_controller/utils");
+const path = require("path");
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(express.static(path.join(__dirname, "./client/build")));
 
 const port = 8000;
 const server = app.listen(
