@@ -40,6 +40,7 @@ export default function LoginPage({ loginFunction }) {
             <input
               className="flex-1 mt-2 h-12 bg-gray-200 outline-none text-2xl rounded-lg p-4"
               type="text"
+              placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -51,6 +52,7 @@ export default function LoginPage({ loginFunction }) {
             <input
               className="flex-1 mt-2 h-12 bg-gray-200 outline-none text-2xl rounded-lg p-4"
               type="text"
+              placeholder="Connect to other server"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />

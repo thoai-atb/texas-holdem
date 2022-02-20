@@ -76,6 +76,9 @@ function App() {
           </GameProvider>
         </div>
       )}
+      <div className="absolute bottom-2 left-2 text-slate-700">
+        @ 2022 Thoai Ly. All Rights Reserved.
+      </div>
     </div>
   );
 }
