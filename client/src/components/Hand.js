@@ -16,11 +16,13 @@ export function Hand({ style, position }) {
     isPlaying,
     showDown,
     betTypes,
+    bigblindSize,
   } = useGame();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
   const actionType = handPlayer.folded ? "fold" : betTypes[positionIndex];
+  const isBroke = !handPlayer.cards?.length && handPlayer.stack < bigblindSize;
   return (
     <div
       className={"w-0 h-0 flex justify-center items-center cursor-pointer"}
@@ -62,7 +64,8 @@ export function Hand({ style, position }) {
             "bg-black text-center text-white text-xl pb-1 rounded-lg relative border-gray-800 transition duration-300" +
             (turnIndex === positionIndex
               ? " bg-lime-300 text-gray-800 font-bold"
-              : "")
+              : "") +
+            (isBroke ? " text-red-500" : "")
           }
           style={{
             width: "9rem",

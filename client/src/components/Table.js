@@ -1,10 +1,12 @@
 import React from "react";
+import { useGame } from "../contexts/Game";
 import { Bets } from "./Bets";
 import { Board } from "./Board";
 import { DealerButton } from "./DealerButton";
 import { Hand } from "./Hand";
 
 export function Table() {
+  const { bigblindSize } = useGame();
   return (
     <div
       className="relative bg-gray-400 border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center"
@@ -13,8 +15,11 @@ export function Table() {
         borderWidth: "0.5rem",
       }}
     >
-      <div className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300"></div>{" "}
-      {/* <-- pot decoration */}
+      <div className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300">
+        <div className="w-full text-center text-slate-700">
+          BLIND LEVEL: {bigblindSize / 2}/{bigblindSize}
+        </div>
+      </div>
       <Board />
       <DealerButton />
       <Bets />

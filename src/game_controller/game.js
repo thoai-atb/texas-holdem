@@ -26,6 +26,7 @@ function createGame(onUpdate, onInfo) {
     availableActions: [
       /* type: "bet", maxSize: "1000" */
     ],
+    bigblindIncrement: 10,
     bigblindSize: 10,
     minRaiseSize: 0,
     debugMode: false,
@@ -104,6 +105,15 @@ function createGame(onUpdate, onInfo) {
     }
   };
 
+  const removeBrokeBots = () => {
+    const ids = state.players.filter(
+      (player) => player && player.isBot && player.stack < state.bigblindSize
+    );
+    ids.forEach((id) => {
+      removePlayer(id.seatIndex);
+    });
+  };
+
   const removeBrokePlayers = () => {
     const ids = state.players.filter(
       (player) => player && player.stack < state.bigblindSize
@@ -139,8 +149,14 @@ function createGame(onUpdate, onInfo) {
   };
 
   const checkToStart = () => {
-    if (countPlayers() <= 1) return;
-    if (state.players.every((player) => player?.ready || !player)) startGame();
+    if (countQualifiedPlayers() <= 1) return;
+    if (
+      state.players.every(
+        (player) =>
+          !player || player?.ready || player.stack < state.bigblindSize
+      )
+    )
+      startGame();
   };
 
   const countPlayers = () => {
@@ -150,6 +166,12 @@ function createGame(onUpdate, onInfo) {
   const countActivePlayers = () => {
     return state.players.filter(
       (player) => player?.cards?.length && !player.folded
+    ).length;
+  };
+
+  const countQualifiedPlayers = () => {
+    return state.players.filter(
+      (player) => player && player.stack >= state.bigblindSize
     ).length;
   };
 
@@ -251,6 +273,23 @@ function createGame(onUpdate, onInfo) {
     return index;
   };
 
+  const nextQualifiedIndex = (index) => {
+    if (
+      state.players.every(
+        (player) => !player || player.stack < state.bigblindSize
+      )
+    )
+      return -1;
+    do {
+      index = (index + 1) % state.players.length;
+    } while (
+      index < 0 ||
+      !state.players[index] ||
+      state.players[index].stack < state.bigblindSize
+    );
+    return index;
+  };
+
   const nextActiveIndex = (index) => {
     if (
       state.players.every((player) => !player?.cards?.length || player.folded)
@@ -285,7 +324,7 @@ function createGame(onUpdate, onInfo) {
   };
 
   const nextButton = () => {
-    state.buttonIndex = nextIndex(state.buttonIndex);
+    state.buttonIndex = nextQualifiedIndex(state.buttonIndex);
   };
 
   const nextRound = () => {
@@ -400,6 +439,7 @@ function createGame(onUpdate, onInfo) {
     );
     state.pot = 0;
     state.playing = false;
+    state.bigblindSize += state.bigblindIncrement;
     state.winners = [];
     state.board = [];
     state.players.forEach((player) => {
@@ -409,6 +449,8 @@ function createGame(onUpdate, onInfo) {
         player.folded = false;
       }
     });
+    removeBrokeBots();
+    checkToStart();
     onUpdate();
   };
 
@@ -436,17 +478,17 @@ function createGame(onUpdate, onInfo) {
     let tempIndex = state.buttonIndex;
     if (state.players[tempIndex].stack >= state.bigblindSize)
       deal(tempIndex, 2);
-    tempIndex = nextIndex(tempIndex);
+    tempIndex = nextQualifiedIndex(tempIndex);
     while (tempIndex != state.buttonIndex) {
       if (state.players[tempIndex].stack >= state.bigblindSize)
         deal(tempIndex, 2);
-      tempIndex = nextIndex(tempIndex);
+      tempIndex = nextQualifiedIndex(tempIndex);
     }
-    tempIndex = nextIndex(tempIndex); // TO SMALL BLIND
+    tempIndex = nextQualifiedIndex(tempIndex); // TO SMALL BLIND
     blind(tempIndex, state.bigblindSize / 2);
-    tempIndex = nextIndex(tempIndex); // TO BIG BLIND
+    tempIndex = nextQualifiedIndex(tempIndex); // TO BIG BLIND
     blind(tempIndex, state.bigblindSize);
-    tempIndex = nextIndex(tempIndex); // TO UTG
+    tempIndex = nextQualifiedIndex(tempIndex); // TO UTG
     state.turnIndex = tempIndex;
     state.completeActionSeat = tempIndex;
     prepareTurn();
@@ -469,6 +511,7 @@ function createGame(onUpdate, onInfo) {
     clearBots,
     removePlayerByName,
     removePlayer,
+    removeBrokeBots,
     removeBrokePlayers,
     fillMoney,
     setMoney,

@@ -15,6 +15,7 @@ export function ActionBar() {
     turnIndex,
     availableActions,
     showDown,
+    bigblindSize,
   } = useGame();
   const [showSelectBetSize, setShowSelectBetSize] = React.useState(false);
   if (!players || !players[seatIndex]) return null;
@@ -22,7 +23,7 @@ export function ActionBar() {
   const disable = !isPlaying || seatIndex !== turnIndex;
   return (
     <div className="w-full flex items-center justify-center pointer-events-auto">
-      {!isPlaying && !thisPlayer.ready && (
+      {!isPlaying && !thisPlayer.ready && thisPlayer.stack >= bigblindSize && (
         <Button
           action={() => takeAction({ type: "ready" })}
           title="ready"

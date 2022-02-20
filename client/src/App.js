@@ -1,12 +1,12 @@
-import "./App.css";
-import { Table } from "./components/Table";
-import { ActionBar } from "./components/ActionBar";
-import { GameProvider } from "./contexts/Game";
 import { useEffect, useRef, useState } from "react";
-import { getSocket } from "./socket/socket";
-import LoginPage from "./pages/LoginPage";
+import "./App.css";
+import { ActionBar } from "./components/ActionBar";
 import { Chat } from "./components/Chat";
 import MenuBar from "./components/MenuBar";
+import { Table } from "./components/Table";
+import { GameProvider } from "./contexts/Game";
+import LoginPage from "./pages/LoginPage";
+import { getSocket } from "./socket/socket";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -63,7 +63,7 @@ function App() {
               <ActionBar />
             </div>
             <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-              <MenuBar />
+              <MenuBar toggleChat={() => setChatHidden((hid) => !hid)} />
             </div>
             <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
               {chatHint && (
