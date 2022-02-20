@@ -18,10 +18,11 @@ export function GameProvider({ children, socket }) {
   const [showDown, setShowDown] = React.useState(false);
   const [availableActions, setAvailableActions] = React.useState([]);
   const [bigblindSize, setBigblindSize] = React.useState(0);
+  const [debugMode, setDebugMode] = React.useState(false);
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {
-      console.log("game state update");
+      if (gameState.debugMode) console.log("game state update", { gameState });
       setDeck(gameState.deck);
       setPlayers(gameState.players);
       setBets(gameState.bets);
@@ -36,6 +37,7 @@ export function GameProvider({ children, socket }) {
       setAvailableActions(gameState.availableActions);
       setBigblindSize(gameState.bigblindSize);
       setWinners(gameState.winners);
+      setDebugMode(gameState.debugMode);
     });
     socket.on("seat_index", (index) => {
       console.log("You are in seat: ", index);
@@ -66,6 +68,7 @@ export function GameProvider({ children, socket }) {
     availableActions,
     bigblindSize,
     winners,
+    debugMode,
     takeAction,
   };
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

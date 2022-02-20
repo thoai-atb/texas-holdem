@@ -1,5 +1,6 @@
 const { findWinners } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
+const { randomId } = require("../utils/random_id");
 const createBot = require("./bot");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
@@ -8,9 +9,7 @@ const SHOWDOWN_TIME = 6000;
 
 function createGame(onUpdate, onInfo) {
   const state = {
-    id:
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15), // TO IDENTIFY GAMES WHEN RESETTING
+    id: randomId(), // TO IDENTIFY GAMES WHEN RESETTING
     players: new Array(9).fill(null),
     bets: new Array(9).fill(0),
     betTypes: new Array(9).fill(null),

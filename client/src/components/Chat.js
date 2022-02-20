@@ -2,12 +2,16 @@ import React, { useEffect } from "react";
 import { useGame } from "../contexts/Game";
 
 export function Chat({ hidden, setHidden }) {
-  const { socket } = useGame();
+  const { socket, debugMode } = useGame();
   const [message, setMessage] = React.useState("");
   const [messages, setMessages] = React.useState([]);
   const [typedMessages, setTypedMessages] = React.useState([]);
   const inputRef = React.useRef(null);
   const scrollRef = React.useRef(null);
+
+  if (debugMode) {
+    // console.log("Messages: ", { message, typedMessages, messages });
+  }
 
   useEffect(() => {
     const chatMesssageHandler = ({ desc: message }) => {

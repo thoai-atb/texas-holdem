@@ -5,6 +5,7 @@ const createGame = require("./src/game_controller/game");
 const rl = require("readline");
 const { generateBotName } = require("./src/game_controller/utils");
 const path = require("path");
+const { randomId } = require("./src/utils/random_id");
 
 const app = express();
 
@@ -148,6 +149,7 @@ io.on("connection", (socket) => {
     const chat = `<${name}> ${message}`;
     if (chatLogging) console.log(chat);
     io.sockets.emit("chat_message", {
+      id: randomId(),
       desc: chat,
       content: message,
       senderID: seatIndex,

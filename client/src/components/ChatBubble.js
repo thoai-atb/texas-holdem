@@ -7,13 +7,16 @@ function timeToReadMessage(message) {
 
 export function ChatBubble({ offset, seatIndex }) {
   const { socket } = useGame();
-  const [messages, setMessages] = React.useState([]);
+  const [message, setMessage] = React.useState(null);
   useEffect(() => {
-    const chatMesssageHandler = ({ content, senderID }) => {
+    const chatMesssageHandler = ({ id, content, senderID }) => {
       if (senderID !== seatIndex) return;
-      setMessages((messages) => [content, ...messages]);
+      setMessage({
+        id,
+        content,
+      });
       const timeId = setTimeout(() => {
-        setMessages((messages) => messages.splice(messages.length - 1, 1)); // remove last message
+        setMessage((message) => (message.id === id ? null : message)); // remove message if it was the old message
       }, timeToReadMessage(content));
       return () => clearTimeout(timeId);
     };
@@ -22,7 +25,7 @@ export function ChatBubble({ offset, seatIndex }) {
       socket.off("chat_message", chatMesssageHandler);
     };
   }, [socket, seatIndex]);
-  if (!messages.length) return null;
+  if (!message) return null;
   return (
     <div
       className="h-96 absolute bottom-full pointer-events-none"
@@ -40,7 +43,7 @@ export function ChatBubble({ offset, seatIndex }) {
           backgroundColor: "rgba(255, 255, 255, 0.7)",
         }}
       >
-        {messages[0]}
+        {message.content}
         <div
           className="absolute top-full bg-white"
           style={{
