@@ -61,12 +61,13 @@ export function Hand({ style, position }) {
           className={
             "bg-black text-center text-white text-xl pb-1 rounded-lg relative border-gray-800 transition duration-300" +
             (turnIndex === positionIndex
-              ? " bg-lime-300 text-gray-800 border-2 font-bold"
+              ? " bg-lime-300 text-gray-800 font-bold"
               : "")
           }
           style={{
             width: "9rem",
             height: "3.8rem",
+            borderWidth: turnIndex === positionIndex ? "0.2rem" : "0rem",
           }}
         >
           <div>

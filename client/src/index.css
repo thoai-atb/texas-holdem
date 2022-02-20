@@ -28,3 +28,7 @@ code {
   width: 100vw;
   flex-direction: column;
 }
+
+.font-playing-card {
+  font-family: "Laila", sans-serif;
+}

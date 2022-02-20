@@ -34,9 +34,10 @@ function Bet({ style, position }) {
       {amount > 0 && (
         <div
           className={
-            "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-2 border-white border-dotted"
+            "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-white border-dotted"
           }
           style={{
+            borderWidth: "0.28rem",
             backgroundColor: colorFromAmount(amount),
           }}
         >
@@ -62,9 +63,10 @@ function Pot() {
     >
       <div
         className={
-          "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-2 border-white border-dotted"
+          "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-white border-dotted"
         }
         style={{
+          borderWidth: "0.28rem",
           backgroundColor: colorFromAmount(pot),
         }}
       >
