@@ -11,7 +11,6 @@ export function Card({ card, hidden }) {
     hands.some((hand) =>
       hand.some((c) => c.suit === card.suit && c.value === card.value)
     );
-  console.log(require("../assets/texture/card-back.png"));
   return (
     <div
       className={

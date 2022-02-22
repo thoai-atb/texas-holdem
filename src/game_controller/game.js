@@ -7,7 +7,7 @@ const createBot = require("./bot");
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
 
-function createGame(onUpdate, onInfo) {
+function createGame(onUpdate, onInfo, onSoundEffect) {
   const state = {
     id: randomId(), // TO IDENTIFY GAMES WHEN RESETTING
     players: new Array(9).fill(null),
@@ -36,7 +36,17 @@ function createGame(onUpdate, onInfo) {
 
   // PLAYERS
 
+  const randomAvailableSeat = () => {
+    const availableSeats = [];
+    for (let i = 0; i < 9; i++) {
+      if (!state.players[i]) availableSeats.push(i);
+    }
+    if (availableSeats.length === 0) return -1;
+    return availableSeats[Math.floor(Math.random() * availableSeats.length)];
+  };
+
   const addPlayer = (seatIndex, name) => {
+    if (state.players[seatIndex]) return false;
     state.players[seatIndex] = {
       seatIndex,
       name,
@@ -47,6 +57,7 @@ function createGame(onUpdate, onInfo) {
       state.players.forEach((player) => {
         if (player && !player.isBot) player.ready = false;
       });
+    return true;
   };
 
   const addBot = (name) => {
@@ -191,6 +202,7 @@ function createGame(onUpdate, onInfo) {
       return true;
     }
     nextTurn();
+    onSoundEffect("fold");
     return true;
   };
 
@@ -199,6 +211,7 @@ function createGame(onUpdate, onInfo) {
       return false;
     state.betTypes[state.turnIndex] = "check";
     nextTurn();
+    onSoundEffect("check");
     return true;
   };
 
@@ -212,6 +225,7 @@ function createGame(onUpdate, onInfo) {
     state.betTypes[state.turnIndex] = "call";
     state.players[state.turnIndex].stack -= toCall;
     nextTurn();
+    onSoundEffect("call");
     return true;
   };
 
@@ -230,6 +244,7 @@ function createGame(onUpdate, onInfo) {
     state.betTypes[state.turnIndex] = "bet";
     state.completeActionSeat = state.turnIndex;
     nextTurn();
+    onSoundEffect("bet");
     return true;
   };
 
@@ -249,6 +264,7 @@ function createGame(onUpdate, onInfo) {
     state.minRaiseSize = raiseSize;
     state.completeActionSeat = state.turnIndex;
     nextTurn();
+    onSoundEffect("raise");
     return true;
   };
 
@@ -271,6 +287,13 @@ function createGame(onUpdate, onInfo) {
       index = (index + 1) % state.players.length;
     } while (index < 0 || !state.players[index]);
     return index;
+  };
+
+  const isQualified = (seatIndex) => {
+    return (
+      state.players[seatIndex] &&
+      state.players[seatIndex].stack >= state.bigblindSize
+    );
   };
 
   const nextQualifiedIndex = (index) => {
@@ -339,12 +362,15 @@ function createGame(onUpdate, onInfo) {
     switch (state.round) {
       case 1:
         state.board = dealCards(state.deck, 3);
+        onSoundEffect("flip");
         break;
       case 2:
         state.board = [...state.board, ...dealCards(state.deck, 1)];
+        onSoundEffect("flip");
         break;
       case 3:
         state.board = [...state.board, ...dealCards(state.deck, 1)];
+        onSoundEffect("flip");
         break;
       case 4:
         showDown();
@@ -429,6 +455,7 @@ function createGame(onUpdate, onInfo) {
       } else onInfo(info, info);
     }
 
+    onSoundEffect("showdown");
     onUpdate();
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };
@@ -450,6 +477,7 @@ function createGame(onUpdate, onInfo) {
       }
     });
     removeBrokeBots();
+    nextButton();
     checkToStart();
     onUpdate();
   };
@@ -474,7 +502,7 @@ function createGame(onUpdate, onInfo) {
     state.winners = [];
     state.showDown = false;
     state.round = 0;
-    nextButton();
+    if (state.buttonIndex < 0 || !isQualified(state.buttonIndex)) nextButton();
     let tempIndex = state.buttonIndex;
     if (state.players[tempIndex].stack >= state.bigblindSize)
       deal(tempIndex, 2);
@@ -491,6 +519,7 @@ function createGame(onUpdate, onInfo) {
     tempIndex = nextQualifiedIndex(tempIndex); // TO UTG
     state.turnIndex = tempIndex;
     state.completeActionSeat = tempIndex;
+    onSoundEffect("flip");
     prepareTurn();
   };
 
@@ -517,6 +546,7 @@ function createGame(onUpdate, onInfo) {
     setMoney,
     nextTurn,
     nextButton,
+    randomAvailableSeat,
   };
 
   return game;

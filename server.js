@@ -36,7 +36,7 @@ const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
-const game = createGame(broadcast, infoFunction);
+const game = createGame(broadcast, infoFunction, playGameSoundFx);
 
 function broadcast() {
   io.sockets.emit("game_state", game.state);
@@ -47,6 +47,24 @@ function infoFunction(desc, content) {
     desc,
     content,
   });
+}
+
+function playGameSoundFx(sound) {
+  if (["bet", "call", "raise"].includes(sound)) {
+    io.sockets.emit("sound_effect", "chips");
+  }
+  if (["check"].includes(sound)) {
+    io.sockets.emit("sound_effect", "tap");
+  }
+  if (["fold"].includes(sound)) {
+    io.sockets.emit("sound_effect", "throw");
+  }
+  if (["showdown"].includes(sound)) {
+    io.sockets.emit("sound_effect", "win");
+  }
+  if (["flip"].includes(sound)) {
+    io.sockets.emit("sound_effect", "flip");
+  }
 }
 
 io.on("connection", (socket) => {
@@ -61,10 +79,11 @@ io.on("connection", (socket) => {
   connections.push(socket);
 
   // SELECT SEAT
-  const seatIndex = availableSeats.splice(
-    Math.random() * availableSeats.length,
-    1
-  )[0];
+  var seatIndex = game.randomAvailableSeat();
+  if (seatIndex === -1) {
+    game.clearBots();
+    seatIndex = game.randomAvailableSeat();
+  }
   playerData[seatIndex] = {
     seatIndex,
     name,
@@ -90,8 +109,8 @@ io.on("connection", (socket) => {
     availableSeats.push(seatIndex);
     game.removePlayer(seatIndex);
     if (playerData.every((player) => player === null)) {
-      console.log("No players left, resetting game");
-      Object.assign(game, createGame(broadcast, infoFunction));
+      console.log("No players left");
+      // Object.assign(game, createGame(broadcast, infoFunction, playGameSoundFx));
     }
     broadcast();
   });
