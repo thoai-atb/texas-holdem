@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { useSoundHandler } from "../hooks/useSoundHandler";
 
 const GameContext = React.createContext({});
 
@@ -20,8 +19,6 @@ export function GameProvider({ children, socket }) {
   const [availableActions, setAvailableActions] = React.useState([]);
   const [bigblindSize, setBigblindSize] = React.useState(0);
   const [debugMode, setDebugMode] = React.useState(false);
-
-  useSoundHandler({ socket });
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {

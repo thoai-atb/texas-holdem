@@ -245,6 +245,11 @@ const executeCommand = (command, invoker = "Server") => {
       game.fillMoney(arg);
       broadcast();
       break;
+    case "set_blind":
+      isAction = true;
+      game.setBlinds(parseInt(arg));
+      broadcast();
+      break;
     default:
       return;
   }

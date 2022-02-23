@@ -34,7 +34,7 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     botSpeed: 1000,
   };
 
-  // PLAYERS
+  // COMMANDS
 
   const randomAvailableSeat = () => {
     const availableSeats = [];
@@ -159,6 +159,13 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     state.players[seatIndex].ready = true;
   };
 
+  const setBlinds = (bigblindSize = 10, bigblindIncrement = 10) => {
+    state.bigblindSize = bigblindSize;
+    state.bigblindIncrement = bigblindIncrement;
+  };
+
+  // PLAYERS & COUNTINGS
+
   const checkToStart = () => {
     if (countQualifiedPlayers() <= 1) return;
     if (
@@ -199,6 +206,7 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     if (state.completeActionSeat === state.turnIndex) {
       // OPEN ACTION FOLDED
       nextTurn(true);
+      onSoundEffect("fold");
       return true;
     }
     nextTurn();
@@ -547,6 +555,7 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     nextTurn,
     nextButton,
     randomAvailableSeat,
+    setBlinds,
   };
 
   return game;

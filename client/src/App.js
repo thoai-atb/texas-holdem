@@ -7,13 +7,17 @@ import { Table } from "./components/Table";
 import { GameProvider } from "./contexts/Game";
 import LoginPage from "./pages/LoginPage";
 import { getSocket } from "./socket/socket";
+import { useSoundHandler } from "./hooks/useSoundHandler";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [socket, setSocket] = useState(null);
   const [chatHidden, setChatHidden] = useState(true);
   const [chatHint, setChatHint] = useState("- Press T to chat -");
+  const [muted, setMuted] = useState(false);
   const containerRef = useRef(null);
+
+  useSoundHandler({ socket, muted });
 
   const login = (name, address, onFail) => {
     address = address || "http://localhost:8000";
@@ -63,7 +67,11 @@ function App() {
               <ActionBar />
             </div>
             <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-              <MenuBar toggleChat={() => setChatHidden((hid) => !hid)} />
+              <MenuBar
+                toggleChat={() => setChatHidden((hid) => !hid)}
+                toggleMuted={() => setMuted((mute) => !mute)}
+                isMuted={muted}
+              />
             </div>
             <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
               {chatHint && (

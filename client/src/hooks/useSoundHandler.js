@@ -15,7 +15,7 @@ import throwSound from "../assets/sounds/throw.wav";
 import winSound from "../assets/sounds/ba_dum_tss.wav";
 import cardFlipSound from "../assets/sounds/card_flip.wav";
 
-export const useSoundHandler = ({ socket }) => {
+export const useSoundHandler = ({ socket, muted }) => {
   const [playChips] = useSound(chipsSound, {
     interrupt: true,
   });
@@ -35,6 +35,7 @@ export const useSoundHandler = ({ socket }) => {
   });
 
   useEffect(() => {
+    if(!socket || muted) return;
     socket.on("sound_effect", (sound) => {
       if (sound === "chips") playChips();
       if (sound === "tap") playTap();
@@ -45,5 +46,5 @@ export const useSoundHandler = ({ socket }) => {
     return () => {
       socket.off("sound_effect");
     };
-  }, [socket, playChips, playTap, playThrow, playWin, playFlip]);
+  }, [socket, playChips, playTap, playThrow, playWin, playFlip, muted]);
 };
