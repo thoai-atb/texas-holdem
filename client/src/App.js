@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { ActionBar } from "./components/ActionBar";
-import { Chat } from "./components/Chat";
-import MenuBar from "./components/MenuBar";
-import { Table } from "./components/Table";
+import { ActionBar } from "./components/ui/ActionBar";
+import { Chat } from "./components/ui/Chat";
+import MenuBar from "./components/ui/MenuBar";
+import { Table } from "./components/game-play/Table";
 import { GameProvider } from "./contexts/Game";
 import LoginPage from "./pages/LoginPage";
 import { getSocket } from "./socket/socket";
@@ -18,7 +18,7 @@ function App() {
   const [muted, setMuted] = useState(false);
   const containerRef = useRef(null);
 
-  const { playBubbleClick, playStickClick } = useSoundHandler({
+  const { playBubbleClick, playStickClick, volume, setVolume } = useSoundHandler({
     socket,
     muted,
   });
@@ -59,7 +59,7 @@ function App() {
   }, [chatHidden]);
 
   return (
-    <SoundContext.Provider value={{ playBubbleClick, playStickClick }}>
+    <SoundContext.Provider value={{ playBubbleClick, playStickClick, volume, setVolume }}>
       <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
         {!loggedIn && <LoginPage loginFunction={login} />}
         {loggedIn && (

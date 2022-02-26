@@ -1,6 +1,6 @@
 import React from "react";
-import { useGame } from "../contexts/Game";
-import { positionFromIndex } from "../utilities/position_converter";
+import { useGame } from "../../contexts/Game";
+import { positionFromIndex } from "../../utilities/position_converter";
 
 export function DealerButton({ debugPosition = -1 }) {
   const { buttonIndex, seatIndex } = useGame();

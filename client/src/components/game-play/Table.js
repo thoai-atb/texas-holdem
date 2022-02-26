@@ -1,5 +1,5 @@
 import React from "react";
-import { useGame } from "../contexts/Game";
+import { useGame } from "../../contexts/Game";
 import { Bets } from "./Bets";
 import { Board } from "./Board";
 import { DealerButton } from "./DealerButton";

@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
-import { useGame } from "../contexts/Game";
+import { useGame } from "../../contexts/Game";
 
 export function Chat({ hidden, setHidden }) {
   const { socket, debugMode } = useGame();
   const [message, setMessage] = React.useState("");
   const [messages, setMessages] = React.useState([]);
   const [typedMessages, setTypedMessages] = React.useState([]);
+  const [typedMessageIndex, setTypedMessageIndex] = React.useState(-1);
   const inputRef = React.useRef(null);
   const scrollRef = React.useRef(null);
 
@@ -34,12 +35,28 @@ export function Chat({ hidden, setHidden }) {
     }
   });
 
+  useEffect(() => {
+    if (typedMessages.length > 0 && typedMessageIndex >= 0) {
+      const message = typedMessages[typedMessageIndex];
+      setMessage(message);
+    }
+  }, [typedMessageIndex, typedMessages]);
+
+  useEffect(() => {
+    setTypedMessageIndex(-1);
+  }, [typedMessages]);
+
   const sendMessage = () => {
     if (!message) return;
     socket.emit("chat_message", message);
     setTypedMessages((typedMessages) =>
       message !== typedMessages[0] ? [message, ...typedMessages] : typedMessages
     );
+  };
+
+  const handleChange = (message) => {
+    setMessage(message);
+    setTypedMessageIndex(-1);
   };
 
   if (hidden) return null;
@@ -80,18 +97,22 @@ export function Chat({ hidden, setHidden }) {
                 setHidden(true);
               } else if (e.key === "Enter") {
                 sendMessage();
-                setMessage("");
+                handleChange("");
                 setHidden(true);
               } else if (e.key === "ArrowUp") {
-                const message = typedMessages[0];
-                setMessage(message);
-                // e.target.setSelectionRange(message.length, message.length);
+                if (typedMessageIndex < typedMessages.length - 1)
+                  setTypedMessageIndex((index) => index + 1);
               } else if (e.key === "ArrowDown") {
+                if (typedMessageIndex > 0)
+                  setTypedMessageIndex((index) => index - 1);
+                else if (typedMessageIndex === 0) {
+                  handleChange("");
+                }
               } else e.stopPropagation();
             }}
             ref={inputRef}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
           />
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useGame } from "../contexts/Game";
+import { useGame } from "../../contexts/Game";
 
 function timeToReadMessage(message) {
   return Math.max(Math.ceil(message.length / 5) * 1000, 2000);
@@ -9,7 +9,12 @@ export function ChatBubble({ offset, seatIndex }) {
   const { socket } = useGame();
   const [message, setMessage] = React.useState(null);
   useEffect(() => {
-    const chatMesssageHandler = ({ id, content, senderID }) => {
+    const chatMesssageHandler = (messageEvent) => {
+      if (!messageEvent) {
+        console.log("No message data");
+        return;
+      }
+      const { id, content, senderID } = messageEvent;
       if (senderID !== seatIndex) return;
       setMessage({
         id,

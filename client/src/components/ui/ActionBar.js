@@ -4,8 +4,8 @@ import {
   AiOutlineMinusCircle,
   AiOutlinePlusCircle,
 } from "react-icons/ai";
-import { useGame } from "../contexts/Game";
-import { useSoundContext } from "../contexts/Sound";
+import { useGame } from "../../contexts/Game";
+import { useSoundContext } from "../../contexts/Sound";
 
 export function ActionBar() {
   const {

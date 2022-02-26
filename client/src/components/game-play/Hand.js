@@ -1,10 +1,10 @@
 import React from "react";
 import { Card } from "./Card";
-import { useGame } from "../contexts/Game";
+import { useGame } from "../../contexts/Game";
 import {
   indexFromPosition,
   positionFromIndex,
-} from "../utilities/position_converter";
+} from "../../utilities/position_converter";
 import { ChatBubble } from "./ChatBubble";
 
 export function Hand({ style, position }) {

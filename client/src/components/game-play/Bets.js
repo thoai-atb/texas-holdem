@@ -1,6 +1,6 @@
 import React from "react";
-import { useGame } from "../contexts/Game";
-import { indexFromPosition } from "../utilities/position_converter";
+import { useGame } from "../../contexts/Game";
+import { indexFromPosition } from "../../utilities/position_converter";
 import { AiOutlineCheckCircle } from "react-icons/ai";
 
 export function Bets() {

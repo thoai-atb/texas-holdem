@@ -1,6 +1,6 @@
 import React from "react";
-import { useGame } from "../contexts/Game";
-import cardBack from "../assets/texture/card-back.png";
+import { useGame } from "../../contexts/Game";
+import cardBack from "../../assets/texture/card-back.png";
 
 export function Card({ card, hidden }) {
   const { winners } = useGame();
@@ -32,7 +32,7 @@ export function Card({ card, hidden }) {
       )}
       {hidden && (
         <div
-          className="w-5/6 h-5/6 rounded-lg bg-gradient-to-r from-gray-200 to-rose-400 "
+          className="w-5/6 h-5/6 rounded-lg"
           style={{
             backgroundImage: `url(${cardBack})`,
             backgroundSize: "cover",
