@@ -14,10 +14,13 @@ import tapSound from "../assets/sounds/tap.wav";
 import throwSound from "../assets/sounds/throw.wav";
 import winSound from "../assets/sounds/ba_dum_tss.wav";
 import cardFlipSound from "../assets/sounds/card_flip.wav";
+import bubbleClickSound from "../assets/sounds/bubble_click.wav";
+import stickClickSound from "../assets/sounds/stick_click.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [playChips] = useSound(chipsSound, {
     interrupt: true,
+    volume: 2.0,
   });
   const [playTap] = useSound(tapSound, {
     interrupt: true,
@@ -33,6 +36,14 @@ export const useSoundHandler = ({ socket, muted }) => {
   const [playFlip] = useSound(cardFlipSound, {
     interrupt: true,
   });
+  const [playBubbleClick] = useSound(bubbleClickSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 1.0,
+  });
+  const [playStickClick] = useSound(stickClickSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 1.0,
+  });
 
   useEffect(() => {
     if(!socket || muted) return;
@@ -47,4 +58,14 @@ export const useSoundHandler = ({ socket, muted }) => {
       socket.off("sound_effect");
     };
   }, [socket, playChips, playTap, playThrow, playWin, playFlip, muted]);
+
+  return {
+    playChips,
+    playTap,
+    playThrow,
+    playWin,
+    playFlip,
+    playBubbleClick,
+    playStickClick,
+  }
 };

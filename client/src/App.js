@@ -8,6 +8,7 @@ import { GameProvider } from "./contexts/Game";
 import LoginPage from "./pages/LoginPage";
 import { getSocket } from "./socket/socket";
 import { useSoundHandler } from "./hooks/useSoundHandler";
+import { SoundContext } from "./contexts/Sound";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -17,7 +18,10 @@ function App() {
   const [muted, setMuted] = useState(false);
   const containerRef = useRef(null);
 
-  useSoundHandler({ socket, muted });
+  const { playBubbleClick, playStickClick } = useSoundHandler({
+    socket,
+    muted,
+  });
 
   const login = (name, address, onFail) => {
     address = address || "http://localhost:8000";
@@ -55,39 +59,41 @@ function App() {
   }, [chatHidden]);
 
   return (
-    <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
-      {!loggedIn && <LoginPage loginFunction={login} />}
-      {loggedIn && (
-        <div>
-          <GameProvider socket={socket}>
-            <div className="absolute w-full h-full justify-center items-center flex pb-28">
-              <Table />
-            </div>
-            <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-              <ActionBar />
-            </div>
-            <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-              <MenuBar
-                toggleChat={() => setChatHidden((hid) => !hid)}
-                toggleMuted={() => setMuted((mute) => !mute)}
-                isMuted={muted}
-              />
-            </div>
-            <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-              {chatHint && (
-                <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
-                  {chatHint}
-                </div>
-              )}
-              <Chat hidden={chatHidden} setHidden={setChatHidden} />
-            </div>
-          </GameProvider>
+    <SoundContext.Provider value={{ playBubbleClick, playStickClick }}>
+      <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
+        {!loggedIn && <LoginPage loginFunction={login} />}
+        {loggedIn && (
+          <div>
+            <GameProvider socket={socket}>
+              <div className="absolute w-full h-full justify-center items-center flex pb-28">
+                <Table />
+              </div>
+              <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                <ActionBar />
+              </div>
+              <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                <MenuBar
+                  toggleChat={() => setChatHidden((hid) => !hid)}
+                  toggleMuted={() => setMuted((mute) => !mute)}
+                  isMuted={muted}
+                />
+              </div>
+              <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                {chatHint && (
+                  <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
+                    {chatHint}
+                  </div>
+                )}
+                <Chat hidden={chatHidden} setHidden={setChatHidden} />
+              </div>
+            </GameProvider>
+          </div>
+        )}
+        <div className="absolute bottom-2 left-2 text-slate-700">
+          @ 2022 Thoai Ly. All Rights Reserved.
         </div>
-      )}
-      <div className="absolute bottom-2 left-2 text-slate-700">
-        @ 2022 Thoai Ly. All Rights Reserved.
       </div>
-    </div>
+    </SoundContext.Provider>
   );
 }
 

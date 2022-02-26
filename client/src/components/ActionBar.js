@@ -5,6 +5,7 @@ import {
   AiOutlinePlusCircle,
 } from "react-icons/ai";
 import { useGame } from "../contexts/Game";
+import { useSoundContext } from "../contexts/Sound";
 
 export function ActionBar() {
   const {
@@ -68,7 +69,7 @@ export function ActionBar() {
       {isPlaying &&
         seatIndex !== turnIndex &&
         !thisPlayer.folded &&
-        thisPlayer.cards?.length &&
+        thisPlayer.cards?.length > 0 &&
         !showDown && (
           <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
             - WAIT FOR YOUR TURN -
@@ -79,13 +80,17 @@ export function ActionBar() {
 }
 
 export const Button = ({ action, title, className }) => {
+  const { playBubbleClick } = useSoundContext();
   return (
     <button
       className={
         className +
         " text-white p-4 rounded-full uppercase m-8 text-4xl w-64 text-center"
       }
-      onClick={action}
+      onClick={() => {
+        playBubbleClick();
+        action();
+      }}
     >
       {title}
     </button>
@@ -100,6 +105,7 @@ export const ActionButton = ({
   setShowSelectBetSize,
   availableAction,
 }) => {
+  const { playBubbleClick, playStickClick } = useSoundContext();
   const inputRef = React.useRef();
   const [betSize, setBetSize] = React.useState(0);
   const { currentBetSize, bigblindSize, pot } = useGame();
@@ -108,9 +114,13 @@ export const ActionButton = ({
   const expand = isAggressive && showSelectBetSize;
 
   const buttonClickHandler = () => {
-    if (isAggressive && !showSelectBetSize) {
-      setShowSelectBetSize(true);
+    if (isAggressive) {
+      if (!showSelectBetSize) {
+        playBubbleClick();
+        setShowSelectBetSize(true);
+      }
     } else {
+      playBubbleClick();
       takeAction({ type: availableAction.type });
     }
   };
@@ -123,6 +133,7 @@ export const ActionButton = ({
       return;
     }
     setShowSelectBetSize(false);
+    playStickClick();
     takeAction({ type: availableAction.type, size: size });
   };
 
@@ -132,6 +143,7 @@ export const ActionButton = ({
     if (newBetSize - currentBetSize < availableAction.minSize) {
       newBetSize = availableAction.minSize + currentBetSize;
     }
+    playStickClick();
     setBetSize(newBetSize);
   };
 
@@ -143,6 +155,7 @@ export const ActionButton = ({
     } else if (value > availableAction.maxSize + currentBetSize) {
       value = availableAction.maxSize + currentBetSize;
     }
+    playStickClick();
     setBetSize(value);
   };
 
@@ -152,6 +165,7 @@ export const ActionButton = ({
     if (newBetSize - currentBetSize > availableAction.maxSize) {
       newBetSize = availableAction.maxSize + currentBetSize;
     }
+    playStickClick();
     setBetSize(newBetSize);
   };
 
@@ -165,7 +179,9 @@ export const ActionButton = ({
   };
 
   useEffect(() => {
-    availableAction && setBetSize(availableAction.minSize + currentBetSize);
+    if (availableAction) {
+      setBetSize(availableAction.minSize + currentBetSize);
+    }
   }, [availableAction, currentBetSize]);
 
   useEffect(() => {

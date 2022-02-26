@@ -32,7 +32,7 @@ export function Card({ card, hidden }) {
       )}
       {hidden && (
         <div
-          className="w-5/6 h-5/6 rounded-lg"
+          className="w-5/6 h-5/6 rounded-lg bg-gradient-to-r from-gray-200 to-rose-400 "
           style={{
             backgroundImage: `url(${cardBack})`,
             backgroundSize: "cover",
