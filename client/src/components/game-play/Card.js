@@ -21,9 +21,9 @@ export function Card({ card, hidden }) {
     >
       {card && !hidden && (
         <div className={["♥", "♦"].includes(card.suit) ? " text-red-600" : ""}>
-          <div className="absolute top-1 left-1">
+          <div className="absolute top-0.5 left-1">
             <div className="text-3xl h-6 font-bold font-playing-card">{card.value}</div>
-            <div className="text-3xl h-6">{card.suit}</div>
+            <div className="text-3xl h-6 mt-0.5">{card.suit}</div>
           </div>
           <div className="absolute bottom-0 right-0 clear-both">
             <div className="text-6xl">{card.suit}</div>

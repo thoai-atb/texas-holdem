@@ -30,7 +30,7 @@ code {
 }
 
 .font-playing-card {
-  font-family: "Laila", sans-serif;
+  font-family: "Lora", serif;
 }
 
 .slider {
@@ -38,7 +38,7 @@ code {
   appearance: none;
   width: 100%; /* Full-width */
   outline: none; /* Remove outline */
-  opacity: 0.9; /* Set transparency (for mouse-over effects on hover) */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
   -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
   transition: opacity 0.2s;
   @apply bg-slate-300 rounded-full h-4 border-4 border-slate-700;
@@ -54,10 +54,12 @@ code {
   -webkit-appearance: none; /* Override default look */
   appearance: none;
   cursor: pointer; /* Cursor on hover */
-  @apply bg-slate-700 w-7 h-7 rounded-full;
+  border-width: 4px;
+  border-opacity: 1;
+  @apply bg-white border-4 border-slate-700 w-7 h-7 rounded-full;
 }
 
 .slider::-moz-range-thumb {
-  @apply bg-slate-700 w-7 h-7 border-0;
+  @apply bg-white border-0 w-7 h-7;
   cursor: pointer; /* Cursor on hover */
 }

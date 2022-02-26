@@ -82,7 +82,14 @@ export function Hand({ style, position }) {
                 ` | ${actionType.toUpperCase()}`}
             </span>
           </div>
-          <div>{handPlayer.name}</div>
+          <div
+            className={
+              "whitespace-nowrap truncate px-1" +
+              (handPlayer.name.length > 12 ? " text-sm mt-1" : "")
+            }
+          >
+            {handPlayer.name}
+          </div>
           {!isPlaying && handPlayer.ready && (
             <div
               className={

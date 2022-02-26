@@ -10,14 +10,13 @@ import stickClickSound from "../assets/sounds/stick_click.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
-  console.log(volume);
   const [playChips] = useSound(chipsSound, {
     interrupt: true,
     volume: 1.5 * volume,
   });
   const [playTap] = useSound(tapSound, {
     interrupt: true,
-    volume: 5.0 * volume,
+    volume: 3.0 * volume,
   });
   const [playThrow] = useSound(throwSound, {
     interrupt: true,
