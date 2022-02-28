@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage";
 import { getSocket } from "./socket/socket";
 import { useSoundHandler } from "./hooks/useSoundHandler";
 import { SoundContext } from "./contexts/Sound";
+import { Info } from "./components/ui/Info";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -16,12 +17,14 @@ function App() {
   const [chatHidden, setChatHidden] = useState(true);
   const [chatHint, setChatHint] = useState("- Press T to chat -");
   const [muted, setMuted] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const containerRef = useRef(null);
 
-  const { playBubbleClick, playStickClick, volume, setVolume } = useSoundHandler({
-    socket,
-    muted,
-  });
+  const { playBubbleClick, playStickClick, volume, setVolume } =
+    useSoundHandler({
+      socket,
+      muted,
+    });
 
   const login = (name, address, onFail) => {
     address = address || "http://localhost:8000";
@@ -59,7 +62,9 @@ function App() {
   }, [chatHidden]);
 
   return (
-    <SoundContext.Provider value={{ playBubbleClick, playStickClick, volume, setVolume }}>
+    <SoundContext.Provider
+      value={{ playBubbleClick, playStickClick, volume, setVolume }}
+    >
       <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
         {!loggedIn && <LoginPage loginFunction={login} />}
         {loggedIn && (
@@ -75,6 +80,7 @@ function App() {
                 <MenuBar
                   toggleChat={() => setChatHidden((hid) => !hid)}
                   toggleMuted={() => setMuted((mute) => !mute)}
+                  toggleInfo={() => setShowInfo((show) => !show)}
                   isMuted={muted}
                 />
               </div>
@@ -85,6 +91,12 @@ function App() {
                   </div>
                 )}
                 <Chat hidden={chatHidden} setHidden={setChatHidden} />
+              </div>
+              <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                <Info
+                  hidden={!showInfo}
+                  setHidden={(hidden) => setShowInfo(!hidden)}
+                />
               </div>
             </GameProvider>
           </div>

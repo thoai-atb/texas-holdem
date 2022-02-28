@@ -1,4 +1,4 @@
-const { findWinners } = require("../texas_holdem/evaluator");
+const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
 const createBot = require("./bot");
@@ -463,7 +463,14 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
       } else onInfo(info, info);
     }
 
-    onSoundEffect("showdown");
+    const type = (() => {
+      const typeStr = state.winners[0].type;
+      if (HandRank[typeStr] <= HandRank["three of a kind"]) return "0";
+      if (HandRank[typeStr] <= HandRank["full house"]) return "a";
+      return "b";
+    })();
+
+    onSoundEffect("showdown_" + type);
     onUpdate();
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };

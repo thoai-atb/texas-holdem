@@ -3,10 +3,12 @@ import useSound from "use-sound";
 import chipsSound from "../assets/sounds/chips.wav";
 import tapSound from "../assets/sounds/tap.wav";
 import throwSound from "../assets/sounds/throw.wav";
-import winSound from "../assets/sounds/ba_dum_tss.wav";
+import baDumTssSound from "../assets/sounds/ba_dum_tss.wav";
 import cardFlipSound from "../assets/sounds/card_flip.wav";
 import bubbleClickSound from "../assets/sounds/bubble_click.wav";
 import stickClickSound from "../assets/sounds/stick_click.wav";
+import cinematicBombSound from "../assets/sounds/cinematic_boom.wav";
+import cinematicAlarmSound from "../assets/sounds/cinematic_alarm.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
@@ -16,16 +18,24 @@ export const useSoundHandler = ({ socket, muted }) => {
   });
   const [playTap] = useSound(tapSound, {
     interrupt: true,
-    volume: 3.0 * volume,
+    volume: 4.0 * volume,
   });
   const [playThrow] = useSound(throwSound, {
     interrupt: true,
-    volume: 3.0 * volume,
+    volume: 2.0 * volume,
   });
-  const [playWin] = useSound(winSound, {
+  const [playWin] = useSound(baDumTssSound, {
     interrupt: true,
     volume: volume,
   });
+  const [playWinA] = useSound(cinematicBombSound, {
+    interrupt: true,
+    volume: volume,
+  });
+  const [playWinB] = useSound(cinematicAlarmSound, {
+    interrupt: true,
+    volume: volume,
+  })
   const [playFlip] = useSound(cardFlipSound, {
     interrupt: true,
     volume: volume,
@@ -46,18 +56,22 @@ export const useSoundHandler = ({ socket, muted }) => {
       if (sound === "tap") playTap();
       if (sound === "throw") playThrow();
       if (sound === "win") playWin();
+      if (sound === "winStrong") playWinA();
+      if (sound === "winStronger") playWinB();
       if (sound === "flip") playFlip();
     });
     return () => {
       socket.off("sound_effect");
     };
-  }, [socket, playChips, playTap, playThrow, playWin, playFlip, muted]);
+  }, [socket, playChips, playTap, playThrow, playWin, playFlip, muted, playWinA, playWinB]);
 
   return {
     playChips,
     playTap,
     playThrow,
     playWin,
+    playWinA,
+    playWinB,
     playFlip,
     playBubbleClick,
     playStickClick,

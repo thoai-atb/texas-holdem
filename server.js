@@ -59,8 +59,14 @@ function playGameSoundFx(sound) {
   if (["fold"].includes(sound)) {
     io.sockets.emit("sound_effect", "throw");
   }
-  if (["showdown"].includes(sound)) {
+  if (["showdown_0"].includes(sound)) {
     io.sockets.emit("sound_effect", "win");
+  }
+  if (["showdown_a"].includes(sound)) {
+    io.sockets.emit("sound_effect", "winStrong");
+  }
+  if (["showdown_b"].includes(sound)) {
+    io.sockets.emit("sound_effect", "winStronger");
   }
   if (["flip"].includes(sound)) {
     io.sockets.emit("sound_effect", "flip");

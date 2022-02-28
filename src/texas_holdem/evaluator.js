@@ -473,6 +473,7 @@ const convertToMatrix = (cards) => {
 };
 
 module.exports = {
+  HandRank,
   findWinners,
   evaluate,
 };
