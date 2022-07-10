@@ -22,7 +22,7 @@ export function Info({ hidden, setHidden }) {
           or other players. Chips are free and are not saved if you leave the table.
         </div>
         <div className="text-lg text-slate-700 mt-5">
-          <div className="font-semibold texas-li">Owner &amp; Developer</div>
+          <div className="font-semibold texas-li">Author</div>
           <div>lybaothoai@gmail.com (Please report here)</div>
         </div>
         <div className="text-lg text-slate-700 mt-5">

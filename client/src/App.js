@@ -10,6 +10,7 @@ import { getSocket } from "./socket/socket";
 import { useSoundHandler } from "./hooks/useSoundHandler";
 import { SoundContext } from "./contexts/Sound";
 import { Info } from "./components/ui/Info";
+import { ControlPanel } from "./components/ui/ControlPanel";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -18,6 +19,7 @@ function App() {
   const [chatHint, setChatHint] = useState("- Press T to chat -");
   const [muted, setMuted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [showControlPanel, setShowControlPanel] = useState(false);
   const containerRef = useRef(null);
 
   const { playBubbleClick, playStickClick, volume, setVolume } =
@@ -81,6 +83,7 @@ function App() {
                   toggleChat={() => setChatHidden((hid) => !hid)}
                   toggleMuted={() => setMuted((mute) => !mute)}
                   toggleInfo={() => setShowInfo((show) => !show)}
+                  toggleControlPanel={() => setShowControlPanel((show) => !show)}
                   isMuted={muted}
                 />
               </div>
@@ -96,6 +99,12 @@ function App() {
                 <Info
                   hidden={!showInfo}
                   setHidden={(hidden) => setShowInfo(!hidden)}
+                />
+              </div>
+              <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                <ControlPanel
+                  hidden={!showControlPanel}
+                  setHidden={(hidden) => setShowControlPanel(!hidden)}
                 />
               </div>
             </GameProvider>

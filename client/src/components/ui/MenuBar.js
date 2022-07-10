@@ -1,11 +1,22 @@
 import React from "react";
-import { AiOutlineLogout, AiFillWechat, AiOutlineInfoCircle } from "react-icons/ai";
+import {
+  AiOutlineLogout,
+  AiFillWechat,
+  AiOutlineInfoCircle,
+  AiOutlineInsertRowBelow,
+} from "react-icons/ai";
 import { BsFillVolumeMuteFill, BsFillVolumeUpFill } from "react-icons/bs";
 import { useGame } from "../../contexts/Game";
 import { useSoundContext } from "../../contexts/Sound";
 import { VolumeOption } from "./VolumeOption";
 
-export default function MenuBar({ toggleChat, toggleMuted, toggleInfo, isMuted }) {
+export default function MenuBar({
+  toggleChat,
+  toggleMuted,
+  toggleInfo,
+  isMuted,
+  toggleControlPanel,
+}) {
   const { socket } = useGame();
   const { playBubbleClick } = useSoundContext();
   const logOutHandler = () => {
@@ -23,6 +34,10 @@ export default function MenuBar({ toggleChat, toggleMuted, toggleInfo, isMuted }
   const infoClickHandler = () => {
     toggleInfo();
     playBubbleClick();
+  };
+  const controlPanelClickHandler = () => {
+    playBubbleClick();
+    toggleControlPanel();
   };
   return (
     <div className="absolute overflow-visible top-0 w-full text-slate-700 text-5xl pointer-events-auto flex flex-row items-center justify-between">
@@ -49,6 +64,13 @@ export default function MenuBar({ toggleChat, toggleMuted, toggleInfo, isMuted }
         {isMuted && <BsFillVolumeMuteFill />}
         {!isMuted && <BsFillVolumeUpFill />}
         {<VolumeOption />}
+      </div>
+      <div
+        className="p-4 w-fit hover:text-white cursor-pointer transition duration-100"
+        title="Control panel"
+        onClick={controlPanelClickHandler}
+      >
+        <AiOutlineInsertRowBelow />
       </div>
       <div
         className="p-4 w-fit hover:text-white cursor-pointer transition duration-100"
