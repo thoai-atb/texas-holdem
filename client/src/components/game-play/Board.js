@@ -7,7 +7,7 @@ export function Board() {
   if (!board) return null;
   return (
     <div className="relative clear-both">
-      <div className="bg-gray-500 border-2 rounded-lg flex flex-row">
+      <div className="bg-gray-500 bg-opacity-50 border-2 rounded-lg flex flex-row">
         {board.map((card, index) => (
           <Card card={card} key={index} />
         ))}

@@ -4,18 +4,35 @@ import { Bets } from "./Bets";
 import { Board } from "./Board";
 import { DealerButton } from "./DealerButton";
 import { Hand } from "./Hand";
+import dotPattern from "../../assets/texture/16.png";
 
 export function Table() {
   const { bigblindSize } = useGame();
   return (
     <div
-      className="relative bg-gray-400 border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center"
+      className="relative bg-lime-400 bg-rad border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center"
       style={{
         maxHeight: "30rem",
         borderWidth: "0.5rem",
+        backgroundImage: "radial-gradient(lime, green)",
+        boxShadow: "0rem 2rem rgba(0, 0, 0, 0.5)"
       }}
     >
-      <div className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300">
+      <div
+        className="absolute rounded-full w-full h-full opacity-5 overflow-hidden "
+        style={{
+          backgroundImage: `url(${dotPattern})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      ></div>
+      <div
+        className="absolute top-0 w-72 h-28 rounded-b-xl bg-gray-300 opacity-50"
+        style={{
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <div className="w-full text-center text-slate-700">
           BLIND LEVEL: {bigblindSize / 2}/{bigblindSize}
         </div>

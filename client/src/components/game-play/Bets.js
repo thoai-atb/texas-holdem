@@ -34,10 +34,12 @@ function Bet({ style, position }) {
       {amount > 0 && (
         <div
           className={
-            "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-white border-dotted"
+            "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-dotted"
           }
           style={{
             borderWidth: "0.28rem",
+            borderColor: borderFromAmount(amount),
+            boxShadow: "0rem 0.5rem 0.3rem 0.1rem rgba(0, 0, 0, 0.2)",
             backgroundColor: colorFromAmount(amount),
           }}
         >
@@ -63,10 +65,12 @@ function Pot() {
     >
       <div
         className={
-          "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-white border-dotted"
+          "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-dotted"
         }
         style={{
           borderWidth: "0.28rem",
+          borderColor: borderFromAmount(pot),
+          boxShadow: "0rem 0.5rem 0.3rem 0.1rem rgba(0, 0, 0, 0.2)",
           backgroundColor: colorFromAmount(pot),
         }}
       >
@@ -77,16 +81,30 @@ function Pot() {
 }
 
 var colors = [
-  "#EF4444",
-  "#F97316",
-  "#EAB308",
-  "#84CC16",
-  "#10B981",
-  "#0EA5E9",
-  "#8B5CF6",
+  "#FF0000", // red
+  "#FF8800", // orange
+  "#FF00FF", // magenta
+  "#57cc16", // lime
+  "#8822FF", // purple blue
+  "#ba3f3f", // brown
+  "#000000", // black
+];
+
+var borderColors = [
+  "#ffffff",
+  "#ffffff",
+  "#ffffff",
+  "#ffffff",
+  "#ffffff",
+  "#ffffff",
+  "#ffffff",
 ];
 
 const colorFromAmount = (amount) => {
   let colorName = colors[amount % colors.length];
   return colorName;
+};
+
+const borderFromAmount = (amount) => {
+  return borderColors[amount % borderColors.length];
 };

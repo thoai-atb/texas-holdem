@@ -46,6 +46,23 @@ export function GameProvider({ children, socket }) {
     socket.emit("info_request");
   }, [seatIndex, socket]);
 
+  useEffect(() => {
+    let title = "";
+    if (board.length > 0) {
+      for (const card of board) {
+        title += card.value + card.suit + " ";
+      }
+    }
+    if (seatIndex === turnIndex) {
+      title += "Your Turn!";
+    }
+    if (winners.length >= 1) {
+      title += players[winners[0].index].name + " wins!"
+    }
+    if (title) document.title = title;
+    else document.title = "Texas Hold'em Abis";
+  }, [board, players, seatIndex, turnIndex, winners]);
+
   const takeAction = (action) => {
     if (isPlaying && turnIndex !== seatIndex) return;
     socket.emit("player_action", action);

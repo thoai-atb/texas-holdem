@@ -246,7 +246,7 @@ const executeCommand = (command, invoker = "Server") => {
       game.state.debugMode = !game.state.debugMode;
       broadcast();
       break;
-    case "please_help":
+    case "please_support":
       isAction = true;
       if (arg) game.fillMoney(arg);
       else game.fillMoney(invoker);

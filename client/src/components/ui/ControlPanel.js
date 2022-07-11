@@ -28,7 +28,7 @@ export function ControlPanel({ hidden, setHidden }) {
           <PanelButton text="Add bot" onClick={() => sendCommand("/add_bot")}/>
           <PanelButton text="Fill bots" onClick={() => sendCommand("/fill_bots")}/>
           <PanelButton text="Reset blinds" onClick={() => sendCommand("/set_blind 10")}/>
-          <PanelButton text="I'm broke!" onClick={() => sendCommand(`/please_help`)}/>
+          <PanelButton text="I'm broke!" onClick={() => sendCommand(`/please_support`)}/>
         </div>
       </div>
     </>
