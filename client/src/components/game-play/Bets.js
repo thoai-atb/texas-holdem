@@ -13,8 +13,8 @@ export function Bets() {
       <Bet style={{ bottom: "35%", left: "16%" }} position={2} />
       <Bet style={{ top: "35%", left: "16%" }} position={3} />
       <Bet style={{ top: "27%", left: "30%" }} position={4} />
-      <Bet style={{ top: "27%", right: "30%" }} position={5} />
-      <Bet style={{ top: "35%", right: "16%" }} position={6} />
+      <Bet style={{ top: "32%", right: "30%" }} position={5} />
+      <Bet style={{ top: "35%", right: "17%" }} position={6} />
       <Bet style={{ bottom: "35%", right: "16%" }} position={7} />
       <Bet style={{ bottom: "27%", right: "30%" }} position={8} />
     </div>

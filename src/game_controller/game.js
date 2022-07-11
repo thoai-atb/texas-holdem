@@ -2,6 +2,7 @@ const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
 const createBot = require("./bot");
+const robohashAvatars = require("robohash-avatars");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
 const ROUND_TIME = 1500;
@@ -46,10 +47,19 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
   };
 
   const addPlayer = (seatIndex, name) => {
+    var avatarURL = robohashAvatars.generateAvatar({
+      username: name,
+      background: robohashAvatars.BackgroundSets.RandomBackground1,
+      characters: robohashAvatars.CharacterSets.Kittens,
+      height: 400,
+      width: 400,
+    });
+    console.log(avatarURL);
     if (state.players[seatIndex]) return false;
     state.players[seatIndex] = {
       seatIndex,
       name,
+      avatarURL,
       stack: 1000,
       cards: [],
     };
@@ -68,11 +78,20 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
   };
 
   const setBot = (seatIndex, name) => {
+    var avatarURL = robohashAvatars.generateAvatar({
+      username: name,
+      background: robohashAvatars.BackgroundSets.RandomBackground1,
+      characters: robohashAvatars.CharacterSets.Robots,
+      height: 400,
+      width: 400,
+    });
+    console.log(avatarURL);
     state.players[seatIndex] = {
       seatIndex,
       name,
       bot: createBot(),
       isBot: true,
+      avatarURL,
       stack: 1000,
       ready: true,
       cards: [],
@@ -464,7 +483,7 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     }
 
     const type = (() => {
-      if(!state.winners.length) return "0";
+      if (!state.winners.length) return "0";
       const typeStr = state.winners[0].type;
       if (HandRank[typeStr] <= HandRank["three of a kind"]) return "0";
       if (HandRank[typeStr] <= HandRank["full house"]) return "a";

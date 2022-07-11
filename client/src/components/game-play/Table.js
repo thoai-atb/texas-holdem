@@ -39,6 +39,15 @@ export function Table() {
       </div>
       <Board />
       <DealerButton />
+      {/* <DealerButton debugPosition={0}/>
+      <DealerButton debugPosition={1}/>
+      <DealerButton debugPosition={2}/>
+      <DealerButton debugPosition={3}/>
+      <DealerButton debugPosition={4}/>
+      <DealerButton debugPosition={5}/>
+      <DealerButton debugPosition={6}/>
+      <DealerButton debugPosition={7}/>
+      <DealerButton debugPosition={8}/> */}
       <Bets />
       <Hand
         style={{ bottom: "-10%", left: "50%", position: "absolute" }}

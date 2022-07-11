@@ -30,10 +30,10 @@ export function DealerButton({ debugPosition = -1 }) {
       style = { top: "9%", left: "64%" };
       break;
     case 6:
-      style = { top: "19%", left: "85%" };
+      style = { top: "16%", left: "85%" };
       break;
     case 7:
-      style = { top: "82%", left: "85%" };
+      style = { top: "78%", left: "82%" };
       break;
     case 8:
       style = { top: "82%", left: "65%" };
