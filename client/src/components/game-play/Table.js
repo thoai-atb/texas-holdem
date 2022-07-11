@@ -4,7 +4,7 @@ import { Bets } from "./Bets";
 import { Board } from "./Board";
 import { DealerButton } from "./DealerButton";
 import { Hand } from "./Hand";
-import dotPattern from "../../assets/texture/16.png";
+import dotPattern from "../../assets/texture/dot-pattern.png";
 
 export function Table() {
   const { bigblindSize } = useGame();

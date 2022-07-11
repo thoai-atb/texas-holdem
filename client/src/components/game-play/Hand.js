@@ -1,10 +1,11 @@
 import React from "react";
-import { Card } from "./Card";
+import CountUp from 'react-countup';
 import { useGame } from "../../contexts/Game";
 import {
   indexFromPosition,
-  positionFromIndex,
+  positionFromIndex
 } from "../../utilities/position_converter";
+import { Card } from "./Card";
 import { ChatBubble } from "./ChatBubble";
 
 export function Hand({ style, position }) {
@@ -17,6 +18,7 @@ export function Hand({ style, position }) {
     showDown,
     betTypes,
     bigblindSize,
+    MONEY_EFFECT_DURATION,
   } = useGame();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
@@ -74,7 +76,7 @@ export function Hand({ style, position }) {
           }}
         >
           <div>
-            ${handPlayer.stack}
+            $<CountUp preserveValue={true} end={handPlayer.stack} duration={MONEY_EFFECT_DURATION} />
             <span style={{ fontSize: "1em" }}>
               {turnIndex !== positionIndex &&
                 actionType &&

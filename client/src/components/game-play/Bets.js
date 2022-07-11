@@ -2,6 +2,7 @@ import React from "react";
 import { useGame } from "../../contexts/Game";
 import { indexFromPosition } from "../../utilities/position_converter";
 import { AiOutlineCheckCircle } from "react-icons/ai";
+import CountUp from "react-countup";
 
 export function Bets() {
   return (
@@ -21,7 +22,7 @@ export function Bets() {
 }
 
 function Bet({ style, position }) {
-  const { seatIndex, bets, betTypes } = useGame();
+  const { seatIndex, bets, betTypes, MONEY_EFFECT_DURATION } = useGame();
   const index = indexFromPosition(position, seatIndex);
   const amount = bets[index];
   const betType = betTypes[index];
@@ -43,7 +44,7 @@ function Bet({ style, position }) {
             backgroundColor: colorFromAmount(amount),
           }}
         >
-          ${amount}
+          $<CountUp end={amount} preserveValue={true} duration={MONEY_EFFECT_DURATION} />
         </div>
       )}
       {betType === "check" && amount === 0 && (
@@ -56,7 +57,7 @@ function Bet({ style, position }) {
 }
 
 function Pot() {
-  const { pot } = useGame();
+  const { pot, MONEY_EFFECT_DURATION } = useGame();
   if (pot === 0) return null;
   return (
     <div
@@ -74,7 +75,7 @@ function Pot() {
           backgroundColor: colorFromAmount(pot),
         }}
       >
-        ${pot}
+        $<CountUp end={pot} preserveValue={true} duration={MONEY_EFFECT_DURATION} />
       </div>
     </div>
   );
@@ -84,7 +85,7 @@ var colors = [
   "#FF0000", // red
   "#FF8800", // orange
   "#FF00FF", // magenta
-  "#57cc16", // lime
+  "#57CC16", // lime
   "#8822FF", // purple blue
   "#ba3f3f", // brown
   "#000000", // black

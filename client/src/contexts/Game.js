@@ -20,6 +20,8 @@ export function GameProvider({ children, socket }) {
   const [bigblindSize, setBigblindSize] = React.useState(0);
   const [debugMode, setDebugMode] = React.useState(false);
 
+  const MONEY_EFFECT_DURATION = 0.5;
+
   useEffect(() => {
     socket.on("game_state", (gameState) => {
       if (gameState.debugMode) console.log("game state update", { gameState });
@@ -87,6 +89,7 @@ export function GameProvider({ children, socket }) {
     winners,
     debugMode,
     takeAction,
+    MONEY_EFFECT_DURATION,
   };
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }

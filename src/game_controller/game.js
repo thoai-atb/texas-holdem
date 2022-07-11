@@ -464,6 +464,7 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     }
 
     const type = (() => {
+      if(!state.winners.length) return "0";
       const typeStr = state.winners[0].type;
       if (HandRank[typeStr] <= HandRank["three of a kind"]) return "0";
       if (HandRank[typeStr] <= HandRank["full house"]) return "a";
