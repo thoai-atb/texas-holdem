@@ -4,6 +4,7 @@ import {
   AiFillWechat,
   AiOutlineInfoCircle,
   AiOutlineInsertRowBelow,
+  AiOutlineBarChart,
 } from "react-icons/ai";
 import { BsFillVolumeMuteFill, BsFillVolumeUpFill } from "react-icons/bs";
 import { useGame } from "../../contexts/Game";
@@ -16,6 +17,8 @@ export default function MenuBar({
   toggleInfo,
   isMuted,
   toggleControlPanel,
+  toggleStatistics,
+  showStatistics,
 }) {
   const { socket } = useGame();
   const { playBubbleClick } = useSoundContext();
@@ -38,6 +41,10 @@ export default function MenuBar({
   const controlPanelClickHandler = () => {
     playBubbleClick();
     toggleControlPanel();
+  };
+  const statisticsClickHandler = () => {
+    playBubbleClick();
+    toggleStatistics();
   };
   return (
     <div className="absolute overflow-visible top-0 w-full text-slate-700 text-5xl pointer-events-auto flex flex-row items-center justify-between">
@@ -71,6 +78,16 @@ export default function MenuBar({
         onClick={controlPanelClickHandler}
       >
         <AiOutlineInsertRowBelow />
+      </div>
+      <div
+        className={
+          "p-4 w-fit hover:text-white cursor-pointer transition duration-100 " +
+          (showStatistics ? "text-cyan-300" : "")
+        }
+        title="Statistics"
+        onClick={statisticsClickHandler}
+      >
+        <AiOutlineBarChart />
       </div>
       <div
         className="p-4 w-fit hover:text-white cursor-pointer transition duration-100"

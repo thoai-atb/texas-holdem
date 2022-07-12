@@ -54,7 +54,6 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
       height: 400,
       width: 400,
     });
-    console.log(avatarURL);
     if (state.players[seatIndex]) return false;
     state.players[seatIndex] = {
       seatIndex,

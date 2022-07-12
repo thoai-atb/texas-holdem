@@ -10,7 +10,7 @@ export function Table() {
   const { bigblindSize } = useGame();
   return (
     <div
-      className="relative bg-lime-400 bg-rad border-slate-700 rounded-full w-2/3 h-1/2 flex items-center justify-center"
+      className="relative bg-lime-400 bg-rad border-slate-700 rounded-full w-3/4 h-1/2 flex items-center justify-center"
       style={{
         maxHeight: "30rem",
         borderWidth: "0.5rem",

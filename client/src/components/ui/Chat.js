@@ -69,10 +69,10 @@ export function Chat({ hidden, setHidden }) {
       ></div>
       <div
         className="w-96 bg-black opacity-80 z-10 rounded-2xl absolute bottom-2 right-2 flex flex-col pointer-events-auto"
-        style={{ width: "40rem", height: "40rem" }}
+        style={{ width: "35rem", height: "40rem" }}
       >
         <div
-          className="flex-1 border-gray-500 border rounded-2xl mx-6 mt-6 mb-3 overflow-scroll hide-scrollbar"
+          className="flex-1 border-gray-500 border rounded-2xl mx-3 mt-3 mb-3 overflow-scroll hide-scrollbar"
           ref={scrollRef}
         >
           {messages.map((message, index) => (
@@ -88,7 +88,7 @@ export function Chat({ hidden, setHidden }) {
             </div>
           ))}
         </div>
-        <div className="h-12 border-gray-500 border rounded-full box-border m-6 ">
+        <div className="h-12 border-gray-500 border rounded-2xl box-border m-3 mt-0">
           <input
             className="w-full h-full px-4 outline-none bg-transparent text-white text-xl"
             placeholder="Say something..."

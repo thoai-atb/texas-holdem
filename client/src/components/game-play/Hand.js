@@ -75,7 +75,7 @@ export function Hand({ style, position }) {
             borderWidth: turnIndex === positionIndex ? "0.2rem" : "0rem",
           }}
         >
-          <div className="absolute right-full top-full -translate-y-1/3 translate-x-1/3 rounded-full border-black border overflow-hidden w-12 h-12">
+          <div className="absolute right-full top-full -translate-y-2/3 translate-x-1/3 rounded-full border-black border overflow-hidden w-12 h-12">
             <img src={handPlayer.avatarURL} alt="avatar" />
           </div>
           <div>

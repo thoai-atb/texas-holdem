@@ -11,6 +11,7 @@ import { useSoundHandler } from "./hooks/useSoundHandler";
 import { SoundContext } from "./contexts/Sound";
 import { Info } from "./components/ui/Info";
 import { ControlPanel } from "./components/ui/ControlPanel";
+import { Statistics } from "./components/ui/Statistics";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -20,6 +21,7 @@ function App() {
   const [muted, setMuted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showControlPanel, setShowControlPanel] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
   const containerRef = useRef(null);
 
   const { playBubbleClick, playStickClick, volume, setVolume } =
@@ -51,12 +53,15 @@ function App() {
       if (e.key === "t" || e.key === "T" || e.key === "`") {
         setChatHidden(false);
       }
+      if (e.key === "r" || e.key === "R") {
+        if (chatHidden) setShowStatistics((show) => !show);
+      }
     };
     document.addEventListener("keydown", keyDown);
     return () => {
       document.removeEventListener("keydown", keyDown);
     };
-  }, [loggedIn]);
+  }, [loggedIn, chatHidden]);
 
   useEffect(() => {
     if (chatHidden) containerRef?.current?.focus();
@@ -83,7 +88,11 @@ function App() {
                   toggleChat={() => setChatHidden((hid) => !hid)}
                   toggleMuted={() => setMuted((mute) => !mute)}
                   toggleInfo={() => setShowInfo((show) => !show)}
-                  toggleControlPanel={() => setShowControlPanel((show) => !show)}
+                  toggleControlPanel={() =>
+                    setShowControlPanel((show) => !show)
+                  }
+                  toggleStatistics={() => setShowStatistics((show) => !show)}
+                  showStatistics={showStatistics}
                   isMuted={muted}
                 />
               </div>
@@ -105,6 +114,12 @@ function App() {
                 <ControlPanel
                   hidden={!showControlPanel}
                   setHidden={(hidden) => setShowControlPanel(!hidden)}
+                />
+              </div>
+              <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                <Statistics
+                  hidden={!showStatistics}
+                  setHidden={(hidden) => setShowStatistics(!hidden)}
                 />
               </div>
             </GameProvider>

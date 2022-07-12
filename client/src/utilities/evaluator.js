@@ -9,7 +9,28 @@ Array.prototype.count = function (filter) {
   return count;
 };
 
-export function evaluate(hand, board) {
+function findWinners(players, board) {
+  const results = players
+    .filter((player) => player?.cards.length === 2 && !player.folded)
+    .map((player) => ({
+      ...evaluate(player.cards, board),
+      index: player.seatIndex,
+    }));
+  const sorted = results.sort((a, b) => b.strength - a.strength);
+  // find the winners
+  const winners = [];
+  let winner = sorted[0];
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].strength === winner.strength) {
+      winners.push(sorted[i]);
+    } else {
+      break;
+    }
+  }
+  return winners;
+}
+
+function evaluate(hand, board) {
   const result = evalutateRaw(hand, board);
   let sortedHand = [...hand];
   if (valueToIndex(hand[0].value) < valueToIndex(hand[1].value))
@@ -25,7 +46,7 @@ export function evaluate(hand, board) {
   return wrappedResult;
 }
 
-export function evalutateRaw(hand, board) {
+function evalutateRaw(hand, board) {
   const total = [...hand, ...board];
   let matrix = convertToMatrix(total);
 
@@ -273,14 +294,14 @@ export function evalutateRaw(hand, board) {
   };
 }
 
-export const HandRank = {
+const HandRank = {
   "no hand": 0,
   "high card": 1,
-  "pair": 2,
+  pair: 2,
   "two pair": 3,
   "three of a kind": 4,
-  "straight": 5,
-  "flush": 6,
+  straight: 5,
+  flush: 6,
   "full house": 7,
   "four of a kind": 8,
   "straight flush": 9,
@@ -449,4 +470,10 @@ const convertToMatrix = (cards) => {
   });
 
   return matrix;
+};
+
+export const Evaluator = {
+  HandRank,
+  findWinners,
+  evaluate,
 };
