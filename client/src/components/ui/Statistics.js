@@ -21,7 +21,7 @@ export function Statistics({ hidden, setHidden }) {
       >
         Close [R]
       </div>
-      {notEnoughInfo && "Statistics will be shown after the Flop..."}
+      {notEnoughInfo && "Hand ranks calculator"}
       <SortedRanks statistics={statistics} />
     </div>
   );

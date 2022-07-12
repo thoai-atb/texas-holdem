@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
+import { AppContext } from "../App";
 
 const GameContext = React.createContext({});
 
-export function GameProvider({ children, socket }) {
+export function GameProvider({ children }) {
+  const { socket, autoCheckCall, autoCheckFold } = useContext(AppContext);
   const [deck, setDeck] = React.useState([]);
   const [players, setPlayers] = React.useState([]);
   const [bets, setBets] = React.useState([]);
@@ -48,6 +50,7 @@ export function GameProvider({ children, socket }) {
     socket.emit("info_request");
   }, [seatIndex, socket]);
 
+  // UPDATE TITLE
   useEffect(() => {
     let title = "";
     if (board.length > 0) {
@@ -59,7 +62,7 @@ export function GameProvider({ children, socket }) {
       title += "Your Turn!";
     }
     if (winners.length >= 1) {
-      title += players[winners[0].index].name + " wins!"
+      title += players[winners[0].index].name + " wins!";
     }
     if (title) document.title = title;
     else document.title = "Texas Hold'em Abis";
@@ -69,6 +72,36 @@ export function GameProvider({ children, socket }) {
     if (isPlaying && turnIndex !== seatIndex) return;
     socket.emit("player_action", action);
   };
+
+  // AFK MODE
+  useEffect(() => {
+    if (autoCheckCall || autoCheckFold) {
+      if (!players || !players[seatIndex]) return;
+      const thisPlayer = players[seatIndex];
+      if (!isPlaying && !thisPlayer.ready && thisPlayer.stack >= bigblindSize) {
+        takeAction({ type: "ready" });
+      }
+    }
+    if (autoCheckFold)
+      for (const action of availableActions) {
+        if (action.type === "check") takeAction(action);
+        else if (action.type === "fold") takeAction(action);
+      }
+    if (autoCheckCall)
+      for (const action of availableActions) {
+        if (action.type === "check") takeAction(action);
+        else if (action.type === "call") takeAction(action);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    availableActions,
+    autoCheckCall,
+    autoCheckFold,
+    players,
+    seatIndex,
+    isPlaying,
+    bigblindSize,
+  ]);
 
   const value = {
     socket,

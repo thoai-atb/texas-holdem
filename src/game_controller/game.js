@@ -84,7 +84,6 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
       height: 400,
       width: 400,
     });
-    console.log(avatarURL);
     state.players[seatIndex] = {
       seatIndex,
       name,
@@ -190,7 +189,8 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
       state.players.every(
         (player) =>
           !player || player?.ready || player.stack < state.bigblindSize
-      )
+      ) &&
+      !state.playing
     )
       startGame();
   };

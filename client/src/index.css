@@ -64,6 +64,13 @@ code {
   cursor: pointer; /* Cursor on hover */
 }
 
+input[type=checkbox] {
+  accent-color: @apply bg-cyan-300
+}
+
+
+/* ANIMATIONS */
+
 .animate-fade-in-up {
   -webkit-animation-duration: 200ms;
   animation-duration: 200ms;

@@ -1,13 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   AiFillUpCircle,
   AiOutlineMinusCircle,
   AiOutlinePlusCircle,
 } from "react-icons/ai";
+import { AppContext } from "../../App";
 import { useGame } from "../../contexts/Game";
 import { useSoundContext } from "../../contexts/Sound";
 
 export function ActionBar() {
+  const { autoCheckCall, autoCheckFold } = useContext(AppContext);
   const {
     takeAction,
     isPlaying,
@@ -22,6 +24,15 @@ export function ActionBar() {
   if (!players || !players[seatIndex]) return null;
   const thisPlayer = players[seatIndex];
   const disable = !isPlaying || seatIndex !== turnIndex;
+  if (autoCheckCall || autoCheckFold) {
+    return (
+      <div className="w-full flex items-center justify-center pointer-events-auto">
+        <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
+          - YOU ARE AFK ({autoCheckCall ? "CHECK/CALL" : "CHECK/FOLD"}) -
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-full flex items-center justify-center pointer-events-auto">
       {!isPlaying && !thisPlayer.ready && thisPlayer.stack >= bigblindSize && (

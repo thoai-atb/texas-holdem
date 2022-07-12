@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { ActionBar } from "./components/ui/ActionBar";
 import { Chat } from "./components/ui/Chat";
@@ -12,6 +12,9 @@ import { SoundContext } from "./contexts/Sound";
 import { Info } from "./components/ui/Info";
 import { ControlPanel } from "./components/ui/ControlPanel";
 import { Statistics } from "./components/ui/Statistics";
+import { Settings } from "./components/ui/Settings";
+
+export const AppContext = createContext({});
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -22,6 +25,9 @@ function App() {
   const [showInfo, setShowInfo] = useState(false);
   const [showControlPanel, setShowControlPanel] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [autoCheckCall, setAutoCheckCall] = useState(false);
+  const [autoCheckFold, setAutoCheckFold] = useState(false);
   const containerRef = useRef(null);
 
   const { playBubbleClick, playStickClick, volume, setVolume } =
@@ -54,82 +60,118 @@ function App() {
         setChatHidden(false);
       }
       if (e.key === "r" || e.key === "R") {
+        playStickClick();
         if (chatHidden) setShowStatistics((show) => !show);
+      }
+      if (e.key === "c" || e.key === "C") {
+        playStickClick();
+        if (chatHidden) setAutoCheckCall((c) => !c);
+      }
+      if (e.key === "f" || e.key === "F") {
+        playStickClick();
+        if (chatHidden) setAutoCheckFold((c) => !c);
       }
     };
     document.addEventListener("keydown", keyDown);
     return () => {
       document.removeEventListener("keydown", keyDown);
     };
-  }, [loggedIn, chatHidden]);
+  }, [loggedIn, chatHidden, playStickClick]);
 
   useEffect(() => {
     if (chatHidden) containerRef?.current?.focus();
     else setChatHint("");
   }, [chatHidden]);
 
+  useEffect(() => {
+    if (autoCheckCall) setAutoCheckFold(false);
+  }, [autoCheckCall]);
+
+  useEffect(() => {
+    if (autoCheckFold) setAutoCheckCall(false);
+  }, [autoCheckFold]);
+
   return (
-    <SoundContext.Provider
-      value={{ playBubbleClick, playStickClick, volume, setVolume }}
+    <AppContext.Provider
+      value={{
+        socket,
+        chatHidden,
+        chatHint,
+        muted,
+        showInfo,
+        showControlPanel,
+        showStatistics,
+        showSettings,
+        autoCheckCall,
+        autoCheckFold,
+        setAutoCheckCall,
+        setAutoCheckFold,
+        setMuted,
+        setShowSettings,
+        setShowStatistics,
+      }}
     >
-      <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
-        {!loggedIn && <LoginPage loginFunction={login} />}
-        {loggedIn && (
-          <div>
-            <GameProvider socket={socket}>
-              <div className="absolute w-full h-full justify-center items-center flex pb-28">
-                <Table />
-              </div>
-              <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-                <ActionBar />
-              </div>
-              <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-                <MenuBar
-                  toggleChat={() => setChatHidden((hid) => !hid)}
-                  toggleMuted={() => setMuted((mute) => !mute)}
-                  toggleInfo={() => setShowInfo((show) => !show)}
-                  toggleControlPanel={() =>
-                    setShowControlPanel((show) => !show)
-                  }
-                  toggleStatistics={() => setShowStatistics((show) => !show)}
-                  showStatistics={showStatistics}
-                  isMuted={muted}
-                />
-              </div>
-              <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-                {chatHint && (
-                  <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
-                    {chatHint}
-                  </div>
-                )}
-                <Chat hidden={chatHidden} setHidden={setChatHidden} />
-              </div>
-              <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-                <Info
-                  hidden={!showInfo}
-                  setHidden={(hidden) => setShowInfo(!hidden)}
-                />
-              </div>
-              <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-                <ControlPanel
-                  hidden={!showControlPanel}
-                  setHidden={(hidden) => setShowControlPanel(!hidden)}
-                />
-              </div>
-              <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-                <Statistics
-                  hidden={!showStatistics}
-                  setHidden={(hidden) => setShowStatistics(!hidden)}
-                />
-              </div>
-            </GameProvider>
+      <SoundContext.Provider
+        value={{ playBubbleClick, playStickClick, volume, setVolume }}
+      >
+        <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
+          {!loggedIn && <LoginPage loginFunction={login} />}
+          {loggedIn && (
+            <div>
+              <GameProvider>
+                <div className="absolute w-full h-full justify-center items-center flex pb-28">
+                  <Table />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                  <ActionBar />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                  <MenuBar
+                    toggleChat={() => setChatHidden((hid) => !hid)}
+                    toggleInfo={() => setShowInfo((show) => !show)}
+                    toggleControlPanel={() =>
+                      setShowControlPanel((show) => !show)
+                    }
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  {chatHint && (
+                    <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
+                      {chatHint}
+                    </div>
+                  )}
+                  <Chat hidden={chatHidden} setHidden={setChatHidden} />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <Info
+                    hidden={!showInfo}
+                    setHidden={(hidden) => setShowInfo(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <ControlPanel
+                    hidden={!showControlPanel}
+                    setHidden={(hidden) => setShowControlPanel(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                  <Statistics
+                    hidden={!showStatistics}
+                    setHidden={(hidden) => setShowStatistics(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                  <Settings />
+                </div>
+              </GameProvider>
+            </div>
+          )}
+          <div className="absolute bottom-2 left-2 text-slate-700">
+            @ 2022 Thoai Ly. All Rights Reserved.
           </div>
-        )}
-        <div className="absolute bottom-2 left-2 text-slate-700">
-          @ 2022 Thoai Ly. All Rights Reserved.
         </div>
-      </div>
-    </SoundContext.Provider>
+      </SoundContext.Provider>
+    </AppContext.Provider>
   );
 }
 
