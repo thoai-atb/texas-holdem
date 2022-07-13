@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
 import {
-  AiFillSetting, AiFillWechat,
+  AiFillSetting,
+  AiFillWechat,
   AiOutlineInfoCircle,
-  AiOutlineInsertRowBelow, AiOutlineLogout
+  AiOutlineInsertRowBelow,
+  AiOutlineLogout
 } from "react-icons/ai";
 import { AppContext } from "../../App";
-import { useGame } from "../../contexts/Game";
 import { useSoundContext } from "../../contexts/Sound";
 
 export default function MenuBar({
@@ -13,9 +14,8 @@ export default function MenuBar({
   toggleInfo,
   toggleControlPanel,
 }) {
-  const { socket } = useGame();
   const { playBubbleClick } = useSoundContext();
-  const { setShowSettings } = useContext(AppContext);
+  const { setShowSettings, setShowLogout } = useContext(AppContext);
   function handleAction(actionFun) {
     return () => {
       playBubbleClick();
@@ -27,7 +27,7 @@ export default function MenuBar({
       <div
         className="rotate-180 p-4 w-fit hover:text-white cursor-pointer transition duration-100"
         title="Log Out"
-        onClick={handleAction(() => socket.disconnect())}
+        onClick={handleAction(() => setShowLogout((s) => !s))}
       >
         <AiOutlineLogout />
       </div>
@@ -51,7 +51,7 @@ export default function MenuBar({
           "p-4 w-fit hover:text-white cursor-pointer transition duration-100"
         }
         title="Settings"
-        onClick={handleAction(() => setShowSettings(s => !s))}
+        onClick={handleAction(() => setShowSettings((s) => !s))}
       >
         <AiFillSetting />
       </div>

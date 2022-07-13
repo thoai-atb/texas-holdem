@@ -36,7 +36,7 @@ const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
-const game = createGame(broadcast, infoFunction, playGameSoundFx);
+const game = createGame(broadcast, infoFunction, playGameSoundFx, playerKicked);
 
 function broadcast() {
   io.sockets.emit("game_state", game.state);
@@ -70,6 +70,16 @@ function playGameSoundFx(sound) {
   }
   if (["flip"].includes(sound)) {
     io.sockets.emit("sound_effect", "flip");
+  }
+}
+
+function playerKicked(seatIndex) {
+  const socket = connections.find(
+    (socket) => socket.id === playerData[seatIndex]?.socketId
+  );
+  if (socket) {
+    socket.disconnect();
+    console.log(`Player in seat ${seatIndex} was kicked.`);
   }
 }
 

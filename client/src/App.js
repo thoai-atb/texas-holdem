@@ -13,6 +13,8 @@ import { Info } from "./components/ui/Info";
 import { ControlPanel } from "./components/ui/ControlPanel";
 import { Statistics } from "./components/ui/Statistics";
 import { Settings } from "./components/ui/Settings";
+import { Logout } from "./components/ui/Logout";
+import { FirstPlayerDialog } from "./components/ui/FirstPlayerDialog";
 
 export const AppContext = createContext({});
 
@@ -28,6 +30,9 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [autoCheckCall, setAutoCheckCall] = useState(false);
   const [autoCheckFold, setAutoCheckFold] = useState(false);
+  const [disableShortcuts, setDisableShortcuts] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false);
   const containerRef = useRef(null);
 
   const { playBubbleClick, playStickClick, volume, setVolume } =
@@ -54,29 +59,35 @@ function App() {
   };
 
   useEffect(() => {
+    if (showControlPanel || !chatHidden) setDisableShortcuts(true);
+    else setDisableShortcuts(false);
+  }, [chatHidden, showControlPanel]);
+
+  useEffect(() => {
     const keyDown = (e) => {
       if (!loggedIn) return;
+      if (disableShortcuts) return;
       if (e.key === "t" || e.key === "T" || e.key === "`") {
         setChatHidden(false);
       }
       if (e.key === "r" || e.key === "R") {
         playStickClick();
-        if (chatHidden) setShowStatistics((show) => !show);
+        setShowStatistics((show) => !show);
       }
       if (e.key === "c" || e.key === "C") {
         playStickClick();
-        if (chatHidden) setAutoCheckCall((c) => !c);
+        setAutoCheckCall((c) => !c);
       }
       if (e.key === "f" || e.key === "F") {
         playStickClick();
-        if (chatHidden) setAutoCheckFold((c) => !c);
+        setAutoCheckFold((c) => !c);
       }
     };
     document.addEventListener("keydown", keyDown);
     return () => {
       document.removeEventListener("keydown", keyDown);
     };
-  }, [loggedIn, chatHidden, playStickClick]);
+  }, [loggedIn, chatHidden, playStickClick, disableShortcuts]);
 
   useEffect(() => {
     if (chatHidden) containerRef?.current?.focus();
@@ -104,11 +115,15 @@ function App() {
         showSettings,
         autoCheckCall,
         autoCheckFold,
+        showLogout,
+        showFirstPlayerDialog,
         setAutoCheckCall,
         setAutoCheckFold,
         setMuted,
         setShowSettings,
         setShowStatistics,
+        setShowLogout,
+        setShowFirstPlayerDialog,
       }}
     >
       <SoundContext.Provider
@@ -162,6 +177,12 @@ function App() {
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
                   <Settings />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
+                  <Logout />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <FirstPlayerDialog />
                 </div>
               </GameProvider>
             </div>

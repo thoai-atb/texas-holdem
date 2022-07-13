@@ -8,7 +8,7 @@ const robohashAvatars = require("robohash-avatars");
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
 
-function createGame(onUpdate, onInfo, onSoundEffect) {
+function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
   const state = {
     id: randomId(), // TO IDENTIFY GAMES WHEN RESETTING
     players: new Array(9).fill(null),
@@ -120,6 +120,7 @@ function createGame(onUpdate, onInfo, onSoundEffect) {
     if (state.turnIndex === seatIndex) {
       fold() || nextTurn();
     }
+    if (!state.players[seatIndex].isBot) onPlayerKicked(seatIndex);
     state.players[seatIndex] = null;
     if (!state.playing)
       state.players.forEach((player) => {
