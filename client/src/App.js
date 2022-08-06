@@ -26,7 +26,7 @@ function App() {
   const [muted, setMuted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showControlPanel, setShowControlPanel] = useState(false);
-  const [showStatistics, setShowStatistics] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [autoCheckCall, setAutoCheckCall] = useState(false);
   const [autoCheckFold, setAutoCheckFold] = useState(false);
