@@ -11,3 +11,5 @@ Start server with:
 Run client with:
 
 ### `cd client && npm run start`
+
+Play it now: https://texas-holdem-abis.herokuapp.com/
