@@ -36,13 +36,14 @@ const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
-const game = createGame(broadcast, infoFunction, playGameSoundFx, playerKicked);
+const game = createGame(broadcast, broadcastInfo, playGameSoundFx, playerKicked);
 
+// Update game state for all clients
 function broadcast() {
   io.sockets.emit("game_state", game.state);
 }
 
-function infoFunction(desc, content) {
+function broadcastInfo(desc, content) {
   io.sockets.emit("chat_message", {
     desc,
     content,
@@ -83,14 +84,12 @@ function playerKicked(seatIndex) {
   }
 }
 
+// On connection, assign callbacks to socket to handle events
 io.on("connection", (socket) => {
   // CONNECTION
   const name = socket.handshake.query.name;
   const info = `${name} joined the table`;
-  io.sockets.emit("chat_message", {
-    desc: info,
-    content: info,
-  });
+  broadcastInfo(info, info);
   console.log(info);
   connections.push(socket);
 
@@ -174,11 +173,19 @@ io.on("connection", (socket) => {
     }
   });
 
-  // CHAT
+  // CHAT - received chat message from client
   socket.on("chat_message", (message) => {
-    if (message[0] === "/") {
+    if (message[0] === "/") { // Is command?
       const command = message.slice(1);
-      executeCommand(command, name);
+      result = executeCommand(command, name);
+      if (result) { // if there's a private return result, inform invoker as well
+        socket.emit("chat_message", {
+          desc: `${name}: ${command}`,
+        })
+        socket.emit("chat_message", {
+          desc: result,
+        })
+      }
       return;
     }
     const chat = `<${name}> ${message}`;
@@ -192,92 +199,139 @@ io.on("connection", (socket) => {
   });
 });
 
+// COMMANDS - PLAYERS
+const playerCommands = {
+  Help: "help",
+  FillBots: "fill_bots",
+  AddBot: "add_bot",
+  ClearBots: "clear_bots",
+  ClearBrokes: "clear",
+  Kick: "kick",
+  PleaseSupport: "please_support",
+  SetBlind: "set_blind"
+}
+
+// COMMANDS - DEVELOPERS
+const devCommands = {
+  HelpDev: "help_dev",
+  Broadcast: "broadcast",
+  Connections: "connections",
+  Players: "players",
+  Seats: "seats",
+  Start: "start",
+  ToggleChatLogs: "toggle_chat_log",
+  ToggleBotSpeed: "toggle_bot_speed",
+  ToggleDebug: "toggle_debug"
+}
+
+// Commands execution - returns a string to be displayed on player's chat if exists
 const executeCommand = (command, invoker = "Server") => {
-  let isAction = false;
+  let informCommand = false; // true if display the commmand execution to others
   const args = command.split(" ");
   const action = args[0];
   const arg = args.slice(1).join(" ");
 
+  // Log command action
+  const info = `${invoker}: ${command}`;
+  console.log(info);
+
+  // Execute command
   switch (action) {
-    case "broadcast":
-      isAction = true;
+    // === Execute dev command === //
+    case devCommands.HelpDev:
+      return "Developer commands: " + Object.values(devCommands).join(", ");
+    case devCommands.Connections:
+      return(`Number of connections: ${connections.length}`);
+    case devCommands.Players:
+      return(`Players data: ${JSON.stringify(playerData, null, 2)}`);
+    case devCommands.Seats:
+      return(`Available seats: ${availableSeats}`);
+    case devCommands.Broadcast:
+      informCommand = true;
       broadcast();
       break;
-    case "connections":
-      console.log("Number of connections: ", connections.length);
-      break;
-    case "players":
-      console.log("Players data: ", playerData);
-      break;
-    case "seats":
-      console.log("Available seats: ", availableSeats);
-      break;
-    case "fill_bots":
-      isAction = true;
-      for (let i = 0; i < 9; i++) {
-        if (playerData[i] === null) {
-          game.addBot(generateBotName());
-        }
-      }
-      broadcast();
-      break;
-    case "add_bot":
-      isAction = true;
-      game.addBot(generateBotName());
-      broadcast();
-      break;
-    case "clear_bots":
-      isAction = true;
-      game.clearBots();
-      broadcast();
-      break;
-    case "clear":
-      isAction = true;
-      game.removeBrokePlayers();
-      broadcast();
-    case "start":
-      isAction = true;
+    case devCommands.Start:
+      informCommand = true;
       game.checkToStart();
       break;
-    case "toggle_chat_log":
-      isAction = true;
+    case devCommands.ToggleChatLogs:
+      informCommand = true;
       chatLogging = !chatLogging;
       break;
-    case "toggle_bot_speed":
-      isAction = true;
+    case devCommands.ToggleBotSpeed:
+      informCommand = true;
       game.state.botSpeed = 1000 - game.state.botSpeed;
       break;
-    case "kick":
-      isAction = true;
-      game.removePlayerByName(arg);
-      broadcast();
-    case "toggle_debug":
-      isAction = true;
+    case devCommands.ToggleDebug:
+      informCommand = true;
       game.state.debugMode = !game.state.debugMode;
       broadcast();
       break;
-    case "please_support":
-      isAction = true;
+
+    // === Execute player command === //
+    case playerCommands.Help:
+      return "Player commands: " + Object.values(playerCommands).join(", ");
+    case playerCommands.FillBots:
+      informCommand = true;
+      for (let i = 0; i < 9; i++) {
+        if (playerData[i] === null) game.addBot(generateBotName());
+      }
+      broadcast();
+      break;
+    case playerCommands.AddBot:
+      informCommand = true;
+      game.addBot(generateBotName());
+      broadcast();
+      break;
+    case playerCommands.ClearBots:
+      informCommand = true;
+      game.clearBots();
+      broadcast();
+      break;
+    case playerCommands.ClearBrokes:
+      informCommand = true;
+      game.removeBrokePlayers();
+      broadcast();
+    case playerCommands.Kick:
+      if (!arg) {
+        errStr = "Name not provided (ex: kick Joe)";
+        console.log(errStr);
+        return errStr;
+      }
+      if (!game.removePlayerByName(arg)) {
+        errStr = `Could not find player with name ${arg}`;
+        console.log(errStr);
+        return errStr;
+      }
+      informCommand = true;
+      broadcast();
+    case playerCommands.PleaseSupport:
+      informCommand = true;
       if (arg) game.fillMoney(arg);
       else game.fillMoney(invoker);
       broadcast();
       break;
-    case "set_blind":
-      isAction = true;
+    case playerCommands.SetBlind:
+      informCommand = true;
       game.setBlinds(parseInt(arg));
       broadcast();
       break;
     default:
-      return;
+      console.log("Invalid action: " + action);
+      return "Invalid action: " + action;
   }
-  const info = `${invoker}: ${command}`;
-  io.sockets.emit("chat_message", {
-    desc: info,
-    content: command,
-  });
-  console.log(info);
+
+  // Send info to chat
+  if (informCommand) {
+    broadcastInfo(info, command);
+  }
+  return "";
 };
 
+// Execute command from server's console
 rl.createInterface({
   input: process.stdin,
-}).on("line", executeCommand);
+}).on("line", (command) => {
+  result = executeCommand(command)
+  if (result) console.log(result);
+});
