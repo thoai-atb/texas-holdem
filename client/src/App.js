@@ -22,6 +22,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [socket, setSocket] = useState(null);
   const [chatHidden, setChatHidden] = useState(true);
+  const [enteringCommand, setEnteringCommand] = useState(false); // Enter chat directly when pressed "/"
   const [chatHint, setChatHint] = useState("- Press T to chat -");
   const [muted, setMuted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -30,9 +31,9 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [autoCheckCall, setAutoCheckCall] = useState(false);
   const [autoCheckFold, setAutoCheckFold] = useState(false);
-  const [disableShortcuts, setDisableShortcuts] = useState(false);
+  const [disableShortcuts, setDisableShortcuts] = useState(false); // Don't activate shortcuts while using chat and others
   const [showLogout, setShowLogout] = useState(false);
-  const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false);
+  const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false); // Ask player if they want to play with bots
   const { localStorage } = window;
   const containerRef = useRef(null);
 
@@ -71,6 +72,10 @@ function App() {
       if (!loggedIn) return;
       if (disableShortcuts) return;
       if (e.key === "t" || e.key === "T" || e.key === "`") {
+        setChatHidden(false);
+      }
+      if (e.key === "/") {
+        setEnteringCommand(true);
         setChatHidden(false);
       }
       if (e.key === "r" || e.key === "R") {
@@ -158,7 +163,12 @@ function App() {
                       {chatHint}
                     </div>
                   )}
-                  <Chat hidden={chatHidden} setHidden={setChatHidden} />
+                  <Chat
+                    hidden={chatHidden}
+                    setHidden={setChatHidden}
+                    enteringCommand={enteringCommand}
+                    setEnteringCommand={setEnteringCommand}
+                  />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
                   <Info

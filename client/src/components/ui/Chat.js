@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { useGame } from "../../contexts/Game";
 
-export function Chat({ hidden, setHidden }) {
+export function Chat({
+  hidden,
+  setHidden,
+  enteringCommand,
+  setEnteringCommand,
+}) {
   const { socket, debugMode } = useGame();
   const [message, setMessage] = React.useState("");
   const [messages, setMessages] = React.useState([]);
@@ -45,6 +50,13 @@ export function Chat({ hidden, setHidden }) {
   useEffect(() => {
     setTypedMessageIndex(-1);
   }, [typedMessages]);
+
+  useEffect(() => {
+    if (enteringCommand) {
+      setEnteringCommand(false);
+      setMessage("/");
+    }
+  }, [enteringCommand, setEnteringCommand]);
 
   const sendMessage = () => {
     if (!message) return;
