@@ -193,7 +193,7 @@ io.on("connection", (socket) => {
 });
 
 const executeCommand = (command, invoker = "Server") => {
-  let isAction;
+  let isAction = false;
   const args = command.split(" ");
   const action = args[0];
   const arg = args.slice(1).join(" ");

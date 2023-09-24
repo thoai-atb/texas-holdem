@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function LoginPage({ loginFunction }) {
   const [name, setName] = React.useState("");
   const [address, setAddress] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const { localStorage } = window;
+
+  // Get username and server address from local storage
+  useEffect(() => {
+    const userName = localStorage.getItem("userName");
+    const serverAddress = localStorage.getItem("serverAddress");
+    if (userName) setName(userName);
+    if (serverAddress) setAddress(serverAddress);
+  }, [localStorage]);
+
   const login = () => {
     if (!name) {
       alert("Display name cannot be empty!");
@@ -14,7 +24,7 @@ export default function LoginPage({ loginFunction }) {
     };
     let dest = address;
     if (address === "x") dest = "localhost:8000";
-    loginFunction(name, dest || "/", failHandler);
+    loginFunction(name, dest, failHandler);
     setBusy(true);
   };
   const onKeyDown = (event) => {

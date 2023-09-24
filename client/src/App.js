@@ -33,6 +33,7 @@ function App() {
   const [disableShortcuts, setDisableShortcuts] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false);
+  const { localStorage } = window;
   const containerRef = useRef(null);
 
   const { playBubbleClick, playStickClick, volume, setVolume } =
@@ -42,7 +43,9 @@ function App() {
     });
 
   const login = (name, address, onFail) => {
-    address = address || "http://localhost:8000";
+    localStorage.setItem("userName", name);
+    localStorage.setItem("serverAddress", address);
+    if (!address) address = "/";
     const socket = getSocket(name, address);
     socket.on("connect", () => {
       setLoggedIn(true);
