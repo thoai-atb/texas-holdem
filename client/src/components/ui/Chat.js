@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
 import { useGame } from "../../contexts/Game";
+import { useSoundContext } from "../../contexts/Sound";
+
+function isPlayerChatMessage(message) {
+  if (!message) return false;
+  return message[0] === "<"; // not info from server
+}
 
 export function Chat({
   hidden,
@@ -8,6 +14,7 @@ export function Chat({
   setEnteringCommand,
 }) {
   const { socket, debugMode } = useGame();
+  const { playBubbleChat } = useSoundContext();
   const [message, setMessage] = React.useState("");
   const [messages, setMessages] = React.useState([]);
   const [typedMessages, setTypedMessages] = React.useState([]);
@@ -21,13 +28,15 @@ export function Chat({
 
   useEffect(() => {
     const chatMesssageHandler = ({ desc: message }) => {
+      if (isPlayerChatMessage(message))
+        playBubbleChat();
       setMessages((messages) => [...messages, message]);
     };
     socket.on("chat_message", chatMesssageHandler);
     return () => {
       socket.off("chat_message", chatMesssageHandler);
     };
-  }, [socket]);
+  }, [socket, playBubbleChat]);
 
   useEffect(() => {
     if (scrollRef?.current)
@@ -92,7 +101,7 @@ export function Chat({
               key={index}
               className={
                 "flex items-center p-2 text-lg" +
-                (message[0] === "<" ? " text-white" : " text-gray-400")
+                (isPlayerChatMessage(message) ? " text-white" : " text-gray-400")
               }
             >
               {/* <span className="w-2 h-2 rounded-full bg-gray-200 mr-2"></span> */}

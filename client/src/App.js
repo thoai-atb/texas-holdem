@@ -37,7 +37,7 @@ function App() {
   const { localStorage } = window;
   const containerRef = useRef(null);
 
-  const { playBubbleClick, playStickClick, volume, setVolume } =
+  const { playBubbleClick, playBubbleChat, playStickClick, volume, setVolume } =
     useSoundHandler({
       socket,
       muted,
@@ -135,7 +135,7 @@ function App() {
       }}
     >
       <SoundContext.Provider
-        value={{ playBubbleClick, playStickClick, volume, setVolume }}
+        value={{ playBubbleClick, playBubbleChat, playStickClick, volume, setVolume }}
       >
         <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
           {!loggedIn && <LoginPage loginFunction={login} />}

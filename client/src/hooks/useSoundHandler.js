@@ -6,6 +6,7 @@ import throwSound from "../assets/sounds/throw.wav";
 import baDumTssSound from "../assets/sounds/ba_dum_tss.wav";
 import cardFlipSound from "../assets/sounds/card_flip.wav";
 import bubbleClickSound from "../assets/sounds/bubble_click.wav";
+import bubbleChatSound from "../assets/sounds/bubble_chat.wav";
 import stickClickSound from "../assets/sounds/stick_click.wav";
 import cinematicBombSound from "../assets/sounds/cinematic_boom.wav";
 import cinematicAlarmSound from "../assets/sounds/cinematic_alarm.wav";
@@ -44,6 +45,10 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : volume,
   });
+  const [playBubbleChat] = useSound(bubbleChatSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : volume,
+  });
   const [playStickClick] = useSound(stickClickSound, {
     interrupt: true,
     volume: muted ? 0.0 : volume,
@@ -74,6 +79,7 @@ export const useSoundHandler = ({ socket, muted }) => {
     playWinB,
     playFlip,
     playBubbleClick,
+    playBubbleChat,
     playStickClick,
     volume,
     setVolume,
