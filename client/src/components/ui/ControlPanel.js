@@ -23,7 +23,7 @@ export function ControlPanel({ hidden, setHidden }) {
   function unlock() {
     const code = unlockField.current.value;
     unlockField.current.value = "";
-    if (code.toUpperCase() === "FFFFFF") {
+    if (code.toUpperCase() === "FLUSH") {
       playBubbleClick();
       setUnlocked(true);
     } else {

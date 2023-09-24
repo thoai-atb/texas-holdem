@@ -205,7 +205,7 @@ const playerCommands = {
   FillBots: "fill_bots",
   AddBot: "add_bot",
   ClearBots: "clear_bots",
-  ClearBrokes: "clear",
+  ClearBrokes: "clear_brokes",
   Kick: "kick",
   PleaseSupport: "please_support",
   SetBlind: "set_blind"
@@ -234,6 +234,7 @@ const executeCommand = (command, invoker = "Server") => {
   // Log command action
   const info = `${invoker}: ${command}`;
   console.log(info);
+  const errConsoleString = "Couldn't execute command";
 
   // Execute command
   switch (action) {
@@ -284,6 +285,11 @@ const executeCommand = (command, invoker = "Server") => {
       broadcast();
       break;
     case playerCommands.ClearBots:
+      if (game.state.playing) {
+        errStr = "This command can only be used while not playing";
+        console.log(errConsoleString);
+        return errStr;
+      }
       informCommand = true;
       game.clearBots();
       broadcast();
@@ -292,15 +298,21 @@ const executeCommand = (command, invoker = "Server") => {
       informCommand = true;
       game.removeBrokePlayers();
       broadcast();
+      break;
     case playerCommands.Kick:
       if (!arg) {
         errStr = "Name not provided (ex: kick Joe)";
-        console.log(errStr);
+        console.log(errConsoleString);
+        return errStr;
+      }
+      if (game.state.playing) {
+        errStr = "This command can only be used while not playing";
+        console.log(errConsoleString);
         return errStr;
       }
       if (!game.removePlayerByName(arg)) {
-        errStr = `Could not find player with name ${arg}`;
-        console.log(errStr);
+        errStr = `Could not kick player with name ${arg}`;
+        console.log(errConsoleString);
         return errStr;
       }
       informCommand = true;
@@ -317,8 +329,8 @@ const executeCommand = (command, invoker = "Server") => {
       broadcast();
       break;
     default:
-      console.log("Invalid action: " + action);
-      return "Invalid action: " + action;
+      console.log(errConsoleString);
+      return "Invalid command: " + action;
   }
 
   // Send info to chat
@@ -333,5 +345,5 @@ rl.createInterface({
   input: process.stdin,
 }).on("line", (command) => {
   result = executeCommand(command)
-  if (result) console.log(result);
+  if (result) console.log(`-> ${result}`);
 });

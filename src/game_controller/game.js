@@ -35,8 +35,6 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
     botSpeed: 1000,
   };
 
-  // COMMANDS
-
   const randomAvailableSeat = () => {
     const availableSeats = [];
     for (let i = 0; i < 9; i++) {
