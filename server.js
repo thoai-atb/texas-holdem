@@ -43,10 +43,9 @@ function broadcast() {
   io.sockets.emit("game_state", game.state);
 }
 
-function broadcastInfo(desc, content) {
+function broadcastInfo(desc) {
   io.sockets.emit("chat_message", {
-    desc,
-    content,
+    desc // to store inside chat logs
   });
 }
 
@@ -89,7 +88,7 @@ io.on("connection", (socket) => {
   // CONNECTION
   const name = socket.handshake.query.name;
   const info = `${name} joined the table`;
-  broadcastInfo(info, info);
+  broadcastInfo(info);
   console.log(info);
   connections.push(socket);
 
@@ -226,7 +225,8 @@ const devCommands = {
 
 // Commands execution - returns a string to be displayed on player's chat if exists
 const executeCommand = (command, invoker = "Server") => {
-  let informCommand = false; // true if display the commmand execution to others
+  let informCommand = false; // true if display the commmand to all players
+  let informResponse = ""; // response to send to all players
   const args = command.split(" ");
   const action = args[0];
   const arg = args.slice(1).join(" ");
@@ -258,14 +258,17 @@ const executeCommand = (command, invoker = "Server") => {
     case devCommands.ToggleChatLogs:
       informCommand = true;
       chatLogging = !chatLogging;
+      informResponse = `Chat logging is set to ${chatLogging}`;
       break;
     case devCommands.ToggleBotSpeed:
       informCommand = true;
       game.state.botSpeed = 1000 - game.state.botSpeed;
+      informResponse = `Bot speed is set to ${game.state.botSpeed}`;
       break;
     case devCommands.ToggleDebug:
       informCommand = true;
       game.state.debugMode = !game.state.debugMode;
+      informResponse = `Debug mode is set to ${game.state.debugMode}`;
       broadcast();
       break;
 
@@ -325,7 +328,8 @@ const executeCommand = (command, invoker = "Server") => {
       break;
     case playerCommands.SetBlind:
       informCommand = true;
-      game.setBlinds(parseInt(arg));
+      if (!arg) game.setBlinds(10);
+      else game.setBlinds(parseInt(arg));
       broadcast();
       break;
     default:
@@ -335,7 +339,8 @@ const executeCommand = (command, invoker = "Server") => {
 
   // Send info to chat
   if (informCommand) {
-    broadcastInfo(info, command);
+    broadcastInfo(info);
+    if(informResponse) broadcastInfo(informResponse)
   }
   return "";
 };

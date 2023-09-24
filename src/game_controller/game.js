@@ -477,7 +477,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
         .join(" ")}`;
       if (!onInfo) {
         console.log(onInfo);
-      } else onInfo(info, info);
+      } else onInfo(info);
     }
 
     const type = (() => {

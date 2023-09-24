@@ -47,7 +47,7 @@ export const useSoundHandler = ({ socket, muted }) => {
   });
   const [playBubbleChat] = useSound(bubbleChatSound, {
     interrupt: true,
-    volume: muted ? 0.0 : volume,
+    volume: muted ? 0.0 : 0.5 * volume,
   });
   const [playStickClick] = useSound(stickClickSound, {
     interrupt: true,

@@ -21,7 +21,10 @@ export function ChatBubble({ offset, seatIndex }) {
         content,
       });
       const timeId = setTimeout(() => {
-        setMessage((message) => (message.id === id ? null : message)); // remove message if it was the old message
+        setMessage((message) => {
+          if (!message) return null;
+          return message.id === id ? null : message;
+        }); // remove message if it was the old message
       }, timeToReadMessage(content));
       return () => clearTimeout(timeId);
     };
