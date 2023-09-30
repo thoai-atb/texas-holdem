@@ -28,7 +28,7 @@ export function ActionBar() {
     return (
       <div className="w-full flex items-center justify-center pointer-events-auto">
         <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
-          - YOU ARE AFK ({autoCheckCall ? "CHECK/CALL" : "CHECK/FOLD"}) -
+          - YOU ARE AFK {autoCheckCall ? "(CHECK/CALL) (press C to turn off)" : "(CHECK/FOLD) (press F to turn off)"} -
         </div>
       </div>
     );

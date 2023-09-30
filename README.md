@@ -2,25 +2,33 @@
 
 This is a place you can quickly play poker with your friends.
 
-## Local usage
+## Usage
 
-After cloning src, build client with:
+Install dependencies for server and client with:
 
-### `cd client && npm run build`
+### `npm run install-deps`
 
-Start server with:
+Build project with:
 
-### `npm start`
+### `npm run build`
+
+Run project with:
+
+### `npm run start`
+
+Clean build folder with:
+
+### `npm run clean`
 
 ## Development
 
 Start server with:
 
-### `npm start`
+### `npm run dev`
 
 Run client with:
 
-### `cd client && npm run start`
+### `npm run dev-client`
 
 ## Play online
 
