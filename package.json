@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run clean && npm run build:server && npm run build:client && npm run build:client:ship-out",
+    "build": "npm run clean & npm run build:server && npm run build:client && npm run build:client:ship-out",
     "build:server": "npx webpack --config webpack.config.js",
     "build:client": "cd client && npm run build",
     "build:client:ship-out": "mkdir build\\client && move client\\build build\\client",
