@@ -19,10 +19,12 @@ export function ActionBar() {
     availableActions,
     showDown,
     bigblindSize,
+    bets,
   } = useGame();
   const [showBetLevel, setShowSelectBetLevel] = React.useState(false);
   if (!players || !players[seatIndex]) return null;
   const thisPlayer = players[seatIndex];
+  const betOnTable = bets[seatIndex];
   const disable = !isPlaying || seatIndex !== turnIndex;
   if (autoCheckCall || autoCheckFold) {
     return (
@@ -79,6 +81,7 @@ export function ActionBar() {
               title={action.type + (displaySize ? ` $${displaySize}` : "")}
               className={className}
               stack={thisPlayer.stack}
+              betOnTable={betOnTable}
             />
           );
         })}
@@ -121,6 +124,7 @@ export const ActionButton = ({
   setShowSelectBet,
   availableAction,
   stack,
+  betOnTable,
 }) => {
   const { playBubbleClick, playStickClick } = useSoundContext();
   const inputRef = React.useRef();
@@ -197,7 +201,6 @@ export const ActionButton = ({
 
   useEffect(() => {
     if (availableAction) {
-      console.log(availableAction);
       setBetLevel(minBetLevel);
     }
   }, [availableAction, currentBetSize, minBetLevel]);
@@ -259,12 +262,12 @@ export const ActionButton = ({
             full
           </ActionSubButton>
           <ActionSubButton
-            title={maxBetLevel === stack ? "All In" : "Max"}
+            title={maxBetLevel === stack + betOnTable ? "All In" : "Max"}
             onClick={checkBetLevel}
             value={maxBetLevel}
             disable={betLevel === maxBetLevel}
           >
-            {maxBetLevel === stack ? "all in" : "max"}
+            {maxBetLevel === stack + betOnTable ? "all in" : "max"}
           </ActionSubButton>
           <ActionAdjustButton
             disable={betLevel === minBetLevel}

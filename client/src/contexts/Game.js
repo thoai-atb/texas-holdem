@@ -44,7 +44,6 @@ export function GameProvider({ children }) {
       setDebugMode(gameState.debugMode);
     });
     socket.on("seat_index", (index) => {
-      console.log("You are in seat: ", index);
       setSeatIndex(index);
     });
     socket.emit("info_request");

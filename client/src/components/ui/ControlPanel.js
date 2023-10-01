@@ -34,6 +34,7 @@ export function ControlPanel({ hidden, setHidden }) {
 
   useEffect(() => {
     setErrorMessage("");
+    unlockField?.current?.focus();
   }, [hidden]);
 
   if (hidden) return null;

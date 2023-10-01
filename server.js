@@ -6,8 +6,8 @@ const rl = require("readline");
 const { generateBotName } = require("./src/game_controller/utils");
 const path = require("path");
 const { randomId } = require("./src/utils/random_id");
-const fs = require('fs');
-const ini = require('ini');
+const fs = require("fs");
+const ini = require("ini");
 
 // Read the INI configuration file
 const configFile = path.join(__dirname, "./server.ini");
@@ -44,7 +44,13 @@ const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
 // Init game
-const game = createGame(broadcast, broadcastInfo, playGameSoundFx, playerKicked);
+const game = createGame(
+  onUpdate=broadcast,
+  onInfo=broadcastInfo,
+  onSoundEffect=playGameSoundFx,
+  onPlayerKicked=playerKicked,
+  gameConfig=config.Game
+);
 
 // Update game state for all clients
 function broadcast() {
@@ -53,7 +59,7 @@ function broadcast() {
 
 function broadcastInfo(desc) {
   io.sockets.emit("chat_message", {
-    desc // to store inside chat logs
+    desc, // to store inside chat logs
   });
 }
 
@@ -182,16 +188,18 @@ io.on("connection", (socket) => {
 
   // CHAT - received chat message from client
   socket.on("chat_message", (message) => {
-    if (message[0] === "/") { // Is command?
+    if (message[0] === "/") {
+      // Is command?
       const command = message.slice(1);
       result = executeCommand(command, name);
-      if (result) { // if there's a private return result, inform invoker as well
+      if (result) {
+        // if there's a private return result, inform invoker as well
         socket.emit("chat_message", {
           desc: `${name}: ${command}`,
-        })
+        });
         socket.emit("chat_message", {
           desc: result,
-        })
+        });
       }
       return;
     }
@@ -215,8 +223,8 @@ const playerCommands = {
   ClearBrokes: "clear_brokes",
   Kick: "kick",
   PleaseSupport: "please_support",
-  SetBlind: "set_blind"
-}
+  SetBlind: "set_blind",
+};
 
 // COMMANDS - DEVELOPERS
 const devCommands = {
@@ -228,8 +236,8 @@ const devCommands = {
   Start: "start",
   ToggleChatLogs: "toggle_chat_log",
   ToggleBotSpeed: "toggle_bot_speed",
-  ToggleDebug: "toggle_debug"
-}
+  ToggleDebug: "toggle_debug",
+};
 
 // Commands execution - returns a string to be displayed on player's chat if exists
 const executeCommand = (command, invoker = "Server") => {
@@ -250,11 +258,11 @@ const executeCommand = (command, invoker = "Server") => {
     case devCommands.HelpDev:
       return "Developer commands: " + Object.values(devCommands).join(", ");
     case devCommands.Connections:
-      return(`Number of connections: ${connections.length}`);
+      return `Number of connections: ${connections.length}`;
     case devCommands.Players:
-      return(`Players data: ${JSON.stringify(playerData, null, 2)}`);
+      return `Players data: ${JSON.stringify(playerData, null, 2)}`;
     case devCommands.Seats:
-      return(`Available seats: ${availableSeats}`);
+      return `Available seats: ${availableSeats}`;
     case devCommands.Broadcast:
       informCommand = true;
       broadcast();
@@ -348,7 +356,7 @@ const executeCommand = (command, invoker = "Server") => {
   // Send info to chat
   if (informCommand) {
     broadcastInfo(info);
-    if(informResponse) broadcastInfo(informResponse)
+    if (informResponse) broadcastInfo(informResponse);
   }
   return "";
 };
@@ -357,6 +365,6 @@ const executeCommand = (command, invoker = "Server") => {
 rl.createInterface({
   input: process.stdin,
 }).on("line", (command) => {
-  result = executeCommand(command)
+  result = executeCommand(command);
   if (result) console.log(`-> ${result}`);
 });

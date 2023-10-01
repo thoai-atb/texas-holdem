@@ -8,7 +8,7 @@ const robohashAvatars = require("robohash-avatars");
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
 
-function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
+function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig) {
   /*****************************************************************************
   |  This game state will be passed on to client every single refreshes,       |
   |  it contains all states about the game (current player, bets, cards, etc.) |
@@ -42,9 +42,10 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
     bigblindIncrement: 10,
     bigblindSize: 10,
     minRaiseSize: 0,
-    debugMode: false, // client also uses this for debugging
+    debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
     winAmount: 0,
     botSpeed: 1000, // how long should bots think?
+    limitBetSize: gameConfig.LIMIT_BET_SIZE
   };
 
   const randomAvailableSeat = () => {
@@ -449,35 +450,41 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
       });
     }
     if (state.currentBetSize > 0 && stack + lastBet > state.currentBetSize) {
-      availableActions.push({
-        type: "raise",
-        minSize: Math.min(
-          state.minRaiseSize,
-          stack + lastBet - state.currentBetSize // effective stack raise size
-        ),
-        // maxSize: stack + lastBet - state.currentBetSize, // no-limit
-        maxSize: Math.min(
+      let maxSize = stack + lastBet - state.currentBetSize // no-limit
+      if (game.state.limitBetSize) {
+        maxSize = Math.min(
           Math.max(
             maxLimitMultiplier * state.bigblindSize,
             maxLimitMultiplier * state.currentBetSize,
             maxLimitMultiplier * state.pot
           ) - state.currentBetSize,
           stack + lastBet - state.currentBetSize
+        )
+      }
+      availableActions.push({
+        type: "raise",
+        minSize: Math.min(
+          state.minRaiseSize,
+          stack + lastBet - state.currentBetSize // effective stack raise size
         ),
+        maxSize: maxSize
       });
     }
     if (state.currentBetSize === 0 && stack > 0) {
-      availableActions.push({
-        type: "bet",
-        minSize: Math.min(state.bigblindSize, stack), // effective stack bet size
-        // maxSize: stack, // no-limit
-        maxSize: Math.min(
+      let maxSize = stack // no-limit
+      if (game.state.limitBetSize) {
+        maxSize = Math.min(
           Math.max(
             maxLimitMultiplier * state.bigblindSize,
             maxLimitMultiplier * state.pot
           ),
           stack
-        ),
+        )
+      }
+      availableActions.push({
+        type: "bet",
+        minSize: Math.min(state.bigblindSize, stack), // effective stack bet size
+        maxSize: maxSize
       });
     }
     state.availableActions = availableActions;
