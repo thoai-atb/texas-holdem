@@ -8,7 +8,13 @@ const robohashAvatars = require("robohash-avatars");
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
 
-function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig) {
+function createGame(
+  onUpdate,
+  onInfo,
+  onSoundEffect,
+  onPlayerKicked,
+  gameConfig
+) {
   /*****************************************************************************
   |  This game state will be passed on to client every single refreshes,       |
   |  it contains all states about the game (current player, bets, cards, etc.) |
@@ -16,8 +22,9 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
   const state = {
     id: randomId(), // to identify different games when resetting
     players: new Array(9).fill(null),
-    bets: new Array(9).fill(0),
+    bets: new Array(9).fill(0), // amount of bets for each seat
     betTypes: new Array(9).fill(null), // "check" | "call" | "raise"
+    playersRanking: new Array(9).fill(0), // players ranking are updated after each round
     deck: [],
     board: [],
     pot: 0,
@@ -46,7 +53,8 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
     winAmount: 0,
     showDown: false, // is the game announcing the winner?
     botSpeed: 1000, // how long should bots think?
-    limitBetSize: gameConfig.LIMIT_BET_SIZE
+    limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
+    limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
   };
 
   const randomAvailableSeat = () => {
@@ -194,7 +202,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
     state.bigblindIncrement = bigblindIncrement;
   };
 
-  // PLAYERS & COUNTINGS
+  // ==================================== PLAYERS & COUNTINGS
 
   const checkToStart = () => {
     if (countQualifiedPlayers() <= 1) return;
@@ -224,7 +232,28 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
     ).length;
   };
 
-  // ACTIONS
+  const updateRankings = () => {
+    const sorted = state.players
+      .map((p) => {
+        if (!p) return null;
+        return p.stack;
+      })
+      .filter((v) => v)
+      .sort((a, b) => b - a);
+    for (let i = 0; i < state.players.length; i++) {
+      const player = state.players[i];
+      if (!player) continue;
+      const currentPoint = player.stack;
+      const idx = sorted.indexOf(currentPoint);
+      const lastIdx = sorted.lastIndexOf(currentPoint);
+      if (lastIdx > 2) state.playersRanking[i] = 0; // too many players
+      else if (idx === 0 && lastIdx === sorted.length - 1)
+        state.playersRanking[i] = 0; // don't show ranking if all player are 1st
+      else state.playersRanking[i] = idx + 1;
+    }
+  };
+
+  // ==================================== ACTIONS
 
   const deal = (seatIndex) => {
     state.players[seatIndex].cards = dealCards(state.deck, 2);
@@ -318,7 +347,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
     return true;
   };
 
-  // TURNS
+  // ==================================== TURNS
 
   const nextIndex = (index) => {
     if (state.players.every((player) => !player)) return -1;
@@ -435,7 +464,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
     const lastBet = state.bets[state.turnIndex]; // player's bet already on the table
     const toCall = state.currentBetSize - lastBet;
     const stack = state.players[state.turnIndex].stack; // player's remaining chips
-    const maxLimitMultiplier = 3;
+    const maxLimitMultiplier = state.limitBetMultiplier;
     if (toCall > 0 && stack > 0) {
       availableActions.push({
         type: "fold", // can fold if not calling
@@ -451,8 +480,8 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
       });
     }
     if (state.currentBetSize > 0 && stack + lastBet > state.currentBetSize) {
-      let maxSize = stack + lastBet - state.currentBetSize // no-limit
-      if (game.state.limitBetSize) {
+      let maxSize = stack + lastBet - state.currentBetSize; // no-limit
+      if (game.state.limitGame) {
         maxSize = Math.min(
           Math.max(
             maxLimitMultiplier * state.bigblindSize,
@@ -460,7 +489,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
             maxLimitMultiplier * state.pot
           ) - state.currentBetSize,
           stack + lastBet - state.currentBetSize
-        )
+        );
       }
       availableActions.push({
         type: "raise",
@@ -468,24 +497,24 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
           state.minRaiseSize,
           stack + lastBet - state.currentBetSize // effective stack raise size
         ),
-        maxSize: maxSize
+        maxSize: maxSize,
       });
     }
     if (state.currentBetSize === 0 && stack > 0) {
-      let maxSize = stack // no-limit
-      if (game.state.limitBetSize) {
+      let maxSize = stack; // no-limit
+      if (game.state.limitGame) {
         maxSize = Math.min(
           Math.max(
             maxLimitMultiplier * state.bigblindSize,
             maxLimitMultiplier * state.pot
           ),
           stack
-        )
+        );
       }
       availableActions.push({
         type: "bet",
         minSize: Math.min(state.bigblindSize, stack), // effective stack bet size
-        maxSize: maxSize
+        maxSize: maxSize,
       });
     }
     state.availableActions = availableActions;
@@ -546,6 +575,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
       }
     });
     removeBrokeBots();
+    updateRankings();
     nextButton();
     checkToStart();
     onUpdate();

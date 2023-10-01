@@ -237,6 +237,7 @@ const devCommands = {
   ToggleChatLogs: "toggle_chat_log",
   ToggleBotSpeed: "toggle_bot_speed",
   ToggleDebug: "toggle_debug",
+  ToggleLimit: "toggle_limit",
 };
 
 // Commands execution - returns a string to be displayed on player's chat if exists
@@ -285,6 +286,12 @@ const executeCommand = (command, invoker = "Server") => {
       informCommand = true;
       game.state.debugMode = !game.state.debugMode;
       informResponse = `Debug mode is set to ${game.state.debugMode}`;
+      broadcast();
+      break;
+    case devCommands.ToggleLimit:
+      informCommand = true;
+      game.state.limitGame = !game.state.limitGame;
+      informResponse = `Limit game is set to ${game.state.limitGame}`;
       broadcast();
       break;
 
