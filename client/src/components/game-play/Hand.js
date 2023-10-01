@@ -7,6 +7,7 @@ import {
 } from "../../utilities/position_converter";
 import { Card } from "./Card";
 import { ChatBubble } from "./ChatBubble";
+import { PlayerRank } from "./PlayerRank";
 
 export function Hand({ style, position }) {
   const {
@@ -78,6 +79,7 @@ export function Hand({ style, position }) {
           <div className="absolute right-full top-full -translate-y-2/3 translate-x-1/3 rounded-full border-black border overflow-hidden w-12 h-12">
             <img src={handPlayer.avatarURL} alt="avatar" />
           </div>
+          <PlayerRank player={handPlayer} />
           <div>
             $<CountUp preserveValue={true} end={handPlayer.stack} duration={MONEY_EFFECT_DURATION} />
             <span style={{ fontSize: "1em" }}>

@@ -44,6 +44,7 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked, gameConfig)
     minRaiseSize: 0,
     debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
     winAmount: 0,
+    showDown: false, // is the game announcing the winner?
     botSpeed: 1000, // how long should bots think?
     limitBetSize: gameConfig.LIMIT_BET_SIZE
   };
