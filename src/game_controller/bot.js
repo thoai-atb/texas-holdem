@@ -10,12 +10,12 @@ const createBot = () => {
     const passiveAction = availableActions.filter(
       (action) => action.type === "check" || action.type === "call"
     )[0];
-    const agressiveAction = availableActions.filter(
+    const aggressiveAction = availableActions.filter(
       (action) => action.type === "bet" || action.type === "raise"
     )[0];
 
     // CHECK IF ONLY ONE OPTION IS CHECK (ALREADY ALL IN)
-    if (!foldAction && !agressiveAction) {
+    if (!foldAction && !aggressiveAction) {
       if (passiveAction) game[passiveAction.type]();
       callback();
       return;
@@ -25,7 +25,7 @@ const createBot = () => {
     setTimeout(() => {
       if (game.state.id !== id) return;
       // if (!game.state.players[game.state.turnIndex]) return;
-      relativeThinking(game, foldAction, passiveAction, agressiveAction);
+      relativeThinking(game, foldAction, passiveAction, aggressiveAction);
       callback();
     }, game.state.botSpeed + Math.random() * game.state.botSpeed);
   };
@@ -34,7 +34,7 @@ const createBot = () => {
     game,
     foldAction,
     passiveAction,
-    agressiveAction
+    aggressiveAction
   ) => {
     const thinkingOutLoud = game.state.debugMode; // CONSOLE LOG THOUGHT FOR DEBUGGING
     const think = (thought) => {
@@ -108,21 +108,21 @@ const createBot = () => {
     think(
       `${name} sees that pot size is ${game.state.pot} and current bet is ${game.state.currentBetSize}`
     );
-    let goodAgressiveSize;
-    if (!agressiveAction) goodAgressiveSize = 0;
-    else if (agressiveAction.type === "bet")
-      goodAgressiveSize = 2 * game.state.pot;
-    else if (agressiveAction.type === "raise")
-      goodAgressiveSize =
+    let goodAggressiveSize;
+    if (!aggressiveAction) goodAggressiveSize = 0;
+    else if (aggressiveAction.type === "bet")
+      goodAggressiveSize = 2 * game.state.pot;
+    else if (aggressiveAction.type === "raise")
+      goodAggressiveSize =
         ((game.state.pot || 0) + game.state.currentBetSize) * 2;
-    think(`${name} has a good agressive size of ${goodAgressiveSize}`);
+    think(`${name} has a good aggressive size of ${goodAggressiveSize}`);
 
     if (wins <= game.state.round + 1) {
       // BLUFF
       think(`${name} chooses to bluff`);
-      if (agressiveAction) {
-        const size = Math.round((Math.random() - 0.5) * goodAgressiveSize);
-        game[agressiveAction.type](bound(size, agressiveAction));
+      if (aggressiveAction) {
+        const size = Math.round((Math.random() - 0.5) * goodAggressiveSize);
+        game[aggressiveAction.type](bound(size, aggressiveAction));
       } else if (foldAction) {
         game[foldAction.type]();
       } else game[passiveAction.type]();
@@ -149,26 +149,26 @@ const createBot = () => {
       return;
     }
 
-    {
-      // RAISE
-      if (agressiveAction) {
-        const size = Math.round(Math.random() * goodAgressiveSize * 2);
-        think(`${name} chooses to take agressive action of ${size}`);
-        game[agressiveAction.type](bound(size, agressiveAction));
+    { // BET / RAISE
+      if (aggressiveAction) {
+        const size = Math.round(Math.random() * goodAggressiveSize * 2);
+        think(`${name} chooses to take aggressive action of ${size}`);
+        game[aggressiveAction.type](bound(size, aggressiveAction));
       } else if (passiveAction) game[passiveAction.type]();
       else game[foldAction.type]();
       return;
     }
   };
 
-  const diceThinking = (game, foldAction, passiveAction, agressiveAction) => {
+  // Think completely randomly - deprecated (bots are smarter than this now)
+  const diceThinking = (game, foldAction, passiveAction, aggressiveAction) => {
     const poolOfActions = [
       foldAction,
       passiveAction,
       passiveAction,
       passiveAction,
       passiveAction,
-      agressiveAction,
+      aggressiveAction,
     ].filter((action) => action);
     let accepted = false;
     while (!accepted) {

@@ -20,7 +20,7 @@ export function ActionBar() {
     showDown,
     bigblindSize,
   } = useGame();
-  const [showSelectBetSize, setShowSelectBetSize] = React.useState(false);
+  const [showBetLevel, setShowSelectBetLevel] = React.useState(false);
   if (!players || !players[seatIndex]) return null;
   const thisPlayer = players[seatIndex];
   const disable = !isPlaying || seatIndex !== turnIndex;
@@ -28,7 +28,11 @@ export function ActionBar() {
     return (
       <div className="w-full flex items-center justify-center pointer-events-auto">
         <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
-          - YOU ARE AFK {autoCheckCall ? "(CHECK/CALL) (press C to turn off)" : "(CHECK/FOLD) (press F to turn off)"} -
+          - YOU ARE AFK{" "}
+          {autoCheckCall
+            ? "CHECK/CALL (press C to turn off)"
+            : "CHECK/FOLD (press F to turn off)"}{" "}
+          -
         </div>
       </div>
     );
@@ -67,13 +71,14 @@ export function ActionBar() {
           }
           return (
             <ActionButton
-              showSelectBetSize={showSelectBetSize}
-              setShowSelectBetSize={setShowSelectBetSize}
+              showSelectBet={showBetLevel}
+              setShowSelectBet={setShowSelectBetLevel}
               key={index}
               availableAction={action}
               takeAction={takeAction}
               title={action.type + (displaySize ? ` $${displaySize}` : "")}
               className={className}
+              stack={thisPlayer.stack}
             />
           );
         })}
@@ -112,23 +117,26 @@ export const ActionButton = ({
   title,
   takeAction,
   className,
-  showSelectBetSize,
-  setShowSelectBetSize,
+  showSelectBet,
+  setShowSelectBet,
   availableAction,
+  stack,
 }) => {
   const { playBubbleClick, playStickClick } = useSoundContext();
   const inputRef = React.useRef();
-  const [betSize, setBetSize] = React.useState(0);
+  const [betLevel, setBetLevel] = React.useState(0); // bet level includes bets already on the table
   const { currentBetSize, bigblindSize, pot } = useGame();
   const isAggressive =
     availableAction.type === "raise" || availableAction.type === "bet";
-  const expand = isAggressive && showSelectBetSize;
+  const maxBetLevel = availableAction.maxSize + currentBetSize;
+  const minBetLevel = availableAction.minSize + currentBetSize;
+  const expand = isAggressive && showSelectBet;
 
   const buttonClickHandler = () => {
     if (isAggressive) {
-      if (!showSelectBetSize) {
+      if (!showSelectBet) {
         playBubbleClick();
-        setShowSelectBetSize(true);
+        setShowSelectBet(true);
       }
     } else {
       playBubbleClick();
@@ -138,46 +146,44 @@ export const ActionButton = ({
 
   const confirm = (e) => {
     e.stopPropagation();
-    const size = parseInt(betSize) - currentBetSize;
+    const size = parseInt(betLevel) - currentBetSize;
     if (size < availableAction.minSize || size > availableAction.maxSize) {
       alert("Invalid bet size");
       return;
     }
-    setShowSelectBetSize(false);
+    setShowSelectBet(false);
     playStickClick();
     takeAction({ type: availableAction.type, size: size });
   };
 
-  const minusButtonHandler = (e) => {
-    e.stopPropagation();
-    let newBetSize = betSize - bigblindSize;
-    if (newBetSize - currentBetSize < availableAction.minSize) {
-      newBetSize = availableAction.minSize + currentBetSize;
+  const minusButtonHandler = () => {
+    let newBetLevel = betLevel - bigblindSize / 2;
+    if (newBetLevel - currentBetSize < availableAction.minSize) {
+      newBetLevel = minBetLevel;
     }
     playStickClick();
-    setBetSize(newBetSize);
+    setBetLevel(newBetLevel);
   };
 
-  const checkBetSize = (value) => {
+  const checkBetLevel = (value) => {
     if (typeof value === "string") value = parseInt(value);
     if (!value) return;
-    if (value < availableAction.minSize + currentBetSize) {
-      value = availableAction.minSize + currentBetSize;
-    } else if (value > availableAction.maxSize + currentBetSize) {
-      value = availableAction.maxSize + currentBetSize;
+    if (value < minBetLevel) {
+      value = minBetLevel;
+    } else if (value > maxBetLevel) {
+      value = maxBetLevel;
     }
     playStickClick();
-    setBetSize(value);
+    setBetLevel(value);
   };
 
-  const plusButtonHandler = (e) => {
-    e.stopPropagation();
-    var newBetSize = betSize + bigblindSize;
-    if (newBetSize - currentBetSize > availableAction.maxSize) {
-      newBetSize = availableAction.maxSize + currentBetSize;
+  const plusButtonHandler = () => {
+    var newBetLevel = betLevel + bigblindSize / 2;
+    if (newBetLevel - currentBetSize > availableAction.maxSize) {
+      newBetLevel = maxBetLevel;
     }
     playStickClick();
-    setBetSize(newBetSize);
+    setBetLevel(newBetLevel);
   };
 
   const valueOfPercent = (percent) => {
@@ -186,18 +192,19 @@ export const ActionButton = ({
 
   const potPercentDisable = (percent) => {
     let bet = valueOfPercent(percent);
-    return bet < availableAction.minSize + currentBetSize;
+    return bet < minBetLevel || betLevel === bet;
   };
 
   useEffect(() => {
     if (availableAction) {
-      setBetSize(availableAction.minSize + currentBetSize);
+      console.log(availableAction);
+      setBetLevel(minBetLevel);
     }
-  }, [availableAction, currentBetSize]);
+  }, [availableAction, currentBetSize, minBetLevel]);
 
   useEffect(() => {
-    if (inputRef?.current) inputRef.current.value = betSize;
-  }, [betSize]);
+    if (inputRef?.current) inputRef.current.value = betLevel;
+  }, [betLevel]);
 
   return (
     <div
@@ -214,14 +221,22 @@ export const ActionButton = ({
       tabIndex="-1"
       onClick={buttonClickHandler}
     >
-      <div className="" onClick={() => setShowSelectBetSize(false)}>
+      <div className="" onClick={() => setShowSelectBet(false)}>
         {title}
       </div>
       {expand && (
         <>
           <ActionSubButton
+            title="Min"
+            onClick={checkBetLevel}
+            value={minBetLevel}
+            disable={betLevel === minBetLevel}
+          >
+            min
+          </ActionSubButton>
+          <ActionSubButton
             title="Half Pot"
-            onClick={checkBetSize}
+            onClick={checkBetLevel}
             value={valueOfPercent(50)}
             disable={potPercentDisable(50)}
           >
@@ -229,7 +244,7 @@ export const ActionButton = ({
           </ActionSubButton>
           <ActionSubButton
             title="3/4 Pot"
-            onClick={checkBetSize}
+            onClick={checkBetLevel}
             value={valueOfPercent(75)}
             disable={potPercentDisable(75)}
           >
@@ -237,34 +252,38 @@ export const ActionButton = ({
           </ActionSubButton>
           <ActionSubButton
             title="Full Pot"
-            onClick={checkBetSize}
+            onClick={checkBetLevel}
             value={valueOfPercent(100)}
             disable={potPercentDisable(100)}
           >
             full
           </ActionSubButton>
           <ActionSubButton
-            title="All In"
-            onClick={checkBetSize}
-            value={availableAction.maxSize + currentBetSize}
-            disable={false}
+            title={maxBetLevel === stack ? "All In" : "Max"}
+            onClick={checkBetLevel}
+            value={maxBetLevel}
+            disable={betLevel === maxBetLevel}
           >
-            all in
+            {maxBetLevel === stack ? "all in" : "max"}
           </ActionSubButton>
-          <div className="flex items-center justify-center text-white h-full hover:text-slate-700 cursor-pointer active:scale-95">
-            <AiOutlineMinusCircle onClick={minusButtonHandler} />
-          </div>
+          <ActionAdjustButton
+            disable={betLevel === minBetLevel}
+            onClick={minusButtonHandler}
+            Icon={AiOutlineMinusCircle}
+          />
           <input
             className="w-24 bg-white rounded-full text-xl text-black font-bold p-2 text-center cursor-pointer outline-none"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
-            onBlur={(e) => checkBetSize(e.target.value)}
-            defaultValue={betSize}
+            onBlur={(e) => checkBetLevel(e.target.value)}
+            defaultValue={betLevel}
             ref={inputRef}
           ></input>
-          <div className="flex items-center justify-center text-white h-full hover:text-slate-700 cursor-pointer active:scale-95">
-            <AiOutlinePlusCircle onClick={plusButtonHandler} />
-          </div>
+          <ActionAdjustButton
+            disable={betLevel === maxBetLevel}
+            onClick={plusButtonHandler}
+            Icon={AiOutlinePlusCircle}
+          />
           <div className="w-12 h-0 relative">
             <div
               className="absolute flex items-center justify-center text-white rounded-full h-full hover:text-slate-700 text-7xl cursor-pointer active:scale-95"
@@ -295,6 +314,26 @@ const ActionSubButton = ({ children, onClick, value, disable, title }) => {
       title={title}
     >
       {children}
+    </div>
+  );
+};
+
+const ActionAdjustButton = ({ disable, onClick, Icon }) => {
+  const clickHandler = (e) => {
+    e.stopPropagation();
+    if (disable) return;
+    onClick();
+  };
+  return (
+    <div
+      className={
+        "flex items-center justify-center text-white h-full" +
+        (disable
+          ? " opacity-50"
+          : " hover:text-slate-700 cursor-pointer active:scale-95")
+      }
+    >
+      <Icon onClick={clickHandler}></Icon>
     </div>
   );
 };

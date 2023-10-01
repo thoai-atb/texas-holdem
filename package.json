@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run clean & npm run build:server && npm run build:client && npm run build:client:ship-out",
+    "build": "npm run clean & npm run build:server && npm run build:load-config && npm run build:client && npm run build:client:ship-out",
     "build:server": "npx webpack --config webpack.config.js",
+    "build:load-config": "copy server.ini build",
     "build:client": "cd client && npm run build",
     "build:client:ship-out": "mkdir build\\client && move client\\build build\\client",
     "clean": "rmdir /s /q build",
@@ -31,6 +32,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.2",
+    "ini": "^4.1.1",
     "robohash-avatars": "^1.0.1",
     "socket.io": "^4.4.1"
   },

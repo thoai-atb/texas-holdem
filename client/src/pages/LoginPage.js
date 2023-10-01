@@ -22,9 +22,7 @@ export default function LoginPage({ loginFunction }) {
     const failHandler = () => {
       setBusy(false);
     };
-    let dest = address;
-    if (address === "x") dest = "localhost:8000";
-    loginFunction(name, dest, failHandler);
+    loginFunction(name, address, failHandler);
     setBusy(true);
   };
   const onKeyDown = (event) => {

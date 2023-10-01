@@ -9,6 +9,7 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
   },
   externals: [nodeExternals()],
+  mode: 'production',
   module: {
     rules: [
       {

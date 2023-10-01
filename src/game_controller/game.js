@@ -9,30 +9,42 @@ const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
 
 function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
+  /*****************************************************************************
+  |  This game state will be passed on to client every single refreshes,       |
+  |  it contains all states about the game (current player, bets, cards, etc.) |
+  *****************************************************************************/
   const state = {
-    id: randomId(), // TO IDENTIFY GAMES WHEN RESETTING
+    id: randomId(), // to identify different games when resetting
     players: new Array(9).fill(null),
     bets: new Array(9).fill(0),
-    betTypes: new Array(9).fill(null),
+    betTypes: new Array(9).fill(null), // "check" | "call" | "raise"
     deck: [],
     board: [],
     pot: 0,
     playing: false,
     turnIndex: -1,
-    buttonIndex: -1,
-    completeActionSeat: -1,
-    winners: [],
+    buttonIndex: -1, // dealer button index
+    completeActionSeat: -1, // the last index (player) that made an action
+    winners: [], // can have multiple winners if hand ranks are equal
     currentBetSize: 0,
     round: 0, // 0 = preflop, 1 = flop, 2 = turn, 3 = river
     availableActions: [
-      /* type: "bet", maxSize: "1000" */
+      /* action data type: {
+          type: "fold" | "call" | "bet" | "raise"
+          size: <fixed size for call> - to call
+            (for call, size does not include player's bet already on the table)
+          minSize: <min size for bet/raise> 
+            (for raise, minSize does not include player's bet already on the table)
+          maxSize: <max size for bet/raise>
+            (for raise, maxSize does not include player's bet already on the table)
+      } */
     ],
     bigblindIncrement: 10,
     bigblindSize: 10,
     minRaiseSize: 0,
-    debugMode: false,
+    debugMode: false, // client also uses this for debugging
     winAmount: 0,
-    botSpeed: 1000,
+    botSpeed: 1000, // how long should bots think?
   };
 
   const randomAvailableSeat = () => {
@@ -418,9 +430,10 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
   const prepareTurn = () => {
     // CALCULATE AVAILABLE ACTIONS
     availableActions = [];
-    const lastBet = state.bets[state.turnIndex];
+    const lastBet = state.bets[state.turnIndex]; // player's bet already on the table
     const toCall = state.currentBetSize - lastBet;
-    const stack = state.players[state.turnIndex].stack;
+    const stack = state.players[state.turnIndex].stack; // player's remaining chips
+    const maxLimitMultiplier = 3;
     if (toCall > 0 && stack > 0) {
       availableActions.push({
         type: "fold", // can fold if not calling
@@ -442,14 +455,29 @@ function createGame(onUpdate, onInfo, onSoundEffect, onPlayerKicked) {
           state.minRaiseSize,
           stack + lastBet - state.currentBetSize // effective stack raise size
         ),
-        maxSize: stack + lastBet - state.currentBetSize,
+        // maxSize: stack + lastBet - state.currentBetSize, // no-limit
+        maxSize: Math.min(
+          Math.max(
+            maxLimitMultiplier * state.bigblindSize,
+            maxLimitMultiplier * state.currentBetSize,
+            maxLimitMultiplier * state.pot
+          ) - state.currentBetSize,
+          stack + lastBet - state.currentBetSize
+        ),
       });
     }
     if (state.currentBetSize === 0 && stack > 0) {
       availableActions.push({
         type: "bet",
         minSize: Math.min(state.bigblindSize, stack), // effective stack bet size
-        maxSize: stack,
+        // maxSize: stack, // no-limit
+        maxSize: Math.min(
+          Math.max(
+            maxLimitMultiplier * state.bigblindSize,
+            maxLimitMultiplier * state.pot
+          ),
+          stack
+        ),
       });
     }
     state.availableActions = availableActions;

@@ -6,19 +6,26 @@ const rl = require("readline");
 const { generateBotName } = require("./src/game_controller/utils");
 const path = require("path");
 const { randomId } = require("./src/utils/random_id");
+const fs = require('fs');
+const ini = require('ini');
 
+// Read the INI configuration file
+const configFile = path.join(__dirname, "./server.ini");
+const config = ini.parse(fs.readFileSync(configFile, "utf-8"));
+
+// Express app
 const app = express();
-
 app.use(
   cors({
     origin: "*",
     credentials: true,
   })
 );
-
 app.use(express.static(path.join(__dirname, "./client/build")));
 
-const port = process.env.PORT || 8000;
+const port = config.Server.PORT;
+
+// Start server
 const server = app.listen(
   port,
   console.log(`Server is running on port: ${port} `)
@@ -36,6 +43,7 @@ const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
+// Init game
 const game = createGame(broadcast, broadcastInfo, playGameSoundFx, playerKicked);
 
 // Update game state for all clients
