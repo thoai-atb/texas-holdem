@@ -82,6 +82,7 @@ function createGame(
       stack: 1000,
       cards: [],
     };
+    state.playersRanking[seatIndex] = 0
     if (!state.playing)
       state.players.forEach((player) => {
         if (player && !player.isBot) player.ready = false;
@@ -114,6 +115,7 @@ function createGame(
       ready: true,
       cards: [],
     };
+    state.playersRanking[seatIndex] = 0
     if (!state.playing)
       state.players.forEach((player) => {
         if (player && !player.isBot) player.ready = false;
@@ -559,6 +561,7 @@ function createGame(
   };
 
   const postShowDown = () => {
+    state.showDown = false;
     state.winners.forEach(
       (winner) => (state.players[winner.index].stack += state.winAmount)
     );

@@ -14,7 +14,7 @@ export function Statistics({ hidden, setHidden }) {
   }, [board.length]);
   if (hidden) return null;
   return (
-    <div className="absolute text-white bottom-10 bg-black bg-opacity-20 p-4 left-4 pointer-events-auto rounded group">
+    <div className="absolute text-white bottom-10 bg-black bg-opacity-20 p-4 left-4 pointer-events-auto rounded group animate-fade-in-up">
       <div
         className="absolute bottom-full right-0 hidden group-hover:flex justify-end text-sm pb-4 pl-16 hover:text-cyan-500 cursor-pointer"
         onClick={() => setHidden(true)}

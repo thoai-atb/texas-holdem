@@ -1,9 +1,9 @@
 import React from "react";
-import CountUp from 'react-countup';
+import CountUp from "react-countup";
 import { useGame } from "../../contexts/Game";
 import {
   indexFromPosition,
-  positionFromIndex
+  positionFromIndex,
 } from "../../utilities/position_converter";
 import { Card } from "./Card";
 import { ChatBubble } from "./ChatBubble";
@@ -11,6 +11,7 @@ import { PlayerRank } from "./PlayerRank";
 
 export function Hand({ style, position }) {
   const {
+    bets,
     players,
     winners,
     seatIndex,
@@ -26,6 +27,10 @@ export function Hand({ style, position }) {
   const handPlayer = players[positionIndex];
   const actionType = handPlayer.folded ? "fold" : betTypes[positionIndex];
   const isBroke = !handPlayer.cards?.length && handPlayer.stack < bigblindSize;
+  const showCard =
+    showDown ||
+    position === 0 || // your card
+    (bets[positionIndex] === 0 && handPlayer.stack === 0); // hand player all-ed in
   return (
     <div
       className={"w-0 h-0 flex justify-center items-center cursor-pointer"}
@@ -56,7 +61,7 @@ export function Hand({ style, position }) {
               <Card
                 key={index}
                 card={card}
-                hidden={!showDown && position !== 0}
+                hidden={!showCard}
                 // hidden={false}
               />
             ))}
@@ -81,7 +86,12 @@ export function Hand({ style, position }) {
           </div>
           <PlayerRank player={handPlayer} />
           <div>
-            $<CountUp preserveValue={true} end={handPlayer.stack} duration={MONEY_EFFECT_DURATION} />
+            $
+            <CountUp
+              preserveValue={true}
+              end={handPlayer.stack}
+              duration={MONEY_EFFECT_DURATION}
+            />
             <span style={{ fontSize: "1em" }}>
               {turnIndex !== positionIndex &&
                 actionType &&

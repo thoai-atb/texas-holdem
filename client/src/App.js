@@ -15,6 +15,7 @@ import { Statistics } from "./components/ui/Statistics";
 import { Settings } from "./components/ui/Settings";
 import { Logout } from "./components/ui/Logout";
 import { FirstPlayerDialog } from "./components/ui/FirstPlayerDialog";
+import { DebugPanel } from "./components/ui/DebugPanel";
 
 export const AppContext = createContext({});
 
@@ -196,6 +197,9 @@ function App() {
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
                   <FirstPlayerDialog />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <DebugPanel />
                 </div>
               </GameProvider>
             </div>

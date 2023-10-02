@@ -236,7 +236,7 @@ const devCommands = {
   Start: "start",
   ToggleChatLogs: "toggle_chat_log",
   ToggleBotSpeed: "toggle_bot_speed",
-  ToggleDebug: "toggle_debug",
+  ToggleDebug: "debug",
   ToggleLimit: "toggle_limit",
 };
 
