@@ -31,7 +31,7 @@ function createGame(
     playing: false,
     turnIndex: -1,
     buttonIndex: -1, // dealer button index
-    completeActionSeat: -1, // the last index (player) that made an action
+    completeActionSeat: -1, // if the next index is this, go to next round
     winners: [], // can have multiple winners if hand ranks are equal
     currentBetSize: 0,
     round: 0, // 0 = preflop, 1 = flop, 2 = turn, 3 = river
@@ -52,10 +52,15 @@ function createGame(
     debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
     winAmount: 0,
     showDown: false, // is the game announcing the winner?
+    allPlayersAllIn: false, // is all players alled in? - no more actions from here?
     botSpeed: 1000, // how long should bots think?
     limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
   };
+
+  /* =======================================
+  |         ADD & REMOVE PLAYERS           |
+  ======================================= */
 
   const randomAvailableSeat = () => {
     const availableSeats = [];
@@ -82,7 +87,7 @@ function createGame(
       stack: 1000,
       cards: [],
     };
-    state.playersRanking[seatIndex] = 0
+    state.playersRanking[seatIndex] = 0;
     if (!state.playing)
       state.players.forEach((player) => {
         if (player && !player.isBot) player.ready = false;
@@ -115,7 +120,7 @@ function createGame(
       ready: true,
       cards: [],
     };
-    state.playersRanking[seatIndex] = 0
+    state.playersRanking[seatIndex] = 0;
     if (!state.playing)
       state.players.forEach((player) => {
         if (player && !player.isBot) player.ready = false;
@@ -204,7 +209,9 @@ function createGame(
     state.bigblindIncrement = bigblindIncrement;
   };
 
-  // ==================================== PLAYERS & COUNTINGS
+  /* =======================================
+  |           PLAYERS FUNCTIONS            |
+  ======================================= */
 
   const checkToStart = () => {
     if (countQualifiedPlayers() <= 1) return;
@@ -234,32 +241,17 @@ function createGame(
     ).length;
   };
 
-  const updateRankings = () => {
-    const sorted = state.players
-      .map((p) => {
-        if (!p) return null;
-        return p.stack;
-      })
-      .filter((v) => v)
-      .sort((a, b) => b - a);
-    for (let i = 0; i < state.players.length; i++) {
-      const player = state.players[i];
-      if (!player) continue;
-      const currentPoint = player.stack;
-      const idx = sorted.indexOf(currentPoint);
-      const lastIdx = sorted.lastIndexOf(currentPoint);
-      if (lastIdx > 2) state.playersRanking[i] = 0; // too many players
-      else if (idx === 0 && lastIdx === sorted.length - 1)
-        state.playersRanking[i] = 0; // don't show ranking if all player are 1st
-      else state.playersRanking[i] = idx + 1;
-    }
+  const isAllPlayersAlledIn = () => {
+    return (
+      state.players.filter(
+        (player) => player?.cards?.length && !player.folded && player.stack != 0
+      ).length <= 1
+    );
   };
 
-  // ==================================== ACTIONS
-
-  const deal = (seatIndex) => {
-    state.players[seatIndex].cards = dealCards(state.deck, 2);
-  };
+  /* =======================================
+  |             PLAYER ACTIONS             |
+  ======================================= */
 
   const fold = () => {
     if (!state.availableActions.find((action) => action.type === "fold"))
@@ -349,8 +341,11 @@ function createGame(
     return true;
   };
 
-  // ==================================== TURNS
+  /* =======================================
+  |            INDEX FUNCTIONS             |
+  ======================================= */
 
+  // Get next player who is in the table (regardless of money, folded or not)
   const nextIndex = (index) => {
     if (state.players.every((player) => !player)) return -1;
     do {
@@ -359,6 +354,7 @@ function createGame(
     return index;
   };
 
+  // Is player at seat index has enough money for a new round?
   const isQualified = (seatIndex) => {
     return (
       state.players[seatIndex] &&
@@ -366,6 +362,7 @@ function createGame(
     );
   };
 
+  // Get next seat who has enough money for a new round
   const nextQualifiedIndex = (index) => {
     if (
       state.players.every(
@@ -383,6 +380,7 @@ function createGame(
     return index;
   };
 
+  // Get next seat who is still in the game (not folded)
   const nextActiveIndex = (index) => {
     if (
       state.players.every((player) => !player?.cards?.length || player.folded)
@@ -398,6 +396,10 @@ function createGame(
     return index;
   };
 
+  /* =======================================
+  |           TURNS & UPDATES              |
+  ======================================= */
+
   const nextTurn = (carryCompleteActionSeat) => {
     if (countActivePlayers() == 1) {
       state.turnIndex = -1;
@@ -406,18 +408,20 @@ function createGame(
     }
     const nextIndex = nextActiveIndex(state.turnIndex);
     if (carryCompleteActionSeat) {
+      // If player fold, complete action seat will be carried over the next seat
       state.completeActionSeat = nextIndex;
     } else if (nextIndex == state.completeActionSeat) {
+      // If reached the last player who made an action -> round finished
       state.turnIndex = -1;
+      if (isAllPlayersAlledIn()) {
+        state.allPlayersAllIn = true;
+        onSoundEffect("flip");
+      }
       setTimeout(() => nextRound(), ROUND_TIME);
       return;
     }
     state.turnIndex = nextIndex;
     prepareTurn();
-  };
-
-  const nextButton = () => {
-    state.buttonIndex = nextQualifiedIndex(state.buttonIndex);
   };
 
   const nextRound = () => {
@@ -467,6 +471,8 @@ function createGame(
     const toCall = state.currentBetSize - lastBet;
     const stack = state.players[state.turnIndex].stack; // player's remaining chips
     const maxLimitMultiplier = state.limitBetMultiplier;
+
+    // FOLD & CALL
     if (toCall > 0 && stack > 0) {
       availableActions.push({
         type: "fold", // can fold if not calling
@@ -476,12 +482,20 @@ function createGame(
         size: Math.min(toCall, stack), // effective stack call size
       });
     }
+
+    // CHECK
     if (toCall === 0 || stack === 0) {
       availableActions.push({
         type: "check",
       });
     }
-    if (state.currentBetSize > 0 && stack + lastBet > state.currentBetSize) {
+
+    // RAISE
+    if (
+      !state.allPlayersAllIn &&
+      state.currentBetSize > 0 &&
+      stack + lastBet > state.currentBetSize
+    ) {
       let maxSize = stack + lastBet - state.currentBetSize; // no-limit
       if (game.state.limitGame) {
         maxSize = Math.min(
@@ -502,7 +516,9 @@ function createGame(
         maxSize: maxSize,
       });
     }
-    if (state.currentBetSize === 0 && stack > 0) {
+
+    // BET
+    if (!state.allPlayersAllIn && state.currentBetSize === 0 && stack > 0) {
       let maxSize = stack; // no-limit
       if (game.state.limitGame) {
         maxSize = Math.min(
@@ -560,8 +576,34 @@ function createGame(
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };
 
+  const nextButton = () => {
+    state.buttonIndex = nextQualifiedIndex(state.buttonIndex);
+  };
+
+  const updateRankings = () => {
+    const sorted = state.players
+      .map((p) => {
+        if (!p) return null;
+        return p.stack;
+      })
+      .filter((v) => v)
+      .sort((a, b) => b - a);
+    for (let i = 0; i < state.players.length; i++) {
+      const player = state.players[i];
+      if (!player) continue;
+      const currentPoint = player.stack;
+      const idx = sorted.indexOf(currentPoint);
+      const lastIdx = sorted.lastIndexOf(currentPoint);
+      if (lastIdx > 2) state.playersRanking[i] = 0; // too many players
+      else if (idx === 0 && lastIdx === sorted.length - 1)
+        state.playersRanking[i] = 0; // don't show ranking if all player are 1st
+      else state.playersRanking[i] = idx + 1;
+    }
+  };
+
   const postShowDown = () => {
     state.showDown = false;
+    state.allPlayersAllIn = false;
     state.winners.forEach(
       (winner) => (state.players[winner.index].stack += state.winAmount)
     );
@@ -582,6 +624,10 @@ function createGame(
     nextButton();
     checkToStart();
     onUpdate();
+  };
+
+  const deal = (seatIndex) => {
+    state.players[seatIndex].cards = dealCards(state.deck, 2);
   };
 
   const startGame = () => {

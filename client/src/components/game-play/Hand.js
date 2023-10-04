@@ -11,7 +11,6 @@ import { PlayerRank } from "./PlayerRank";
 
 export function Hand({ style, position }) {
   const {
-    bets,
     players,
     winners,
     seatIndex,
@@ -20,6 +19,7 @@ export function Hand({ style, position }) {
     showDown,
     betTypes,
     bigblindSize,
+    allPlayersAllIn,
     MONEY_EFFECT_DURATION,
   } = useGame();
   const positionIndex = indexFromPosition(position, seatIndex);
@@ -27,10 +27,7 @@ export function Hand({ style, position }) {
   const handPlayer = players[positionIndex];
   const actionType = handPlayer.folded ? "fold" : betTypes[positionIndex];
   const isBroke = !handPlayer.cards?.length && handPlayer.stack < bigblindSize;
-  const showCard =
-    showDown ||
-    position === 0 || // your card
-    (bets[positionIndex] === 0 && handPlayer.stack === 0); // hand player all-ed in
+  const showCard = showDown || allPlayersAllIn || position === 0;
   return (
     <div
       className={"w-0 h-0 flex justify-center items-center cursor-pointer"}

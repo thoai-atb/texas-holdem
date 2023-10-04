@@ -22,6 +22,8 @@ export function GameProvider({ children }) {
   const [availableActions, setAvailableActions] = React.useState([]);
   const [bigblindSize, setBigblindSize] = React.useState(0);
   const [debugMode, setDebugMode] = React.useState(false);
+  const [completeActionSeat, setCompleteActionSeat] = React.useState(-1);
+  const [allPlayersAllIn, setAllPlayersAllIn] = React.useState(false);
 
   const MONEY_EFFECT_DURATION = 0.5;
 
@@ -44,6 +46,8 @@ export function GameProvider({ children }) {
       setBigblindSize(gameState.bigblindSize);
       setWinners(gameState.winners);
       setDebugMode(gameState.debugMode);
+      setCompleteActionSeat(gameState.completeActionSeat);
+      setAllPlayersAllIn(gameState.allPlayersAllIn);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
@@ -106,6 +110,8 @@ export function GameProvider({ children }) {
 
   const value = {
     socket,
+
+    // Game state (start)
     deck,
     board,
     players,
@@ -123,6 +129,10 @@ export function GameProvider({ children }) {
     bigblindSize,
     winners,
     debugMode,
+    completeActionSeat,
+    allPlayersAllIn,
+    // Game state (end)
+
     takeAction,
     MONEY_EFFECT_DURATION,
   };
