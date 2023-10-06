@@ -10,6 +10,10 @@ import bubbleChatSound from "../assets/sounds/bubble_chat.wav";
 import stickClickSound from "../assets/sounds/stick_click.wav";
 import cinematicBombSound from "../assets/sounds/cinematic_boom.wav";
 import cinematicAlarmSound from "../assets/sounds/cinematic_alarm.wav";
+import cashRegisterSound from "../assets/sounds/cash_register.wav";
+import bunnSound from "../assets/sounds/bunn.wav";
+import tingSound from "../assets/sounds/ting.wav";
+import oldButtonSound from "../assets/sounds/old_button.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
@@ -36,7 +40,7 @@ export const useSoundHandler = ({ socket, muted }) => {
   const [playWinB] = useSound(cinematicAlarmSound, {
     interrupt: true,
     volume: volume,
-  })
+  });
   const [playFlip] = useSound(cardFlipSound, {
     interrupt: true,
     volume: volume,
@@ -53,6 +57,29 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : volume,
   });
+  const [playOldButtonSound] = useSound(oldButtonSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
+  const [playBunnSound] = useSound(bunnSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
+  const [playTingSound] = useSound(tingSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
+  const [playCashRegisterSound] = useSound(cashRegisterSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
+
+  function playMiscSound(soundName) {
+    if (soundName === "cash-register") playCashRegisterSound();
+    else if (soundName === "bunn") playBunnSound();
+    else if (soundName === "ting") playTingSound();
+    else if (soundName === "old-button") playOldButtonSound();
+  }
 
   useEffect(() => {
     if (!socket || muted) return;
@@ -68,7 +95,17 @@ export const useSoundHandler = ({ socket, muted }) => {
     return () => {
       socket.off("sound_effect");
     };
-  }, [socket, playChips, playTap, playThrow, playWin, playFlip, muted, playWinA, playWinB]);
+  }, [
+    socket,
+    playChips,
+    playTap,
+    playThrow,
+    playWin,
+    playFlip,
+    muted,
+    playWinA,
+    playWinB,
+  ]);
 
   return {
     playChips,
@@ -81,6 +118,7 @@ export const useSoundHandler = ({ socket, muted }) => {
     playBubbleClick,
     playBubbleChat,
     playStickClick,
+    playMiscSound,
     volume,
     setVolume,
   };

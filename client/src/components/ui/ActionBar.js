@@ -9,7 +9,8 @@ import { useGame } from "../../contexts/Game";
 import { useSoundContext } from "../../contexts/Sound";
 
 export function ActionBar() {
-  const { autoCheckCall, autoCheckFold } = useContext(AppContext);
+  const { autoCheckCall, autoCheckFold, showWorkPanel, setShowWorkPanel } =
+    useContext(AppContext);
   const {
     takeAction,
     isPlaying,
@@ -48,6 +49,15 @@ export function ActionBar() {
           className="bg-purple-500"
         />
       )}
+      {!showWorkPanel &&
+        !thisPlayer.ready &&
+        thisPlayer.stack < bigblindSize && (
+          <WorkButton
+            action={() => setShowWorkPanel(true)}
+            title="You're broke! Click here to work for money"
+            className=""
+          />
+        )}
       {isPlaying &&
         !disable &&
         availableActions.map((action, index) => {
@@ -338,5 +348,24 @@ const ActionAdjustButton = ({ disable, onClick, Icon }) => {
     >
       <Icon onClick={clickHandler}></Icon>
     </div>
+  );
+};
+
+const WorkButton = ({ action, title, className }) => {
+  const { playBubbleClick } = useSoundContext();
+  return (
+    <button
+      className={
+        className +
+        " border-2 border-cyan-500 text-cyan-500 p-4 bg-white bg-opacity-50" +
+        " rounded-sm m-8 text-xl text-center hover:bg-opacity-80"
+      }
+      onClick={() => {
+        playBubbleClick();
+        action();
+      }}
+    >
+      {title}
+    </button>
   );
 };

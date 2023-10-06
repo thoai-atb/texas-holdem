@@ -64,10 +64,6 @@ export function ControlPanel({ hidden, setHidden }) {
               text="Reset blinds"
               onClick={() => sendCommand("/set_blind 10")}
             />
-            <PanelButton
-              text="I'm broke!"
-              onClick={() => sendCommand(`/please_support`)}
-            />
           </div>
         )}
         {!unlocked && (

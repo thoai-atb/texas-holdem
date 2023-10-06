@@ -45,11 +45,11 @@ var chatLogging = true;
 
 // Init game
 const game = createGame(
-  onUpdate=broadcast,
-  onInfo=broadcastInfo,
-  onSoundEffect=playGameSoundFx,
-  onPlayerKicked=playerKicked,
-  gameConfig=config.Game
+  (onUpdate = broadcast),
+  (onInfo = broadcastInfo),
+  (onSoundEffect = playGameSoundFx),
+  (onPlayerKicked = playerKicked),
+  (gameConfig = config.Game)
 );
 
 // Update game state for all clients
@@ -181,6 +181,10 @@ io.on("connection", (socket) => {
         game.checkToStart();
         broadcast();
         break;
+      case "work":
+        game.addMoney(name, 1000);
+        broadcastInfo(`${name} worked and earned $1000`);
+        broadcast();
       default:
         break;
     }
@@ -222,7 +226,6 @@ const playerCommands = {
   ClearBots: "clear_bots",
   ClearBrokes: "clear_brokes",
   Kick: "kick",
-  PleaseSupport: "please_support",
   SetBlind: "set_blind",
 };
 
@@ -343,12 +346,6 @@ const executeCommand = (command, invoker = "Server") => {
       }
       informCommand = true;
       broadcast();
-    case playerCommands.PleaseSupport:
-      informCommand = true;
-      if (arg) game.fillMoney(arg);
-      else game.fillMoney(invoker);
-      broadcast();
-      break;
     case playerCommands.SetBlind:
       informCommand = true;
       if (!arg) game.setBlinds(10);

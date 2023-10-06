@@ -200,6 +200,15 @@ function createGame(
     return true;
   };
 
+  const addMoney = (name, amount) => {
+    const seatIndex = state.players.findIndex(
+      (player) => player && player.name === name
+    );
+    if (seatIndex === -1) return false;
+    state.players[seatIndex].stack += amount;
+    return true;
+  };
+
   const setReady = (seatIndex) => {
     state.players[seatIndex].ready = true;
   };
@@ -692,6 +701,7 @@ function createGame(
     removeBrokePlayers,
     fillMoney,
     setMoney,
+    addMoney,
     nextTurn,
     nextButton,
     randomAvailableSeat,

@@ -16,6 +16,7 @@ import { Settings } from "./components/ui/Settings";
 import { Logout } from "./components/ui/Logout";
 import { FirstPlayerDialog } from "./components/ui/FirstPlayerDialog";
 import { DebugPanel } from "./components/ui/DebugPanel";
+import { WorkPanel } from "./components/ui/WorkPanel";
 
 export const AppContext = createContext({});
 
@@ -35,14 +36,21 @@ function App() {
   const [disableShortcuts, setDisableShortcuts] = useState(false); // Don't activate shortcuts while using chat and others
   const [showLogout, setShowLogout] = useState(false);
   const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false); // Ask player if they want to play with bots
+  const [showWorkPanel, setShowWorkPanel] = useState(false); // work for money, money is life
   const { localStorage } = window;
   const containerRef = useRef(null);
 
-  const { playBubbleClick, playBubbleChat, playStickClick, volume, setVolume } =
-    useSoundHandler({
-      socket,
-      muted,
-    });
+  const {
+    playBubbleClick,
+    playBubbleChat,
+    playStickClick,
+    playMiscSound,
+    volume,
+    setVolume,
+  } = useSoundHandler({
+    socket,
+    muted,
+  });
 
   const login = (name, address, onFail) => {
     localStorage.setItem("userName", name);
@@ -126,6 +134,7 @@ function App() {
         autoCheckFold,
         showLogout,
         showFirstPlayerDialog,
+        showWorkPanel,
         setAutoCheckCall,
         setAutoCheckFold,
         setMuted,
@@ -133,10 +142,18 @@ function App() {
         setShowStatistics,
         setShowLogout,
         setShowFirstPlayerDialog,
+        setShowWorkPanel,
       }}
     >
       <SoundContext.Provider
-        value={{ playBubbleClick, playBubbleChat, playStickClick, volume, setVolume }}
+        value={{
+          playBubbleClick,
+          playBubbleChat,
+          playStickClick,
+          playMiscSound,
+          volume,
+          setVolume,
+        }}
       >
         <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
           {!loggedIn && <LoginPage loginFunction={login} />}
@@ -169,6 +186,12 @@ function App() {
                     setHidden={setChatHidden}
                     enteringCommand={enteringCommand}
                     setEnteringCommand={setEnteringCommand}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <WorkPanel
+                    hidden={!showWorkPanel}
+                    setHidden={(hidden) => setShowWorkPanel(!hidden)}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
