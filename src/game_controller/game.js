@@ -58,6 +58,11 @@ function createGame(
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
   };
 
+  const playersLeftTheTable = {
+    /*
+      "John": 200, -> money when player left the table
+    */
+  };
   /* =======================================
   |         ADD & REMOVE PLAYERS           |
   ======================================= */
@@ -80,12 +85,14 @@ function createGame(
       width: 400,
     });
     if (state.players[seatIndex]) return false;
+    var stack = name in playersLeftTheTable ? playersLeftTheTable[name] : 1000;
     state.players[seatIndex] = {
       seatIndex,
       name,
       avatarURL,
-      stack: 1000,
+      stack: stack,
       cards: [],
+      working: false,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -119,6 +126,7 @@ function createGame(
       stack: 1000,
       ready: true,
       cards: [],
+      working: false,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -148,6 +156,8 @@ function createGame(
       fold() || nextTurn();
     }
     if (!state.players[seatIndex].isBot) onPlayerKicked(seatIndex);
+    var player = state.players[seatIndex];
+    playersLeftTheTable[player.name] = player.stack;
     state.players[seatIndex] = null;
     if (!state.playing)
       state.players.forEach((player) => {
@@ -207,6 +217,10 @@ function createGame(
     if (seatIndex === -1) return false;
     state.players[seatIndex].stack += amount;
     return true;
+  };
+
+  const setWorking = (seatIndex, working) => {
+    state.players[seatIndex].working = working;
   };
 
   const setReady = (seatIndex) => {
@@ -570,6 +584,7 @@ function createGame(
       if (!onInfo) {
         console.log(onInfo);
       } else onInfo(info);
+      console.log(info);
     }
 
     const type = (() => {
@@ -702,6 +717,7 @@ function createGame(
     fillMoney,
     setMoney,
     addMoney,
+    setWorking,
     nextTurn,
     nextButton,
     randomAvailableSeat,

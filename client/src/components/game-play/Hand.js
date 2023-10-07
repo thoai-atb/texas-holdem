@@ -25,7 +25,11 @@ export function Hand({ style, position }) {
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
-  const actionType = handPlayer.folded ? "fold" : betTypes[positionIndex];
+  const actionType = handPlayer.working
+    ? "work"
+    : handPlayer.folded
+    ? "fold"
+    : betTypes[positionIndex];
   const isBroke = !handPlayer.cards?.length && handPlayer.stack < bigblindSize;
   const showCard = showDown || allPlayersAllIn || position === 0;
   return (

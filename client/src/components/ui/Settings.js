@@ -49,13 +49,13 @@ export function Settings() {
         />
         <ToggleField
           label="AFK mode (check/call)"
-          shortcut="C"
+          shortcut=""
           active={autoCheckCall}
           onToggle={handleAction(() => setAutoCheckCall((c) => !c))}
         />
         <ToggleField
           label="AFK mode (check/fold)"
-          shortcut="F"
+          shortcut=""
           active={autoCheckFold}
           onToggle={handleAction(() => setAutoCheckFold((f) => !f))}
         />

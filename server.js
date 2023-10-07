@@ -181,10 +181,22 @@ io.on("connection", (socket) => {
         game.checkToStart();
         broadcast();
         break;
-      case "work":
-        game.addMoney(name, 1000);
-        broadcastInfo(`${name} worked and earned $1000`);
+      case "begin-work":
+        game.setWorking(seatIndex, true);
         broadcast();
+        break;
+      case "leave-work":
+        game.setWorking(seatIndex, false);
+        broadcast();
+        break;
+      case "finish-work":
+        game.setWorking(seatIndex, false);
+        game.addMoney(name, 1000);
+        const info = `${name} worked and earned $1000`;
+        broadcastInfo(info);
+        console.log(info);
+        broadcast();
+        break;
       default:
         break;
     }

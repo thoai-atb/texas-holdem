@@ -37,6 +37,7 @@ function App() {
   const [showLogout, setShowLogout] = useState(false);
   const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false); // Ask player if they want to play with bots
   const [showWorkPanel, setShowWorkPanel] = useState(false); // work for money, money is life
+  const [appAction, setAppAction] = useState(null); // events for app's children - such as keyboard shortcuts
   const { localStorage } = window;
   const containerRef = useRef(null);
 
@@ -91,13 +92,14 @@ function App() {
         playStickClick();
         setShowStatistics((show) => !show);
       }
-      if (e.key === "c" || e.key === "C") {
-        playStickClick();
-        setAutoCheckCall((c) => !c);
-      }
       if (e.key === "f" || e.key === "F") {
-        playStickClick();
-        setAutoCheckFold((c) => !c);
+        setAppAction("f_pressed");
+      }
+      if (e.key === " ") {
+        setAppAction("space_pressed");
+      }
+      if (e.key === "Escape") {
+        setAppAction("escape_pressed");
       }
     };
     document.addEventListener("keydown", keyDown);
@@ -135,6 +137,7 @@ function App() {
         showLogout,
         showFirstPlayerDialog,
         showWorkPanel,
+        appAction,
         setAutoCheckCall,
         setAutoCheckFold,
         setMuted,
@@ -143,6 +146,7 @@ function App() {
         setShowLogout,
         setShowFirstPlayerDialog,
         setShowWorkPanel,
+        setAppAction,
       }}
     >
       <SoundContext.Provider
@@ -176,6 +180,12 @@ function App() {
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <WorkPanel
+                    hidden={!showWorkPanel}
+                    setHidden={(hidden) => setShowWorkPanel(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
                   {chatHint && (
                     <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
                       {chatHint}
@@ -186,12 +196,6 @@ function App() {
                     setHidden={setChatHidden}
                     enteringCommand={enteringCommand}
                     setEnteringCommand={setEnteringCommand}
-                  />
-                </div>
-                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-                  <WorkPanel
-                    hidden={!showWorkPanel}
-                    setHidden={(hidden) => setShowWorkPanel(!hidden)}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">

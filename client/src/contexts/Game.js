@@ -1,10 +1,19 @@
 import React, { useContext, useEffect } from "react";
 import { AppContext } from "../App";
+import { useSoundContext } from "./Sound";
 
 const GameContext = React.createContext({});
 
 export function GameProvider({ children }) {
-  const { socket, autoCheckCall, autoCheckFold } = useContext(AppContext);
+  const {
+    socket,
+    autoCheckCall,
+    autoCheckFold,
+    appAction,
+    setAppAction,
+    setShowWorkPanel,
+  } = useContext(AppContext);
+  const { playBubbleClick } = useSoundContext();
   const [deck, setDeck] = React.useState([]);
   const [players, setPlayers] = React.useState([]);
   const [bets, setBets] = React.useState([]);
@@ -106,6 +115,64 @@ export function GameProvider({ children }) {
     seatIndex,
     isPlaying,
     bigblindSize,
+  ]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (appAction === "space_pressed") {
+      setAppAction(null);
+      if (!players || !players[seatIndex]) return;
+      const thisPlayer = players[seatIndex];
+      if (!isPlaying && !thisPlayer.ready) {
+        if (thisPlayer.stack >= bigblindSize) {
+          playBubbleClick();
+          takeAction({ type: "ready" });
+          return;
+        }
+      }
+      if (!thisPlayer.ready && !thisPlayer.working) {
+        if (thisPlayer.stack < bigblindSize) {
+          playBubbleClick();
+          setShowWorkPanel(true);
+          return;
+        }
+      }
+      if (turnIndex === seatIndex)
+        for (const action of availableActions) {
+          if (action.type === "check") {
+            playBubbleClick();
+            takeAction(action);
+            return;
+          } else if (action.type === "call") {
+            playBubbleClick();
+            takeAction(action);
+            return;
+          }
+        }
+    }
+    if (appAction === "f_pressed") {
+      setAppAction(null);
+      if (turnIndex === seatIndex)
+        for (const action of availableActions) {
+          if (action.type === "fold") {
+            playBubbleClick();
+            takeAction(action);
+            return;
+          }
+        }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    appAction,
+    turnIndex,
+    setAppAction,
+    availableActions,
+    bigblindSize,
+    isPlaying,
+    playBubbleClick,
+    players,
+    seatIndex,
+    setShowWorkPanel,
   ]);
 
   const value = {

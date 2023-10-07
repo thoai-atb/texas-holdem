@@ -50,8 +50,8 @@ const GOOD_INFO = [
 ];
 
 export function WorkPanel({ hidden, setHidden }) {
-  const { socket } = useContext(AppContext);
-  const { playMiscSound } = useSoundContext();
+  const { socket, appAction, setAppAction } = useContext(AppContext);
+  const { playMiscSound, playBubbleClick } = useSoundContext();
   const [progress, setProgress] = useState(0);
   const [buttonActive, setButtonActive] = useState(true);
   const [lastDifference, setLastDifference] = useState(0); // this is for the info panel
@@ -85,9 +85,24 @@ export function WorkPanel({ hidden, setHidden }) {
     setProgress(0);
     setFinished(false);
     setHidden(true);
-    playMiscSound("old-button");
-    socket.emit("player_action", { type: "work" });
+    playBubbleClick();
+    socket.emit("player_action", { type: "finish-work" });
   }
+
+  useEffect(() => {
+    if (appAction === "escape_pressed") {
+      setHidden(true);
+      setAppAction(null);
+    }
+  }, [appAction, setHidden, setAppAction]);
+
+  useEffect(() => {
+    if (!hidden) {
+      socket.emit("player_action", { type: "begin-work" });
+    } else if (!finished) {
+      socket.emit("player_action", { type: "leave-work" });
+    }
+  }, [hidden, finished, socket]);
 
   useEffect(() => {
     if (progress >= MAX_SCORE && !finished) {
@@ -101,7 +116,7 @@ export function WorkPanel({ hidden, setHidden }) {
   return (
     <>
       <div
-        className="absolute w-full h-full bg-black opacity-25 pointer-events-auto anima"
+        className="absolute w-full h-full bg-black opacity-25 pointer-events-auto"
         onClick={() => setHidden(true)}
       ></div>
       <div
