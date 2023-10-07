@@ -5,48 +5,97 @@ import { AppContext } from "../../App";
 
 const MAX_SCORE = 10;
 const NORMAL_INFO = [
-  "good",
-  "life is money",
-  "you gotta do what you gotta do",
-  "no money no life",
-  "take it easy",
-  "do you job",
-  "almost there",
-  "get your money",
-  "sugar is sweet",
-  "just do it",
-  "hit the button",
-  "don't rush",
-  "money is money",
-  "good morning mister",
-  "good work",
-  "keep going",
-  "make it worth",
+  "Good",
+  "Life is money",
+  "You gotta do what you gotta do",
+  "No money, no life",
+  "Take it easy",
+  "Do your job",
+  "Almost there",
+  "Get your money",
+  "Sugar is sweet",
+  "Just do it",
+  "Hit the button",
+  "Don't rush",
+  "Money is money",
+  "Good morning, mister",
+  "Good work",
+  "Keep going",
+  "Make it worth",
+  "Work hard, play hard",
+  "Success takes effort and dedication",
+  "Keep your eye on the prize",
+  "Hustle until your dreams become reality",
+  "No shortcuts on the road to success",
+  "Stay focused and get the job done",
+  "Every task is a step toward your goals",
+  "Achievement begins with action",
+  "Determination leads to triumph",
+  "Stay committed to your journey",
+  "Rise and grind, every day",
+  "Strive for excellence in everything.",
+  "Put your heart and soul into your work",
+  "Small steps lead to big results",
+  "Make each day count in your career",
+  "Effort is the currency of achievement",
+  "Embrace challenges as opportunities"
 ];
 const BAD_INFO = [
-  "don't gamble kid!",
-  "sorry kid!",
-  "wasting my time!",
-  "what cha doing man?",
-  "hey watch out!",
-  "what's wrong?",
-  "hold on mister",
-  "better becareful!",
-  "oh no!",
-  "look out!",
-  "you were paid to do this!",
-  "bad weather young man!",
+  "Don't gamble, kid!",
+  "Sorry, kid!",
+  "Wasting my time!",
+  "What are you doing, man?",
+  "Hey, watch out!",
+  "What's wrong?",
+  "Hold on, mister.",
+  "Better be careful!",
+  "Oh no!",
+  "Look out!",
+  "You were paid to do this!",
+  "Bad weather, young man!",
+  "Don't mess this up!",
+  "You really dropped the ball, didn't you?",
+  "This is a disaster!",
+  "Unacceptable!",
+  "You're in big trouble now!",
+  "What a disappointment!",
+  "I expected better from you!",
+  "You're on thin ice!",
+  "You're a liability!",
+  "You let everyone down!",
+  "This is a trainwreck!",
+  "You're a total failure!",
+  "I can't believe your incompetence!",
+  "You're a real disappointment!",
+  "You're a disgrace!",
+  "This is a nightmare!"
 ];
 const GOOD_INFO = [
-  "good job kid!",
-  "congratulations!",
-  "give ya some bonus!",
-  "hey, here's some boost!",
-  "good, take my taco here!",
-  "that's amazing!",
-  "nice job!",
-  "you're promoted!",
-  "well done!",
+  "Good job, kid!",
+  "Congratulations!",
+  "Give you some bonus!",
+  "Hey, here's some boost!",
+  "Good, take my taco here!",
+  "That's amazing!",
+  "Nice job!",
+  "You're promoted!",
+  "Well done!",
+  "Outstanding performance!",
+  "You're a rockstar!",
+  "Impressive work!",
+  "Exceptional effort!",
+  "You're a shining star!",
+  "Well done, superstar!",
+  "You nailed it!",
+  "You're a top-notch performer!",
+  "You're a true asset to the team!",
+  "You're on fire!",
+  "Keep up the great work!",
+  "You're a true professional!",
+  "You make it look easy!",
+  "You're a success story!",
+  "You're the best of the best!",
+  "Your dedication is inspiring!"
 ];
 
 export function WorkPanel({ hidden, setHidden }) {
@@ -58,7 +107,7 @@ export function WorkPanel({ hidden, setHidden }) {
   const [finished, setFinished] = useState(false);
 
   function getDiff() {
-    const pool = [1, 1, 1, 1, 1, 1, 1, 1, 1, -2, -2, -2, 3];
+    const pool = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -2, -2, -2, -2, -2, 3, 3];
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
@@ -69,7 +118,7 @@ export function WorkPanel({ hidden, setHidden }) {
     setProgress((progress) => Math.max(progress + diff, 0));
     var timeout = 1000;
     if (diff < 1) {
-      timeout = 2000;
+      timeout = 1000;
       playMiscSound("ting");
     } else if (diff > 1) {
       timeout = 1000;

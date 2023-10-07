@@ -49,6 +49,7 @@ const game = createGame(
   (onInfo = broadcastInfo),
   (onSoundEffect = playGameSoundFx),
   (onPlayerKicked = playerKicked),
+  (onChat = chat),
   (gameConfig = config.Game)
 );
 
@@ -60,6 +61,17 @@ function broadcast() {
 function broadcastInfo(desc) {
   io.sockets.emit("chat_message", {
     desc, // to store inside chat logs
+  });
+}
+
+function chat(name, message, seatIndex) {
+  const chat = `<${name}> ${message}`;
+  if (chatLogging) console.log(chat);
+  io.sockets.emit("chat_message", {
+    id: randomId(),
+    desc: chat,
+    content: message,
+    senderID: seatIndex,
   });
 }
 
@@ -192,7 +204,8 @@ io.on("connection", (socket) => {
       case "finish-work":
         game.setWorking(seatIndex, false);
         game.addMoney(name, 1000);
-        const info = `${name} worked and earned $1000`;
+        var timesWorked = game.earnTimesWorked(seatIndex);
+        const info = `${name} worked hard and earned $1000 - work count: ${timesWorked}`;
         broadcastInfo(info);
         console.log(info);
         broadcast();
@@ -239,6 +252,7 @@ const playerCommands = {
   ClearBrokes: "clear_brokes",
   Kick: "kick",
   SetBlind: "set_blind",
+  ToggleAutoFillBots: "auto_fill_bots",
 };
 
 // COMMANDS - DEVELOPERS
@@ -249,10 +263,10 @@ const devCommands = {
   Players: "players",
   Seats: "seats",
   Start: "start",
-  ToggleChatLogs: "toggle_chat_log",
-  ToggleBotSpeed: "toggle_bot_speed",
+  ToggleChatLogs: "chat_log",
+  ToggleBotSpeed: "bot_speed",
   ToggleDebug: "debug",
-  ToggleLimit: "toggle_limit",
+  ToggleLimit: "limit",
 };
 
 // Commands execution - returns a string to be displayed on player's chat if exists
@@ -315,14 +329,18 @@ const executeCommand = (command, invoker = "Server") => {
       return "Player commands: " + Object.values(playerCommands).join(", ");
     case playerCommands.FillBots:
       informCommand = true;
-      for (let i = 0; i < 9; i++) {
-        if (playerData[i] === null) game.addBot(generateBotName());
-      }
+      game.fillBots();
       broadcast();
       break;
     case playerCommands.AddBot:
       informCommand = true;
       game.addBot(generateBotName());
+      broadcast();
+      break;
+    case playerCommands.ToggleAutoFillBots:
+      informCommand = true;
+      game.state.endRoundAutoFillBots = !game.state.endRoundAutoFillBots;
+      informResponse = `Auto fill bots is set to ${game.state.endRoundAutoFillBots}`;
       broadcast();
       break;
     case playerCommands.ClearBots:

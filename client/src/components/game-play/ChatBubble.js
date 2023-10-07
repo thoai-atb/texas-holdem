@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useGame } from "../../contexts/Game";
 
 function timeToReadMessage(message) {
-  return Math.max(Math.ceil(message.length / 5) * 1000, 2000);
+  return Math.min(Math.max(Math.ceil(message.length / 5) * 1000, 2000), 8000);
 }
 
 export function ChatBubble({ offset, seatIndex }) {

@@ -1,4 +1,5 @@
 const names = require("../assets/first-names.json");
+const greetings = require("../assets/greetings.json");
 
 function generateBotNameDeprecated() {
   var name = "Bot ";
@@ -19,6 +20,14 @@ function generateBotName() {
   return name;
 }
 
+function getRandomGreetings() {
+  var message = "";
+  var random = Math.floor(Math.random() * greetings.length);
+  message += greetings[random];
+  return message;
+}
+
 module.exports = {
   generateBotName,
+  getRandomGreetings,
 };

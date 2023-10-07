@@ -1,6 +1,7 @@
 const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
+const { generateBotName, getRandomGreetings } = require("./utils");
 const createBot = require("./bot");
 const robohashAvatars = require("robohash-avatars");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
@@ -13,6 +14,7 @@ function createGame(
   onInfo,
   onSoundEffect,
   onPlayerKicked,
+  onChat,
   gameConfig
 ) {
   /*****************************************************************************
@@ -56,11 +58,13 @@ function createGame(
     botSpeed: 1000, // how long should bots think?
     limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
+    endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
+    botsDefeated: 0,
   };
 
   const playersLeftTheTable = {
     /*
-      "John": 200, -> money when player left the table
+      "John": { stack: 200, timesWorked: 1 }
     */
   };
   /* =======================================
@@ -85,7 +89,10 @@ function createGame(
       width: 400,
     });
     if (state.players[seatIndex]) return false;
-    var stack = name in playersLeftTheTable ? playersLeftTheTable[name] : 1000;
+    var stack =
+      name in playersLeftTheTable ? playersLeftTheTable[name].stack : 1000;
+    var timesWorked =
+      name in playersLeftTheTable ? playersLeftTheTable[name].timesWorked : 0;
     state.players[seatIndex] = {
       seatIndex,
       name,
@@ -93,6 +100,7 @@ function createGame(
       stack: stack,
       cards: [],
       working: false,
+      timesWorked: timesWorked,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -106,7 +114,17 @@ function createGame(
     const seatIndex = state.players.findIndex((player) => !player);
     if (seatIndex === -1) return false;
     setBot(seatIndex, name);
+    setTimeout(
+      () => onChat(name, getRandomGreetings(), seatIndex),
+      Math.random() * 2000 + 1000
+    );
     return true;
+  };
+
+  const fillBots = () => {
+    for (let i = 0; i < 9; i++) {
+      if (state.players[i] === null) addBot(generateBotName());
+    }
   };
 
   const setBot = (seatIndex, name) => {
@@ -157,7 +175,10 @@ function createGame(
     }
     if (!state.players[seatIndex].isBot) onPlayerKicked(seatIndex);
     var player = state.players[seatIndex];
-    playersLeftTheTable[player.name] = player.stack;
+    playersLeftTheTable[player.name] = {
+      stack: player.stack,
+      timesWorked: player.timesWorked,
+    };
     state.players[seatIndex] = null;
     if (!state.playing)
       state.players.forEach((player) => {
@@ -176,8 +197,12 @@ function createGame(
       (player) => player && player.isBot && player.stack < state.bigblindSize
     );
     ids.forEach((id) => {
+      state.botsDefeated += 1;
       removePlayer(id.seatIndex);
     });
+    if (ids.length > 0) {
+      onInfo("Bots defeated: " + state.botsDefeated);
+    }
   };
 
   const removeBrokePlayers = () => {
@@ -217,6 +242,11 @@ function createGame(
     if (seatIndex === -1) return false;
     state.players[seatIndex].stack += amount;
     return true;
+  };
+
+  const earnTimesWorked = (seatIndex) => {
+    state.players[seatIndex].timesWorked += 1;
+    return state.players[seatIndex].timesWorked;
   };
 
   const setWorking = (seatIndex, working) => {
@@ -643,6 +673,9 @@ function createGame(
         player.folded = false;
       }
     });
+    if (state.endRoundAutoFillBots) {
+      fillBots();
+    }
     removeBrokeBots();
     updateRankings();
     nextButton();
@@ -709,6 +742,7 @@ function createGame(
     addPlayer,
     setBot,
     addBot,
+    fillBots,
     clearBots,
     removePlayerByName,
     removePlayer,
@@ -717,6 +751,7 @@ function createGame(
     fillMoney,
     setMoney,
     addMoney,
+    earnTimesWorked,
     setWorking,
     nextTurn,
     nextButton,

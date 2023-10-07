@@ -33,8 +33,8 @@ export function ActionBar() {
         <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
           - YOU ARE AFK{" "}
           {autoCheckCall
-            ? "CHECK/CALL (press C to turn off)"
-            : "CHECK/FOLD (press F to turn off)"}{" "}
+            ? "CHECK/CALL"
+            : "CHECK/FOLD"}{" "}
           -
         </div>
       </div>
