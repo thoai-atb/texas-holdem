@@ -21,7 +21,7 @@ export function HandStatistics({ hidden, setHidden }) {
       >
         Close [R]
       </div>
-      {notEnoughInfo && "Hand ranks calculator"}
+      {notEnoughInfo && statistics.every((s) => !s) && "Hand ranks calculator"}
       <SortedRanks statistics={statistics} />
     </div>
   );

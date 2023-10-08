@@ -88,7 +88,7 @@ function kickSocketPlayerEvent(seatIndex) {
 }
 
 function newRoundEvent() {
-  io.sockets.emit("sound_effect", "chipsPlaying");
+  io.sockets.emit("sound_effect", "chipsCollect");
 }
 
 function playGameSoundFx(sound) {
@@ -114,15 +114,6 @@ function playGameSoundFx(sound) {
     io.sockets.emit("sound_effect", "flip");
   }
 }
-
-// Zesta's idea to have chips playing sound effect
-setRandomInterval(
-  () => {
-    io.sockets.emit("sound_effect", "chipsPlaying");
-  },
-  1000,
-  config.Server.CHIPS_SOUND_EFFECT_RANDOM_INTERVAL
-);
 
 // On connection, assign callbacks to socket to handle events
 io.on("connection", (socket) => {

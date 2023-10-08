@@ -7,4 +7,14 @@ function setRandomInterval(intervalFunction, minDelay, maxDelay) {
   outerFunction()
 }
 
+// Zesta's idea to have chips playing sound effect
+// if (config.Server.CHIPS_SOUND_EFFECT_RANDOM_INTERVAL > 0)
+//   setRandomInterval(
+//     () => {
+//       io.sockets.emit("sound_effect", "chipsCollect");
+//     },
+//     1000,
+//     config.Server.CHIPS_SOUND_EFFECT_RANDOM_INTERVAL
+//   );
+
 module.exports = { setRandomInterval };

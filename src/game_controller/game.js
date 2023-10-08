@@ -136,7 +136,7 @@ function createGame(
     setBot(seatIndex, name);
     setTimeout(
       () => onChat(name, getRandomGreetings(), seatIndex),
-      Math.random() * 2000 + 1000
+      Math.random() * 4000 + 1000
     );
     return true;
   };

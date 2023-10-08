@@ -14,7 +14,7 @@ import cashRegisterSound from "../assets/sounds/cash_register.wav";
 import bunnSound from "../assets/sounds/bunn.wav";
 import tingSound from "../assets/sounds/ting.wav";
 import oldButtonSound from "../assets/sounds/old_button.wav";
-import chipPlayingSound from "../assets/sounds/chip_playing.wav";
+import chipsCollectSound from "../assets/sounds/chips_collect.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
@@ -74,7 +74,7 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
-  const [playChipPlayingSound] = useSound(chipPlayingSound, {
+  const [playChipsCollectSound] = useSound(chipsCollectSound, {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
@@ -85,14 +85,14 @@ export const useSoundHandler = ({ socket, muted }) => {
       else if (soundName === "bunn") playBunnSound();
       else if (soundName === "ting") playTingSound();
       else if (soundName === "old-button") playOldButtonSound();
-      else if (soundName === "chip-playing") playChipPlayingSound();
+      else if (soundName === "chips-collect") playChipsCollectSound();
     },
     [
       playCashRegisterSound,
       playBunnSound,
       playTingSound,
       playOldButtonSound,
-      playChipPlayingSound,
+      playChipsCollectSound,
     ]
   );
 
@@ -106,7 +106,7 @@ export const useSoundHandler = ({ socket, muted }) => {
       if (sound === "winStrong") playWinA();
       if (sound === "winStronger") playWinB();
       if (sound === "flip") playFlip();
-      if (sound === "chipsPlaying") playMiscSound("chip-playing");
+      if (sound === "chipsCollect") playMiscSound("chips-collect");
     });
     return () => {
       socket.off("sound_effect");
