@@ -48,7 +48,7 @@ const game = createGame(
   (onUpdate = broadcast),
   (onInfo = broadcastInfo),
   (onSoundEffect = playGameSoundFx),
-  (onPlayerKicked = playerKicked),
+  (onPlayerKicked = kickSocketPlayer),
   (onChat = chat),
   (gameConfig = config.Game)
 );
@@ -99,31 +99,44 @@ function playGameSoundFx(sound) {
   }
 }
 
-function playerKicked(seatIndex) {
+function kickSocketPlayer(seatIndex) {
   const socket = connections.find(
     (socket) => socket.id === playerData[seatIndex]?.socketId
   );
   if (socket) {
-    socket.disconnect();
+    socket.emit("disconnect_reason", "You were kicked");
     console.log(`Player in seat ${seatIndex} was kicked.`);
   }
 }
 
 // On connection, assign callbacks to socket to handle events
 io.on("connection", (socket) => {
-  // CONNECTION
+  // NAME
   const name = socket.handshake.query.name;
+
+  // SELECT SEAT
+  var seatIndex = game.randomAvailableSeat();
+  if (seatIndex === -1) {
+    const info = `${name} wanted to join the table but table was full`;
+    broadcastInfo(info);
+    console.log(info);
+    socket.emit("disconnect_reason", "Table was full");
+    return;
+  }
+  if (game.nameExisted(name)) {
+    socket.emit(
+      "disconnect_reason",
+      `Name "${name}" was taken by players in the table`
+    );
+    return;
+  }
+
+  // CONNECTION
   const info = `${name} joined the table`;
   broadcastInfo(info);
   console.log(info);
   connections.push(socket);
 
-  // SELECT SEAT
-  var seatIndex = game.randomAvailableSeat();
-  if (seatIndex === -1) {
-    game.clearBots();
-    seatIndex = game.randomAvailableSeat();
-  }
   playerData[seatIndex] = {
     seatIndex,
     name,
@@ -204,10 +217,13 @@ io.on("connection", (socket) => {
       case "finish-work":
         game.setWorking(seatIndex, false);
         game.addMoney(name, 1000);
-        var timesWorked = game.earnTimesWorked(seatIndex);
-        const info = `${name} worked hard and earned $1000 - work count: ${timesWorked}`;
+        game.earnTimesWorked(seatIndex);
+        const info = `${name} worked hard and earned $1000`;
+        const response = `${name}: ${action.response}`
         broadcastInfo(info);
+        broadcastInfo(response);
         console.log(info);
+        console.log(response);
         broadcast();
         break;
       default:
@@ -267,6 +283,7 @@ const devCommands = {
   ToggleBotSpeed: "bot_speed",
   ToggleDebug: "debug",
   ToggleLimit: "limit",
+  SetMoney: "set_money",
 };
 
 // Commands execution - returns a string to be displayed on player's chat if exists
@@ -323,6 +340,15 @@ const executeCommand = (command, invoker = "Server") => {
       informResponse = `Limit game is set to ${game.state.limitGame}`;
       broadcast();
       break;
+    case devCommands.SetMoney:
+      if (!arg) {
+        game.setMoney(invoker, 0)
+      } else {
+        game.setMoney(invoker, parseInt(arg))
+      }
+      informCommand = true;
+      broadcast();
+      break;
 
     // === Execute player command === //
     case playerCommands.Help:
@@ -376,6 +402,7 @@ const executeCommand = (command, invoker = "Server") => {
       }
       informCommand = true;
       broadcast();
+      break;
     case playerCommands.SetBlind:
       informCommand = true;
       if (!arg) game.setBlinds(10);

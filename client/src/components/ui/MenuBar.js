@@ -4,7 +4,8 @@ import {
   AiFillWechat,
   AiOutlineInfoCircle,
   AiOutlineInsertRowBelow,
-  AiOutlineLogout
+  AiOutlineLogout,
+  AiOutlineAlignLeft,
 } from "react-icons/ai";
 import { AppContext } from "../../App";
 import { useSoundContext } from "../../contexts/Sound";
@@ -13,13 +14,14 @@ export default function MenuBar({
   toggleChat,
   toggleInfo,
   toggleControlPanel,
+  toggleStatistics,
 }) {
   const { playBubbleClick } = useSoundContext();
   const { setShowSettings, setShowLogout } = useContext(AppContext);
-  function handleAction(actionFun) {
+  function handleAction(actionFunc) {
     return () => {
       playBubbleClick();
-      actionFun();
+      actionFunc();
     };
   }
   return (
@@ -38,6 +40,13 @@ export default function MenuBar({
         onClick={handleAction(toggleInfo)}
       >
         <AiOutlineInfoCircle />
+      </div>
+      <div
+        className="p-4 w-fit hover:text-white cursor-pointer transition duration-100"
+        title="Statistics"
+        onClick={handleAction(toggleStatistics)}
+      >
+        <AiOutlineAlignLeft />
       </div>
       <div
         className="p-4 w-fit hover:text-white cursor-pointer transition duration-100"

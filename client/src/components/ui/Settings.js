@@ -8,8 +8,8 @@ export function Settings() {
   const {
     showSettings,
     setShowSettings,
-    showStatistics,
-    setShowStatistics,
+    showHandStatistics,
+    setShowHandStatistics,
     setMuted,
     muted,
     autoCheckCall,
@@ -44,8 +44,8 @@ export function Settings() {
         <ToggleField
           label="Hand ranks calculator"
           shortcut="R"
-          active={showStatistics}
-          onToggle={handleAction(() => setShowStatistics((s) => !s))}
+          active={showHandStatistics}
+          onToggle={handleAction(() => setShowHandStatistics((s) => !s))}
         />
         <ToggleField
           label="AFK mode (check/call)"
@@ -92,20 +92,6 @@ function ToggleField({ label, shortcut, active, onToggle }) {
       ) : (
         <span className="text-gray-500 group-hover:text-white">Off</span>
       )}
-    </div>
-  );
-}
-
-// eslint-disable-next-line no-unused-vars
-function ShortcutField({ label, shortcut }) {
-  return (
-    <div className="w-full flex my-1 justify-between items-center select-none group">
-      <span>
-        {label}:{" "}
-        <span className="text-white bg-gray-500 px-4 rounded ml-4 pb-1">
-          {shortcut}
-        </span>
-      </span>
     </div>
   );
 }

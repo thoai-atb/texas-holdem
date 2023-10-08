@@ -33,6 +33,8 @@ export function GameProvider({ children }) {
   const [debugMode, setDebugMode] = React.useState(false);
   const [completeActionSeat, setCompleteActionSeat] = React.useState(-1);
   const [allPlayersAllIn, setAllPlayersAllIn] = React.useState(false);
+  const [botsDefeated, setBotsDefeated] = React.useState(false);
+  const [gamesPlayed, setGamesPlayed] = React.useState(0);
 
   const MONEY_EFFECT_DURATION = 0.5;
 
@@ -57,6 +59,8 @@ export function GameProvider({ children }) {
       setDebugMode(gameState.debugMode);
       setCompleteActionSeat(gameState.completeActionSeat);
       setAllPlayersAllIn(gameState.allPlayersAllIn);
+      setBotsDefeated(gameState.botsDefeated);
+      setGamesPlayed(gameState.gamesPlayed);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
@@ -198,6 +202,8 @@ export function GameProvider({ children }) {
     debugMode,
     completeActionSeat,
     allPlayersAllIn,
+    botsDefeated,
+    gamesPlayed,
     // Game state (end)
 
     takeAction,

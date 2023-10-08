@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGame } from "../../contexts/Game";
 import { calculateStatistics } from "../../utilities/statistics";
 
-export function Statistics({ hidden, setHidden }) {
+export function HandStatistics({ hidden, setHidden }) {
   const { seatIndex, board, players } = useGame();
   const [statistics, setStatistics] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const cards = players[seatIndex]?.cards;

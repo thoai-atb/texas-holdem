@@ -11,12 +11,13 @@ import { useSoundHandler } from "./hooks/useSoundHandler";
 import { SoundContext } from "./contexts/Sound";
 import { Info } from "./components/ui/Info";
 import { ControlPanel } from "./components/ui/ControlPanel";
-import { Statistics } from "./components/ui/Statistics";
+import { HandStatistics } from "./components/ui/HandStatistics";
 import { Settings } from "./components/ui/Settings";
 import { Logout } from "./components/ui/Logout";
 import { FirstPlayerDialog } from "./components/ui/FirstPlayerDialog";
 import { DebugPanel } from "./components/ui/DebugPanel";
 import { WorkPanel } from "./components/ui/WorkPanel";
+import { Statistics } from "./components/ui/StatisticsPanel";
 
 export const AppContext = createContext({});
 
@@ -27,9 +28,10 @@ function App() {
   const [enteringCommand, setEnteringCommand] = useState(false); // Enter chat directly when pressed "/"
   const [chatHint, setChatHint] = useState("- Press T to chat -");
   const [muted, setMuted] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showControlPanel, setShowControlPanel] = useState(false);
-  const [showStatistics, setShowStatistics] = useState(true);
+  const [showHandStatistics, setShowHandStatistics] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [autoCheckCall, setAutoCheckCall] = useState(false);
   const [autoCheckFold, setAutoCheckFold] = useState(false);
@@ -62,12 +64,17 @@ function App() {
       setLoggedIn(true);
     });
     socket.on("connect_error", () => {
-      alert("Can't connect to server!");
+      alert("Could not connect to server!");
       onFail();
     });
     socket.on("disconnect", () => {
       alert("Disconnected from server!");
       setLoggedIn(false);
+    });
+    // custom event disconnect_reason - game play related (kicked, table was full)
+    socket.on("disconnect_reason", (disconnectReason) => {
+      alert("Server: " + disconnectReason);
+      socket.disconnect(); // disconnection comes from client
     });
     setSocket(socket);
   };
@@ -90,10 +97,13 @@ function App() {
       }
       if (e.key === "r" || e.key === "R") {
         playStickClick();
-        setShowStatistics((show) => !show);
+        setShowHandStatistics((show) => !show);
       }
       if (e.key === "f" || e.key === "F") {
         setAppAction("f_pressed");
+      }
+      if (e.key === "s" || e.key === "S") {
+        setAppAction("s_pressed");
       }
       if (e.key === " ") {
         setAppAction("space_pressed");
@@ -121,6 +131,15 @@ function App() {
     if (autoCheckFold) setAutoCheckCall(false);
   }, [autoCheckFold]);
 
+  useEffect(() => {
+    if (!chatHidden) {
+      setShowStatistics(false);
+      setShowControlPanel(false);
+      setShowInfo(false);
+      setShowSettings(false);
+    }
+  }, [chatHidden]);
+
   return (
     <AppContext.Provider
       value={{
@@ -130,7 +149,7 @@ function App() {
         muted,
         showInfo,
         showControlPanel,
-        showStatistics,
+        showHandStatistics,
         showSettings,
         autoCheckCall,
         autoCheckFold,
@@ -142,7 +161,7 @@ function App() {
         setAutoCheckFold,
         setMuted,
         setShowSettings,
-        setShowStatistics,
+        setShowHandStatistics,
         setShowLogout,
         setShowFirstPlayerDialog,
         setShowWorkPanel,
@@ -173,6 +192,7 @@ function App() {
                 <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
                   <MenuBar
                     toggleChat={() => setChatHidden((hid) => !hid)}
+                    toggleStatistics={() => setShowStatistics((hid) => !hid)}
                     toggleInfo={() => setShowInfo((show) => !show)}
                     toggleControlPanel={() =>
                       setShowControlPanel((show) => !show)
@@ -186,16 +206,9 @@ function App() {
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-                  {chatHint && (
-                    <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
-                      {chatHint}
-                    </div>
-                  )}
-                  <Chat
-                    hidden={chatHidden}
-                    setHidden={setChatHidden}
-                    enteringCommand={enteringCommand}
-                    setEnteringCommand={setEnteringCommand}
+                  <Statistics
+                    hidden={!showStatistics}
+                    setHidden={(hidden) => setShowStatistics(!hidden)}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
@@ -211,9 +224,22 @@ function App() {
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
-                  <Statistics
-                    hidden={!showStatistics}
-                    setHidden={(hidden) => setShowStatistics(!hidden)}
+                  <HandStatistics
+                    hidden={!showHandStatistics}
+                    setHidden={(hidden) => setShowHandStatistics(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  {chatHint && (
+                    <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
+                      {chatHint}
+                    </div>
+                  )}
+                  <Chat
+                    hidden={chatHidden}
+                    setHidden={setChatHidden}
+                    enteringCommand={enteringCommand}
+                    setEnteringCommand={setEnteringCommand}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">

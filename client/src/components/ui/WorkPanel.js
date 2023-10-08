@@ -2,101 +2,14 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSoundContext } from "../../contexts/Sound";
 import moneyPng from "../../assets/texture/one-thousand-dollars.png";
 import { AppContext } from "../../App";
+import {
+  GOOD_INFO,
+  NORMAL_INFO,
+  BAD_INFO,
+  RECEIVE_MONEY_RESPONSE,
+} from "./data/phrases";
 
 const MAX_SCORE = 10;
-const NORMAL_INFO = [
-  "Good",
-  "Life is money",
-  "You gotta do what you gotta do",
-  "No money, no life",
-  "Take it easy",
-  "Do your job",
-  "Almost there",
-  "Get your money",
-  "Sugar is sweet",
-  "Just do it",
-  "Hit the button",
-  "Don't rush",
-  "Money is money",
-  "Good morning, mister",
-  "Good work",
-  "Keep going",
-  "Make it worth",
-  "Work hard, play hard",
-  "Success takes effort and dedication",
-  "Keep your eye on the prize",
-  "Hustle until your dreams become reality",
-  "No shortcuts on the road to success",
-  "Stay focused and get the job done",
-  "Every task is a step toward your goals",
-  "Achievement begins with action",
-  "Determination leads to triumph",
-  "Stay committed to your journey",
-  "Rise and grind, every day",
-  "Strive for excellence in everything.",
-  "Put your heart and soul into your work",
-  "Small steps lead to big results",
-  "Make each day count in your career",
-  "Effort is the currency of achievement",
-  "Embrace challenges as opportunities"
-];
-const BAD_INFO = [
-  "Don't gamble, kid!",
-  "Sorry, kid!",
-  "Wasting my time!",
-  "What are you doing, man?",
-  "Hey, watch out!",
-  "What's wrong?",
-  "Hold on, mister.",
-  "Better be careful!",
-  "Oh no!",
-  "Look out!",
-  "You were paid to do this!",
-  "Bad weather, young man!",
-  "Don't mess this up!",
-  "You really dropped the ball, didn't you?",
-  "This is a disaster!",
-  "Unacceptable!",
-  "You're in big trouble now!",
-  "What a disappointment!",
-  "I expected better from you!",
-  "You're on thin ice!",
-  "You're a liability!",
-  "You let everyone down!",
-  "This is a trainwreck!",
-  "You're a total failure!",
-  "I can't believe your incompetence!",
-  "You're a real disappointment!",
-  "You're a disgrace!",
-  "This is a nightmare!"
-];
-const GOOD_INFO = [
-  "Good job, kid!",
-  "Congratulations!",
-  "Give you some bonus!",
-  "Hey, here's some boost!",
-  "Good, take my taco here!",
-  "That's amazing!",
-  "Nice job!",
-  "You're promoted!",
-  "Well done!",
-  "Outstanding performance!",
-  "You're a rockstar!",
-  "Impressive work!",
-  "Exceptional effort!",
-  "You're a shining star!",
-  "Well done, superstar!",
-  "You nailed it!",
-  "You're a top-notch performer!",
-  "You're a true asset to the team!",
-  "You're on fire!",
-  "Keep up the great work!",
-  "You're a true professional!",
-  "You make it look easy!",
-  "You're a success story!",
-  "You're the best of the best!",
-  "Your dedication is inspiring!"
-];
 
 export function WorkPanel({ hidden, setHidden }) {
   const { socket, appAction, setAppAction } = useContext(AppContext);
@@ -105,6 +18,7 @@ export function WorkPanel({ hidden, setHidden }) {
   const [buttonActive, setButtonActive] = useState(true);
   const [lastDifference, setLastDifference] = useState(0); // this is for the info panel
   const [finished, setFinished] = useState(false);
+  const [confirmResponse, setConfirmResponse] = useState(""); // when receive money
 
   function getDiff() {
     const pool = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -2, -2, -2, -2, -2, 3, 3];
@@ -135,7 +49,10 @@ export function WorkPanel({ hidden, setHidden }) {
     setFinished(false);
     setHidden(true);
     playBubbleClick();
-    socket.emit("player_action", { type: "finish-work" });
+    socket.emit("player_action", {
+      type: "finish-work",
+      response: confirmResponse,
+    });
   }
 
   useEffect(() => {
@@ -157,6 +74,11 @@ export function WorkPanel({ hidden, setHidden }) {
     if (progress >= MAX_SCORE && !finished) {
       setProgress(MAX_SCORE);
       setFinished(true);
+      const response =
+        RECEIVE_MONEY_RESPONSE[
+          Math.floor(Math.random() * RECEIVE_MONEY_RESPONSE.length)
+        ];
+      setConfirmResponse(response);
       playMiscSound("cash-register");
     }
   }, [progress, finished, playMiscSound]);
@@ -210,7 +132,7 @@ export function WorkPanel({ hidden, setHidden }) {
               onClick={() => exitWork()}
               className="text-2xl hover:text-cyan-500"
             >
-              Thanks! I need it to support my family!
+              {confirmResponse}
             </button>
           </>
         )}

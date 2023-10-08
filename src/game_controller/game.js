@@ -60,13 +60,15 @@ function createGame(
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
     botsDefeated: 0,
+    gamesPlayed: 0,
   };
 
   const playersLeftTheTable = {
     /*
-      "John": { stack: 200, timesWorked: 1 }
+      "John": { stack: 200, timesWorked: 1, timesWon: 1000, botsDefeated: 2 }
     */
   };
+
   /* =======================================
   |         ADD & REMOVE PLAYERS           |
   ======================================= */
@@ -80,6 +82,20 @@ function createGame(
     return availableSeats[Math.floor(Math.random() * availableSeats.length)];
   };
 
+  const nameExisted = (name) => {
+    for (const player of state.players) {
+      if (player && player.name === name) return true;
+    }
+    return false;
+  };
+
+  const checkIsBot = (name) => {
+    for (const player of state.players) {
+      if (player && player.isBot && player.name === name) return true;
+    }
+    return false;
+  };
+
   const addPlayer = (seatIndex, name) => {
     var avatarURL = robohashAvatars.generateAvatar({
       username: name,
@@ -89,10 +105,11 @@ function createGame(
       width: 400,
     });
     if (state.players[seatIndex]) return false;
-    var stack =
-      name in playersLeftTheTable ? playersLeftTheTable[name].stack : 1000;
-    var timesWorked =
-      name in playersLeftTheTable ? playersLeftTheTable[name].timesWorked : 0;
+    var saved = playersLeftTheTable;
+    var stack = name in saved ? saved[name].stack : 1000;
+    var timesWorked = name in saved ? saved[name].timesWorked : 0;
+    var timesWon = name in saved ? saved[name].timesWon : 0;
+    var botsDefeated = name in saved ? saved[name].botsDefeated : 0;
     state.players[seatIndex] = {
       seatIndex,
       name,
@@ -101,6 +118,8 @@ function createGame(
       cards: [],
       working: false,
       timesWorked: timesWorked,
+      timesWon: timesWon,
+      botsDefeated: botsDefeated,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -145,6 +164,8 @@ function createGame(
       ready: true,
       cards: [],
       working: false,
+      timesWon: 0,
+      botsDefeated: 0,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -165,7 +186,8 @@ function createGame(
       (player) => player && player.name === name
     );
     if (seatIndex === -1) return false;
-    removePlayer(seatIndex);
+    if (state.players[seatIndex].isBot) removePlayer(seatIndex);
+    else onPlayerKicked(seatIndex);
     return true;
   };
 
@@ -173,11 +195,13 @@ function createGame(
     if (state.turnIndex === seatIndex) {
       fold() || nextTurn();
     }
-    if (!state.players[seatIndex].isBot) onPlayerKicked(seatIndex);
+    if (!state.players[seatIndex]) return;
     var player = state.players[seatIndex];
     playersLeftTheTable[player.name] = {
       stack: player.stack,
       timesWorked: player.timesWorked,
+      timesWon: player.timesWon,
+      botsDefeated: player.botsDefeated,
     };
     state.players[seatIndex] = null;
     if (!state.playing)
@@ -197,12 +221,10 @@ function createGame(
       (player) => player && player.isBot && player.stack < state.bigblindSize
     );
     ids.forEach((id) => {
-      state.botsDefeated += 1;
+      onInfo(`${id.name} was defeated and left the table`);
       removePlayer(id.seatIndex);
     });
-    if (ids.length > 0) {
-      onInfo("Bots defeated: " + state.botsDefeated);
-    }
+    return ids.length; // number of bots defeated in round
   };
 
   const removeBrokePlayers = () => {
@@ -656,16 +678,23 @@ function createGame(
   };
 
   const postShowDown = () => {
+    // Reset variables
     state.showDown = false;
     state.allPlayersAllIn = false;
-    state.winners.forEach(
-      (winner) => (state.players[winner.index].stack += state.winAmount)
-    );
     state.pot = 0;
     state.playing = false;
     state.bigblindSize += state.bigblindIncrement;
-    state.winners = [];
     state.board = [];
+    state.gamesPlayed += 1;
+
+    // Update winners and players
+    const winnerIndexes = []; // to update stats
+    state.winners.forEach((winner) => {
+      state.players[winner.index].stack += state.winAmount;
+      state.players[winner.index].timesWon += 1;
+      winnerIndexes.push(winner.index);
+    });
+    state.winners = [];
     state.players.forEach((player) => {
       if (player) {
         player.ready = player.isBot;
@@ -673,10 +702,18 @@ function createGame(
         player.folded = false;
       }
     });
-    if (state.endRoundAutoFillBots) {
-      fillBots();
+
+    if (state.endRoundAutoFillBots) fillBots();
+    var botsDefeated = removeBrokeBots();
+    if (botsDefeated > 0) {
+      state.botsDefeated += botsDefeated;
+      for (let index of winnerIndexes) {
+        state.players[index].botsDefeated +=
+          botsDefeated / winnerIndexes.length;
+      }
     }
-    removeBrokeBots();
+
+    // Prepare for next round
     updateRankings();
     nextButton();
     checkToStart();
@@ -739,6 +776,8 @@ function createGame(
     bet,
     call,
     raise,
+    nameExisted,
+    checkIsBot,
     addPlayer,
     setBot,
     addBot,

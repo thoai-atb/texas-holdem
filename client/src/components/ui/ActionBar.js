@@ -54,7 +54,7 @@ export function ActionBar() {
         thisPlayer.stack < bigblindSize && (
           <WorkButton
             action={() => setShowWorkPanel(true)}
-            title="You're broke! Click here to work for money"
+            title="You're broke! Click here to work for money 💸"
             className=""
           />
         )}
@@ -358,7 +358,7 @@ const WorkButton = ({ action, title, className }) => {
       className={
         className +
         " border-2 border-cyan-500 text-cyan-500 p-4 bg-white bg-opacity-50" +
-        " rounded-sm m-8 text-xl text-center hover:bg-opacity-80"
+        " rounded-full m-8 text-xl text-center hover:bg-opacity-80"
       }
       onClick={() => {
         playBubbleClick();

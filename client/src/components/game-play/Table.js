@@ -15,7 +15,7 @@ export function Table() {
         maxHeight: "30rem",
         borderWidth: "0.5rem",
         backgroundImage: "radial-gradient(lime, green)",
-        boxShadow: "0rem 2rem rgba(0, 0, 0, 0.5)"
+        boxShadow: "0rem 2rem rgba(0, 0, 0, 0.5)",
       }}
     >
       <div
@@ -49,22 +49,7 @@ export function Table() {
       <DealerButton debugPosition={7}/>
       <DealerButton debugPosition={8}/> */}
       <Bets />
-      <Hand
-        style={{ bottom: "-10%", left: "50%", position: "absolute" }}
-        position={0}
-      />
-      <Hand
-        style={{ bottom: "0%", left: "25%", position: "absolute" }}
-        position={1}
-      />
-      <Hand
-        style={{ bottom: "20%", left: "5%", position: "absolute" }}
-        position={2}
-      />
-      <Hand
-        style={{ top: "20%", left: "5%", position: "absolute" }}
-        position={3}
-      />
+      {/* Hands should be in order: 4 5 3 6 2 7 1 8 0 - because hands on the bottom can't be displayed over by hands on top*/}
       <Hand
         style={{ top: "-2%", left: "25%", position: "absolute" }}
         position={4}
@@ -74,16 +59,32 @@ export function Table() {
         position={5}
       />
       <Hand
+        style={{ top: "20%", left: "5%", position: "absolute" }}
+        position={3}
+      />
+      <Hand
         style={{ top: "20%", right: "5%", position: "absolute" }}
         position={6}
+      />
+      <Hand
+        style={{ bottom: "20%", left: "5%", position: "absolute" }}
+        position={2}
       />
       <Hand
         style={{ bottom: "20%", right: "5%", position: "absolute" }}
         position={7}
       />
       <Hand
+        style={{ bottom: "0%", left: "25%", position: "absolute" }}
+        position={1}
+      />
+      <Hand
         style={{ bottom: "0%", left: "75%", position: "absolute" }}
         position={8}
+      />
+      <Hand
+        style={{ bottom: "-10%", left: "50%", position: "absolute" }}
+        position={0}
       />
     </div>
   );
