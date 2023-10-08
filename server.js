@@ -6,6 +6,7 @@ const rl = require("readline");
 const { generateBotName } = require("./src/game_controller/utils");
 const path = require("path");
 const { randomId } = require("./src/utils/random_id");
+const { setRandomInterval } = require("./src/utils/random_interval");
 const fs = require("fs");
 const ini = require("ini");
 
@@ -48,8 +49,9 @@ const game = createGame(
   (onUpdate = broadcast),
   (onInfo = broadcastInfo),
   (onSoundEffect = playGameSoundFx),
-  (onPlayerKicked = kickSocketPlayer),
-  (onChat = chat),
+  (onPlayerKicked = kickSocketPlayerEvent),
+  (onChat = chatEvent),
+  (onNewRound = newRoundEvent),
   (gameConfig = config.Game)
 );
 
@@ -64,7 +66,7 @@ function broadcastInfo(desc) {
   });
 }
 
-function chat(name, message, seatIndex) {
+function chatEvent(name, message, seatIndex) {
   const chat = `<${name}> ${message}`;
   if (chatLogging) console.log(chat);
   io.sockets.emit("chat_message", {
@@ -73,6 +75,20 @@ function chat(name, message, seatIndex) {
     content: message,
     senderID: seatIndex,
   });
+}
+
+function kickSocketPlayerEvent(seatIndex) {
+  const socket = connections.find(
+    (socket) => socket.id === playerData[seatIndex]?.socketId
+  );
+  if (socket) {
+    socket.emit("disconnect_reason", "You were kicked");
+    console.log(`Player in seat ${seatIndex} was kicked.`);
+  }
+}
+
+function newRoundEvent() {
+  io.sockets.emit("sound_effect", "chipsPlaying");
 }
 
 function playGameSoundFx(sound) {
@@ -99,15 +115,14 @@ function playGameSoundFx(sound) {
   }
 }
 
-function kickSocketPlayer(seatIndex) {
-  const socket = connections.find(
-    (socket) => socket.id === playerData[seatIndex]?.socketId
-  );
-  if (socket) {
-    socket.emit("disconnect_reason", "You were kicked");
-    console.log(`Player in seat ${seatIndex} was kicked.`);
-  }
-}
+// Zesta's idea to have chips playing sound effect
+setRandomInterval(
+  () => {
+    io.sockets.emit("sound_effect", "chipsPlaying");
+  },
+  1000,
+  config.Server.CHIPS_SOUND_EFFECT_RANDOM_INTERVAL
+);
 
 // On connection, assign callbacks to socket to handle events
 io.on("connection", (socket) => {
@@ -219,7 +234,7 @@ io.on("connection", (socket) => {
         game.addMoney(name, 1000);
         game.earnTimesWorked(seatIndex);
         const info = `${name} worked hard and earned $1000`;
-        const response = `${name}: ${action.response}`
+        const response = `${name}: ${action.response}`;
         broadcastInfo(info);
         broadcastInfo(response);
         console.log(info);
@@ -342,9 +357,9 @@ const executeCommand = (command, invoker = "Server") => {
       break;
     case devCommands.SetMoney:
       if (!arg) {
-        game.setMoney(invoker, 0)
+        game.setMoney(invoker, 0);
       } else {
-        game.setMoney(invoker, parseInt(arg))
+        game.setMoney(invoker, parseInt(arg));
       }
       informCommand = true;
       broadcast();

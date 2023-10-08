@@ -15,6 +15,7 @@ function createGame(
   onSoundEffect,
   onPlayerKicked,
   onChat,
+  onNewRound,
   gameConfig
 ) {
   /*****************************************************************************
@@ -718,6 +719,7 @@ function createGame(
     nextButton();
     checkToStart();
     onUpdate();
+    onNewRound();
   };
 
   const deal = (seatIndex) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useSound from "use-sound";
 import chipsSound from "../assets/sounds/chips.wav";
 import tapSound from "../assets/sounds/tap.wav";
@@ -14,6 +14,7 @@ import cashRegisterSound from "../assets/sounds/cash_register.wav";
 import bunnSound from "../assets/sounds/bunn.wav";
 import tingSound from "../assets/sounds/ting.wav";
 import oldButtonSound from "../assets/sounds/old_button.wav";
+import chipPlayingSound from "../assets/sounds/chip_playing.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
@@ -73,13 +74,27 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
+  const [playChipPlayingSound] = useSound(chipPlayingSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
 
-  function playMiscSound(soundName) {
-    if (soundName === "cash-register") playCashRegisterSound();
-    else if (soundName === "bunn") playBunnSound();
-    else if (soundName === "ting") playTingSound();
-    else if (soundName === "old-button") playOldButtonSound();
-  }
+  const playMiscSound = useCallback(
+    (soundName) => {
+      if (soundName === "cash-register") playCashRegisterSound();
+      else if (soundName === "bunn") playBunnSound();
+      else if (soundName === "ting") playTingSound();
+      else if (soundName === "old-button") playOldButtonSound();
+      else if (soundName === "chip-playing") playChipPlayingSound();
+    },
+    [
+      playCashRegisterSound,
+      playBunnSound,
+      playTingSound,
+      playOldButtonSound,
+      playChipPlayingSound,
+    ]
+  );
 
   useEffect(() => {
     if (!socket || muted) return;
@@ -91,6 +106,7 @@ export const useSoundHandler = ({ socket, muted }) => {
       if (sound === "winStrong") playWinA();
       if (sound === "winStronger") playWinB();
       if (sound === "flip") playFlip();
+      if (sound === "chipsPlaying") playMiscSound("chip-playing");
     });
     return () => {
       socket.off("sound_effect");
@@ -105,6 +121,7 @@ export const useSoundHandler = ({ socket, muted }) => {
     muted,
     playWinA,
     playWinB,
+    playMiscSound,
   ]);
 
   return {
