@@ -1,13 +1,23 @@
 const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
-const { generateBotName, getRandomGreetings } = require("./utils");
+const { generateBotName, getRandomPhrase } = require("./utils");
 const createBot = require("./bot");
 const robohashAvatars = require("robohash-avatars");
+const {
+  BOT_BET_CHAT,
+  BOT_CHECK_CHAT,
+  BOT_FOLD_CHAT,
+  BOT_GREETING_CHAT,
+  BOT_RAISE_CHAT,
+  BOT_WIN_CHAT,
+} = require("./config");
 // const { evaluate, findWinner } = require("../texas_holdem/evaluator");
 
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
+const WIN_CHAT_DELAY = SHOWDOWN_TIME + 1000;
+const RIVER_ROUND = 3;
 
 function createGame(
   onUpdate,
@@ -62,6 +72,7 @@ function createGame(
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
     botsDefeated: 0,
     gamesPlayed: 0,
+    lastChatTimeStamp: 0,
   };
 
   const playersLeftTheTable = {
@@ -134,10 +145,7 @@ function createGame(
     const seatIndex = state.players.findIndex((player) => !player);
     if (seatIndex === -1) return false;
     setBot(seatIndex, name);
-    setTimeout(
-      () => onChat(name, getRandomGreetings(), seatIndex),
-      Math.random() * 4000 + 1000
-    );
+    ifBotThenConsiderChat(seatIndex, ...BOT_GREETING_CHAT);
     return true;
   };
 
@@ -333,14 +341,14 @@ function createGame(
     if (!state.availableActions.find((action) => action.type === "fold"))
       return false;
     state.players[state.turnIndex].folded = true;
+    ifBotThenConsiderChat(state.turnIndex, ...BOT_FOLD_CHAT);
+    onSoundEffect("fold");
     if (state.completeActionSeat === state.turnIndex) {
       // OPEN ACTION FOLDED
       nextTurn(true);
-      onSoundEffect("fold");
       return true;
     }
     nextTurn();
-    onSoundEffect("fold");
     return true;
   };
 
@@ -348,6 +356,8 @@ function createGame(
     if (!state.availableActions.find((action) => action.type === "check"))
       return false;
     state.betTypes[state.turnIndex] = "check";
+    if (state.round !== RIVER_ROUND)
+      ifBotThenConsiderChat(state.turnIndex, ...BOT_CHECK_CHAT);
     nextTurn();
     onSoundEffect("check");
     return true;
@@ -381,6 +391,7 @@ function createGame(
     state.minRaiseSize = betSize;
     state.betTypes[state.turnIndex] = "bet";
     state.completeActionSeat = state.turnIndex;
+    ifBotThenConsiderChat(state.turnIndex, ...BOT_BET_CHAT);
     nextTurn();
     onSoundEffect("bet");
     return true;
@@ -401,6 +412,7 @@ function createGame(
     state.currentBetSize += raiseSize;
     state.minRaiseSize = raiseSize;
     state.completeActionSeat = state.turnIndex;
+    ifBotThenConsiderChat(state.turnIndex, ...BOT_RAISE_CHAT);
     nextTurn();
     onSoundEffect("raise");
     return true;
@@ -470,6 +482,29 @@ function createGame(
       state.players[index].folded
     );
     return index;
+  };
+
+  const ifBotThenConsiderChat = (
+    seatIndex,
+    phraseType,
+    probability = 1,
+    delayTime = 1000,
+    randomDuration = 0,
+    onlyChatWhenSilenceFor = 10000
+  ) => {
+    if (Math.random() < probability)
+      if (state.players[seatIndex]?.isBot)
+        setTimeout(() => {
+          if (!state.players[seatIndex]) return;
+          if (Date.now() - state.lastChatTimeStamp < onlyChatWhenSilenceFor)
+            return;
+          onChat(
+            state.players[seatIndex].name,
+            getRandomPhrase(phraseType),
+            seatIndex
+          );
+          state.lastChatTimeStamp = Date.now();
+        }, Math.random() * randomDuration + delayTime);
   };
 
   /* =======================================
@@ -638,6 +673,7 @@ function createGame(
         console.log(onInfo);
       } else onInfo(info);
       console.log(info);
+      ifBotThenConsiderChat(winner.index, ...BOT_WIN_CHAT);
     }
 
     const type = (() => {

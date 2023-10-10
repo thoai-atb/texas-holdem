@@ -6,7 +6,6 @@ const rl = require("readline");
 const { generateBotName } = require("./src/game_controller/utils");
 const path = require("path");
 const { randomId } = require("./src/utils/random_id");
-const { setRandomInterval } = require("./src/utils/random_interval");
 const fs = require("fs");
 const ini = require("ini");
 
