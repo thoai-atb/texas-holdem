@@ -289,6 +289,7 @@ const devCommands = {
   ToggleDebug: "debug",
   ToggleLimit: "limit",
   SetMoney: "set_money",
+  Exit: "exit",
 };
 
 // Commands execution - returns a string to be displayed on player's chat if exists
@@ -354,6 +355,8 @@ const executeCommand = (command, invoker = "Server") => {
       informCommand = true;
       broadcast();
       break;
+    case devCommands.Exit:
+      process.exit();
 
     // === Execute player command === //
     case playerCommands.Help:

@@ -1,8 +1,8 @@
 const BOT_GREETING_CHAT = [
   "greeting-phrases",
   1, // probability
-  1000, // delay time
-  4000, // random duration time
+  3000, // delay time
+  5000, // random duration time
   1000, // only chat when silence for
 ];
 const BOT_FOLD_CHAT = [

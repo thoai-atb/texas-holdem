@@ -5,7 +5,7 @@ module.exports = {
   target: 'node', // for node, not browser
   entry: './server.js',
   output: {
-    filename: 'texas-holdem.js',
+    filename: 'server.js',
     path: path.resolve(__dirname, 'build'),
   },
   externals: [nodeExternals()],

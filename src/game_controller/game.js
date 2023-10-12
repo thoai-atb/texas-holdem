@@ -16,7 +16,6 @@ const {
 
 const ROUND_TIME = 1500;
 const SHOWDOWN_TIME = 6000;
-const WIN_CHAT_DELAY = SHOWDOWN_TIME + 1000;
 const RIVER_ROUND = 3;
 
 function createGame(

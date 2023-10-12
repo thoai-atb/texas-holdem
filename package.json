@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run clean & npm run build:server && npm run build:load-config && npm run build:client && npm run build:client:ship-out",
+    "build": "npm run build:part1 && npm run build:part2",
+    "build:part1": "npm run clean & npm run build:server && build:server-deps && npm run build:load-config",
+    "build:part2": "npm run build:client && npm run build:client:ship-out && npm run build:create-cmd",
     "build:server": "npx webpack --config webpack.config.js",
+    "build:server-deps": "copy package.json build && cd build && npm install --production && del package*.json",
     "build:load-config": "copy server.ini build",
+    "build:create-cmd": "echo @echo off > build\\start.cmd && echo node server.js >> build\\start.cmd && echo pause >> build\\start.cmd",
     "build:client": "cd client && npm run build",
     "build:client:ship-out": "mkdir build\\client && move client\\build build\\client",
     "clean": "rmdir /s /q build",
@@ -16,7 +20,7 @@
     "heroku-postbuild": "cd client && npm install && npm run build",
     "install-deps": "npm install && cd client && npm install",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node build/texas-holdem.js"
+    "start": "node build/server.js"
   },
   "repository": {
     "type": "git",
