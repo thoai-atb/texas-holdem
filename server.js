@@ -139,6 +139,7 @@ io.on("connection", (socket) => {
   // CONNECTION
   const info = `${name} joined the table`;
   broadcastInfo(info);
+  io.sockets.emit("sound_effect", "playerJoin");
   console.log(info);
   connections.push(socket);
 
@@ -162,13 +163,13 @@ io.on("connection", (socket) => {
       desc: info,
       content: info,
     });
+    io.sockets.emit("sound_effect", "playerExit");
     connections.splice(connections.indexOf(socket), 1);
     playerData[seatIndex] = null;
     availableSeats.push(seatIndex);
     game.removePlayer(seatIndex);
     if (playerData.every((player) => player === null)) {
       console.log("No players left");
-      // Object.assign(game, createGame(broadcast, infoFunction, playGameSoundFx));
     }
     broadcast();
   });

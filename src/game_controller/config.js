@@ -21,10 +21,10 @@ const BOT_WIN_CHAT = [
 ];
 const BOT_CHECK_CHAT = [
   "random-phrases",
-  0.2, // probability
+  0.1, // probability
   undefined, // delay time
   undefined, // random duration time
-  10000, // only chat when silence for
+  15000, // only chat when silence for
 ];
 const BOT_BET_CHAT = [
   "bet-phrases",

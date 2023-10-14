@@ -24,11 +24,11 @@ Clean build folder with:
 
 Start server with:
 
-### `npm run dev`
+### `npm run server`
 
 Run client with:
 
-### `npm run dev-client`
+### `npm run client`
 
 ## Play online
 

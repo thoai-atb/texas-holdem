@@ -11,10 +11,12 @@ import stickClickSound from "../assets/sounds/stick_click.wav";
 import cinematicBombSound from "../assets/sounds/cinematic_boom.wav";
 import cinematicAlarmSound from "../assets/sounds/cinematic_alarm.wav";
 import cashRegisterSound from "../assets/sounds/cash_register.wav";
-import bunnSound from "../assets/sounds/bunn.wav";
+import waterDropSound from "../assets/sounds/water_drop.wav";
 import tingSound from "../assets/sounds/ting.wav";
 import oldButtonSound from "../assets/sounds/old_button.wav";
 import chipsCollectSound from "../assets/sounds/chips_collect.wav";
+import bellSound from "../assets/sounds/bell.wav";
+import doorSound from "../assets/sounds/door.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
@@ -62,7 +64,7 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
-  const [playBunnSound] = useSound(bunnSound, {
+  const [playWaterDropSound] = useSound(waterDropSound, {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
@@ -78,27 +80,40 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
+  const [playBellSound] = useSound(bellSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
+  const [playDoorSound] = useSound(doorSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 0.5 * volume,
+  });
 
   const playMiscSound = useCallback(
     (soundName) => {
       if (soundName === "cash-register") playCashRegisterSound();
-      else if (soundName === "bunn") playBunnSound();
+      else if (soundName === "water-drop") playWaterDropSound();
       else if (soundName === "ting") playTingSound();
       else if (soundName === "old-button") playOldButtonSound();
       else if (soundName === "chips-collect") playChipsCollectSound();
+      else if (soundName === "bell") playBellSound();
+      else if (soundName === "door") playDoorSound();
     },
     [
       playCashRegisterSound,
-      playBunnSound,
+      playWaterDropSound,
       playTingSound,
       playOldButtonSound,
       playChipsCollectSound,
+      playBellSound,
+      playDoorSound,
     ]
   );
 
   useEffect(() => {
     if (!socket || muted) return;
     socket.on("sound_effect", (sound) => {
+      console.log(sound);
       if (sound === "chips") playChips();
       if (sound === "tap") playTap();
       if (sound === "throw") playThrow();
@@ -107,6 +122,8 @@ export const useSoundHandler = ({ socket, muted }) => {
       if (sound === "winStronger") playWinB();
       if (sound === "flip") playFlip();
       if (sound === "chipsCollect") playMiscSound("chips-collect");
+      if (sound === "playerJoin") playMiscSound("bell");
+      if (sound === "playerExit") playMiscSound("door");
     });
     return () => {
       socket.off("sound_effect");

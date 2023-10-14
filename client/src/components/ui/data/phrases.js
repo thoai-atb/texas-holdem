@@ -32,7 +32,7 @@ const NORMAL_INFO = [
   "Effort is the currency of achievement",
   "Embrace challenges as opportunities",
   "Believe in yourself and your abilities",
-  "Your potential is limitless; never settle",
+  "Your potential is limitless, never settle",
   "Embrace challenges as opportunities for growth",
   "Success is the result of consistent effort",
   "Keep pushing forward, no matter the obstacles",
