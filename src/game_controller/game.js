@@ -131,6 +131,7 @@ function createGame(
       timesWorked: timesWorked,
       timesWon: timesWon,
       botsDefeated: botsDefeated,
+      newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -174,6 +175,7 @@ function createGame(
       working: false,
       timesWon: 0,
       botsDefeated: 0,
+      newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
     if (!state.playing)
@@ -776,6 +778,7 @@ function createGame(
     state.players.forEach((player) => {
       if (player) {
         player.folded = false;
+        player.newToTable = false;
       }
     });
     state.winners = [];

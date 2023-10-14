@@ -35,18 +35,25 @@ export function Statistics({ hidden, setHidden }) {
           <StatisticItem title="Games played" value={gamesPlayed} />
           <StatisticItem title="Bots defeated" value={botsDefeated} />
         </StatisticHeader>
-        <StatisticHeader title="Bots defeated by players">
+        <StatisticHeader title="Leader board">
           {players
-            .filter((p) => p && !p.isBot)
+            .filter((p) => p && playersRanking[p.seatIndex] > 0)
+            .sort(
+              (a, b) =>
+                playersRanking[a.seatIndex] - playersRanking[b.seatIndex]
+            )
             .map((p) => (
               <StatisticItem
                 key={p.name}
-                title={`Bots defeated by ${p.name}`}
-                value={p.botsDefeated}
+                title={`Rank of ${p.name}`}
+                value={playersRanking[p.seatIndex]}
               />
             ))}
+        </StatisticHeader>
+        <StatisticHeader title="Bots defeated by players">
           {players
-            .filter((p) => p && p.isBot && playersRanking[p.seatIndex] > 0)
+            .filter((p) => p && (!p.isBot || playersRanking[p.seatIndex] > 0))
+            .sort((a, b) => b.botsDefeated - a.botsDefeated)
             .map((p) => (
               <StatisticItem
                 key={p.name}
@@ -57,16 +64,8 @@ export function Statistics({ hidden, setHidden }) {
         </StatisticHeader>
         <StatisticHeader title="Times won">
           {players
-            .filter((p) => p && !p.isBot)
-            .map((p) => (
-              <StatisticItem
-                key={p.name}
-                title={`Times ${p.name} won`}
-                value={p.timesWon}
-              />
-            ))}
-          {players
-            .filter((p) => p && p.isBot && playersRanking[p.seatIndex] > 0)
+            .filter((p) => p && (!p.isBot || playersRanking[p.seatIndex] > 0))
+            .sort((a, b) => b.timesWon - a.timesWon)
             .map((p) => (
               <StatisticItem
                 key={p.name}
@@ -78,6 +77,7 @@ export function Statistics({ hidden, setHidden }) {
         <StatisticHeader title="Times worked">
           {players
             .filter((p) => p && !p.isBot)
+            .sort((a, b) => b.timesWorked - a.timesWorked)
             .map((p) => (
               <StatisticItem
                 key={p.name}
