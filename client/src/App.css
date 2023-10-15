@@ -8,13 +8,3 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 } 
-
-.texas-li {
-
-}
-
-.texas-li::before {
-  content: "";
-  @apply inline-block bg-slate-700 w-2 h-2 mr-2 rounded-full
-}
-

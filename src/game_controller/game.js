@@ -72,6 +72,7 @@ function createGame(
     botsDefeated: 0,
     gamesPlayed: 0,
     lastChatTimeStamp: 0,
+    starterStack: 1000,
   };
 
   const playersLeftTheTable = {
@@ -117,7 +118,7 @@ function createGame(
     });
     if (state.players[seatIndex]) return false;
     var saved = playersLeftTheTable;
-    var stack = name in saved ? saved[name].stack : 1000;
+    var stack = name in saved ? saved[name].stack : game.state.starterStack;
     var timesWorked = name in saved ? saved[name].timesWorked : 0;
     var timesWon = name in saved ? saved[name].timesWon : 0;
     var botsDefeated = name in saved ? saved[name].botsDefeated : 0;
@@ -169,7 +170,7 @@ function createGame(
       bot: createBot(),
       isBot: true,
       avatarURL,
-      stack: 1000,
+      stack: state.starterStack,
       ready: true,
       cards: [],
       working: false,
@@ -292,6 +293,10 @@ function createGame(
   const setBlinds = (bigblindSize = 10, bigblindIncrement = 10) => {
     state.bigblindSize = bigblindSize;
     state.bigblindIncrement = bigblindIncrement;
+  };
+
+  const setStarterStack = (amount) => {
+    state.starterStack = amount;
   };
 
   /* =======================================
@@ -836,6 +841,7 @@ function createGame(
     nextButton,
     randomAvailableSeat,
     setBlinds,
+    setStarterStack,
   };
 
   return game;

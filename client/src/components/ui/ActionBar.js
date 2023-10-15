@@ -4,13 +4,18 @@ import {
   AiOutlineMinusCircle,
   AiOutlinePlusCircle,
 } from "react-icons/ai";
-import { AppContext } from "../../App";
+import { AppContext, useAppContext } from "../../App";
 import { useGame } from "../../contexts/Game";
 import { useSoundContext } from "../../contexts/Sound";
 
 export function ActionBar() {
-  const { autoCheckCall, autoCheckFold, showWorkPanel, setShowWorkPanel } =
-    useContext(AppContext);
+  const {
+    autoCheckCall,
+    autoCheckFold,
+    showWorkPanel,
+    setShowWorkPanel,
+    darkMode,
+  } = useContext(AppContext);
   const {
     takeAction,
     isPlaying,
@@ -31,11 +36,7 @@ export function ActionBar() {
     return (
       <div className="w-full flex items-center justify-center pointer-events-auto">
         <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
-          - YOU ARE AFK{" "}
-          {autoCheckCall
-            ? "CHECK/CALL"
-            : "CHECK/FOLD"}{" "}
-          -
+          - YOU ARE AFK {autoCheckCall ? "CHECK/CALL" : "CHECK/FOLD"} -
         </div>
       </div>
     );
@@ -46,7 +47,9 @@ export function ActionBar() {
         <Button
           action={() => takeAction({ type: "ready" })}
           title="ready"
-          className="bg-purple-500"
+          className={
+            darkMode ? " text-purple-400 bg-gray-900" : " bg-purple-500"
+          }
         />
       )}
       {!showWorkPanel &&
@@ -65,18 +68,26 @@ export function ActionBar() {
           let displaySize;
           switch (action.type) {
             case "fold":
-              className = "bg-red-500";
+              className = darkMode
+                ? " text-red-400 bg-gray-900"
+                : " bg-red-500";
               break;
             case "check":
             case "call":
-              className = "bg-lime-500";
+              className = darkMode
+                ? " text-lime-400 bg-gray-900"
+                : " bg-lime-500";
               displaySize = action.size;
               break;
             case "bet":
-              className = "bg-cyan-500";
+              className = darkMode
+                ? " text-cyan-400 bg-gray-900"
+                : " bg-cyan-500";
               break;
             case "raise":
-              className = "bg-cyan-500";
+              className = darkMode
+                ? " text-cyan-400 bg-gray-900"
+                : " bg-cyan-500";
               break;
             default:
               break;
@@ -100,7 +111,12 @@ export function ActionBar() {
         !thisPlayer.folded &&
         thisPlayer.cards?.length > 0 &&
         !showDown && (
-          <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
+          <div
+            className={
+              "flex items-center justify-center tracking-widest text-2xl opacity-50 m-8 p-4" +
+              (darkMode ? " text-cyan-300" : " text-black")
+            }
+          >
             - WAIT FOR YOUR TURN -
           </div>
         )}
@@ -136,6 +152,7 @@ export const ActionButton = ({
   stack,
   betOnTable,
 }) => {
+  const { darkMode } = useContext(AppContext);
   const { playBubbleClick, playStickClick } = useSoundContext();
   const inputRef = React.useRef();
   const [betLevel, setBetLevel] = React.useState(0); // bet level includes bets already on the table
@@ -285,7 +302,10 @@ export const ActionButton = ({
             Icon={AiOutlineMinusCircle}
           />
           <input
-            className="w-24 bg-white rounded-full text-xl text-black font-bold p-2 text-center cursor-pointer outline-none"
+            className={
+              "w-24 rounded-full text-xl font-bold p-2 text-center cursor-pointer outline-none" +
+              (darkMode ? " bg-black text-white" : " bg-white text-black")
+            }
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             onBlur={(e) => checkBetLevel(e.target.value)}
@@ -299,7 +319,10 @@ export const ActionButton = ({
           />
           <div className="w-12 h-0 relative">
             <div
-              className="absolute flex items-center justify-center text-white rounded-full h-full hover:text-slate-700 text-7xl cursor-pointer active:scale-95"
+              className={
+                "absolute flex items-center justify-center rounded-full h-full hover:text-slate-700 text-7xl cursor-pointer active:scale-95" +
+                (darkMode ? " text-cyan-400" : " text-white")
+              }
               title="Confirm"
             >
               <AiFillUpCircle onClick={confirm} />
@@ -312,6 +335,7 @@ export const ActionButton = ({
 };
 
 const ActionSubButton = ({ children, onClick, value, disable, title }) => {
+  const { darkMode } = useContext(AppContext);
   return (
     <div
       onClick={(e) => {
@@ -319,7 +343,8 @@ const ActionSubButton = ({ children, onClick, value, disable, title }) => {
         if (!disable) onClick(value);
       }}
       className={
-        "flex items-center justify-center rounded-full px-4 py-1 font-bold bg-white text-cyan-500 h-full text-lg whitespace-nowrap" +
+        "flex items-center justify-center rounded-full px-4 py-1 font-bold text-cyan-500 h-full text-lg whitespace-nowrap" +
+        (darkMode ? " bg-black" : " bg-white") +
         (disable
           ? " opacity-50"
           : " hover:bg-slate-700 cursor-pointer active:scale-95")
@@ -332,6 +357,7 @@ const ActionSubButton = ({ children, onClick, value, disable, title }) => {
 };
 
 const ActionAdjustButton = ({ disable, onClick, Icon }) => {
+  const { darkMode } = useAppContext();
   const clickHandler = (e) => {
     e.stopPropagation();
     if (disable) return;
@@ -340,7 +366,8 @@ const ActionAdjustButton = ({ disable, onClick, Icon }) => {
   return (
     <div
       className={
-        "flex items-center justify-center text-white h-full" +
+        "flex items-center justify-center  h-full" +
+        (darkMode ? " text-cyan-300" : " text-white") +
         (disable
           ? " opacity-50"
           : " hover:text-slate-700 cursor-pointer active:scale-95")
@@ -353,12 +380,14 @@ const ActionAdjustButton = ({ disable, onClick, Icon }) => {
 
 const WorkButton = ({ action, title, className }) => {
   const { playBubbleClick } = useSoundContext();
+  const { darkMode } = useAppContext();
   return (
     <button
       className={
         className +
-        " border-2 border-cyan-500 text-cyan-500 p-4 bg-white bg-opacity-50" +
-        " rounded-full m-8 text-xl text-center hover:bg-opacity-80"
+        " border  border-cyan-500 text-cyan-500 p-4 bg-opacity-50" +
+        " rounded-full m-8 text-xl text-center hover:bg-opacity-80" +
+        (darkMode ? " bg-black" : " bg-white")
       }
       onClick={() => {
         playBubbleClick();

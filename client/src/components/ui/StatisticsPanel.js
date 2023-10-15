@@ -49,6 +49,8 @@ export function Statistics({ hidden, setHidden }) {
                 value={playersRanking[p.seatIndex]}
               />
             ))}
+          {players.filter((p) => p && playersRanking[p.seatIndex] > 0)
+            .length === 0 && <StatisticItem comment="empty" />}
         </StatisticHeader>
         <StatisticHeader title="Bots defeated by players">
           {players
@@ -100,7 +102,14 @@ function StatisticHeader({ title, children }) {
   );
 }
 
-function StatisticItem({ title, value }) {
+function StatisticItem({ title, value, comment }) {
+  if (comment) {
+    return (
+      <div className="text-lg text-gray-400">
+        <span>({comment})</span>
+      </div>
+    );
+  }
   return (
     <div className="text-lg">
       <span>{title}: </span>

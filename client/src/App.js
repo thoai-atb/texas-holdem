@@ -1,4 +1,4 @@
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { ActionBar } from "./components/ui/ActionBar";
 import { Chat } from "./components/ui/Chat";
@@ -20,6 +20,7 @@ import { WorkPanel } from "./components/ui/WorkPanel";
 import { Statistics } from "./components/ui/StatisticsPanel";
 
 export const AppContext = createContext({});
+export const useAppContext = () => useContext(AppContext);
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -40,6 +41,7 @@ function App() {
   const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false); // Ask player if they want to play with bots
   const [showWorkPanel, setShowWorkPanel] = useState(false); // work for money, money is life
   const [appAction, setAppAction] = useState(null); // events for app's children - such as keyboard shortcuts
+  const [darkMode, setDarkMode] = useState(true);
   const { localStorage } = window;
   const containerRef = useRef(null);
 
@@ -99,6 +101,10 @@ function App() {
         playStickClick();
         setShowHandStatistics((show) => !show);
       }
+      if (e.key === "d" || e.key === "D") {
+        playStickClick();
+        setDarkMode((d) => !d);
+      }
       if (e.key === "f" || e.key === "F") {
         setAppAction("f_pressed");
       }
@@ -157,6 +163,7 @@ function App() {
         showFirstPlayerDialog,
         showWorkPanel,
         appAction,
+        darkMode,
         setAutoCheckCall,
         setAutoCheckFold,
         setMuted,
@@ -166,6 +173,7 @@ function App() {
         setShowFirstPlayerDialog,
         setShowWorkPanel,
         setAppAction,
+        setDarkMode,
       }}
     >
       <SoundContext.Provider
@@ -178,7 +186,14 @@ function App() {
           setVolume,
         }}
       >
-        <div className="relative w-sceen h-screen bg-gradient-to-r from-amber-200 to-pink-200">
+        <div
+          className={
+            "relative w-sceen h-screen bg-gradient-to-r" +
+            (darkMode
+              ? " from-slate-700 to-gray-900"
+              : " from-amber-200 to-pink-200")
+          }
+        >
           {!loggedIn && <LoginPage loginFunction={login} />}
           {loggedIn && (
             <div>
@@ -231,7 +246,12 @@ function App() {
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
                   {chatHint && (
-                    <div className="text-black opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center">
+                    <div
+                      className={
+                        "opacity-30 tracking-wider uppercase text-2xl absolute top-4 text-center" +
+                        (darkMode ? " text-cyan-300" : " text-black")
+                      }
+                    >
                       {chatHint}
                     </div>
                   )}
@@ -257,7 +277,12 @@ function App() {
               </GameProvider>
             </div>
           )}
-          <div className="absolute bottom-2 left-2 text-slate-700">
+          <div
+            className={
+              "absolute bottom-2 left-2" +
+              (darkMode ? " text-cyan-300" : " text-slate-700")
+            }
+          >
             @ 2022 Thoai Ly. All Rights Reserved.
           </div>
         </div>

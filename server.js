@@ -290,6 +290,7 @@ const devCommands = {
   ToggleDebug: "debug",
   ToggleLimit: "limit",
   SetMoney: "set_money",
+  SetStarterStack: "set_starter",
   Exit: "exit",
 };
 
@@ -351,8 +352,16 @@ const executeCommand = (command, invoker = "Server") => {
       if (!arg) {
         game.setMoney(invoker, 0);
       } else {
-        game.setMoney(invoker, parseInt(arg));
+        const params = arg.split(" ");
+        if (params.length === 1) game.setMoney(invoker, parseInt(params[0]));
+        else game.setMoney(params[1], parseInt(params[0]));
       }
+      informCommand = true;
+      broadcast();
+      break;
+    case devCommands.SetStarterStack:
+      if (!arg) game.setStarterStack(1000);
+      else game.setStarterStack(parseInt(arg));
       informCommand = true;
       broadcast();
       break;

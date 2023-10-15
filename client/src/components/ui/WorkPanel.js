@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useSoundContext } from "../../contexts/Sound";
 import moneyPng from "../../assets/texture/one-thousand-dollars.png";
-import { AppContext } from "../../App";
+import { AppContext, useAppContext } from "../../App";
 import {
   GOOD_INFO,
   NORMAL_INFO,
@@ -12,7 +12,7 @@ import {
 const MAX_SCORE = 10;
 
 export function WorkPanel({ hidden, setHidden }) {
-  const { socket, appAction, setAppAction } = useContext(AppContext);
+  const { socket, appAction, setAppAction, darkMode } = useContext(AppContext);
   const { playMiscSound, playBubbleClick } = useSoundContext();
   const [progress, setProgress] = useState(0);
   const [buttonActive, setButtonActive] = useState(true);
@@ -26,6 +26,7 @@ export function WorkPanel({ hidden, setHidden }) {
   }
 
   function handleClick() {
+    if (!buttonActive) return false;
     setButtonActive(false);
     const diff = getDiff();
     setLastDifference(diff);
@@ -91,12 +92,15 @@ export function WorkPanel({ hidden, setHidden }) {
         onClick={() => setHidden(true)}
       ></div>
       <div
-        className="absolute w-96 bg-white bg-opacity-95 z-10 rounded-2xl top-20 px-8 py-5 flex flex-col pointer-events-auto animate-fade-in-up"
+        className={
+          "absolute w-96 z-10 rounded-2xl top-24 px-8 py-5 flex flex-col pointer-events-auto animate-fade-in-up" +
+          (darkMode
+            ? " bg-opacity-80 bg-black text-white"
+            : " bg-opacity-90 bg-white text-slate-700")
+        }
         style={{ width: "50rem", height: "40rem" }}
       >
-        <div className="text-xl text-slate-700 font-bold text-center">
-          WORK FOR MONEY
-        </div>
+        <div className="text-xl font-bold text-center">WORK FOR MONEY</div>
         <ProgressBar progress={progress} />
         {!finished && (
           <>
@@ -142,13 +146,14 @@ export function WorkPanel({ hidden, setHidden }) {
 }
 
 function InfoBar({ buttonActive, lastDifference }) {
+  const { darkMode } = useAppContext();
   var info = null;
   var signColor = "";
   var signStr = "";
   if (!buttonActive) {
     if (lastDifference === 1) {
       info = NORMAL_INFO[Math.floor(Math.random() * NORMAL_INFO.length)];
-      signColor = "text-black";
+      signColor = darkMode ? "text-white" : "text-black";
       signStr = "+" + lastDifference;
     } else if (lastDifference < 0) {
       info = BAD_INFO[Math.floor(Math.random() * BAD_INFO.length)];

@@ -16,6 +16,8 @@ export function Settings() {
     autoCheckFold,
     setAutoCheckCall,
     setAutoCheckFold,
+    darkMode,
+    setDarkMode,
   } = useContext(AppContext);
   const { playStickClick } = useSoundContext();
   if (!showSettings) return null;
@@ -42,7 +44,13 @@ export function Settings() {
           toggleMuted={handleAction(() => setMuted((m) => !m))}
         />
         <ToggleField
-          label="Hand ranks calculator"
+          label="Dark mode"
+          shortcut="D"
+          active={darkMode}
+          onToggle={handleAction(() => setDarkMode((d) => !d))}
+        />
+        <ToggleField
+          label="Probability Calculator"
           shortcut="R"
           active={showHandStatistics}
           onToggle={handleAction(() => setShowHandStatistics((s) => !s))}

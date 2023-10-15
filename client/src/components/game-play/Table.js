@@ -1,20 +1,27 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useGame } from "../../contexts/Game";
 import { Bets } from "./Bets";
 import { Board } from "./Board";
 import { DealerButton } from "./DealerButton";
 import { Hand } from "./Hand";
 import dotPattern from "../../assets/texture/dot-pattern.png";
+import { AppContext } from "../../App";
 
 export function Table() {
   const { bigblindSize } = useGame();
+  const { darkMode } = useContext(AppContext);
   return (
     <div
-      className="relative bg-lime-400 bg-rad border-slate-700 rounded-full w-3/4 h-1/2 flex items-center justify-center"
+      className={
+        "relative bg-rad rounded-full w-3/4 h-1/2 flex items-center justify-center" +
+        (darkMode ? " border-black" : " border-green-900")
+      }
       style={{
         maxHeight: "30rem",
         borderWidth: "0.5rem",
-        backgroundImage: "radial-gradient(lime, green)",
+        backgroundImage: darkMode
+          ? "radial-gradient(cyan, navy)"
+          : "radial-gradient(lime, green)",
         boxShadow: "0rem 2rem rgba(0, 0, 0, 0.5)",
       }}
     >

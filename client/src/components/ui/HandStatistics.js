@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useGame } from "../../contexts/Game";
 import { calculateStatistics } from "../../utilities/statistics";
+import { useAppContext } from "../../App";
 
 export function HandStatistics({ hidden, setHidden }) {
   const { seatIndex, board, players } = useGame();
+  const { darkMode } = useAppContext();
   const [statistics, setStatistics] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const cards = players[seatIndex]?.cards;
   const notEnoughInfo = board.length <= 0 || !cards || cards.length <= 0;
@@ -14,14 +16,19 @@ export function HandStatistics({ hidden, setHidden }) {
   }, [board.length]);
   if (hidden) return null;
   return (
-    <div className="absolute text-white bottom-10 bg-black bg-opacity-20 p-4 left-4 pointer-events-auto rounded group animate-fade-in-up">
+    <div
+      className={
+        "absolute bottom-10 bg-black bg-opacity-20 p-4 left-4 pointer-events-auto rounded group animate-fade-in-up" +
+        (darkMode ? " text-cyan-300" : " text-white")
+      }
+    >
       <div
         className="absolute bottom-full right-0 hidden group-hover:flex justify-end text-sm pb-4 pl-16 hover:text-cyan-500 cursor-pointer"
         onClick={() => setHidden(true)}
       >
         Close [R]
       </div>
-      {notEnoughInfo && statistics.every((s) => !s) && "Hand ranks calculator"}
+      {notEnoughInfo && statistics.every((s) => !s) && "(Probability Calculator)"}
       <SortedRanks statistics={statistics} />
     </div>
   );

@@ -8,6 +8,7 @@ import {
 import { Card } from "./Card";
 import { ChatBubble } from "./ChatBubble";
 import { PlayerRank } from "./PlayerRank";
+import { useAppContext } from "../../App";
 
 export function Hand({ style, position }) {
   const {
@@ -22,6 +23,7 @@ export function Hand({ style, position }) {
     allPlayersAllIn,
     MONEY_EFFECT_DURATION,
   } = useGame();
+  const { darkMode } = useAppContext();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
@@ -116,7 +118,8 @@ export function Hand({ style, position }) {
           {!isPlaying && handPlayer.ready && (
             <div
               className={
-                "absolute bottom-full w-full h-18 bg-white text-black rounded-md"
+                "absolute bottom-full w-full h-18 rounded-md" +
+                (darkMode ? " bg-blue-500 text-white" : " bg-white text-black")
               }
             >
               READY
