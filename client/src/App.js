@@ -41,7 +41,7 @@ function App() {
   const [showFirstPlayerDialog, setShowFirstPlayerDialog] = useState(false); // Ask player if they want to play with bots
   const [showWorkPanel, setShowWorkPanel] = useState(false); // work for money, money is life
   const [appAction, setAppAction] = useState(null); // events for app's children - such as keyboard shortcuts
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const { localStorage } = window;
   const containerRef = useRef(null);
 

@@ -2,8 +2,9 @@ import React from "react";
 import { useSoundContext } from "../../contexts/Sound";
 
 export function VolumeOption() {
-  const { volume, setVolume } = useSoundContext();
+  const { volume, setVolume, playStickClick } = useSoundContext();
   const handleChange = (e) => {
+    playStickClick();
     const value = e.target.value;
     setVolume(value * 0.1);
   };

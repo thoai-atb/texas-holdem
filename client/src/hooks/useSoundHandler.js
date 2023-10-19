@@ -17,6 +17,7 @@ import oldButtonSound from "../assets/sounds/old_button.wav";
 import chipsCollectSound from "../assets/sounds/chips_collect.wav";
 import bellSound from "../assets/sounds/bell.wav";
 import doorSound from "../assets/sounds/door.wav";
+import clapsSound from "../assets/sounds/claps.wav";
 
 export const useSoundHandler = ({ socket, muted }) => {
   const [volume, setVolume] = useState(1);
@@ -88,6 +89,10 @@ export const useSoundHandler = ({ socket, muted }) => {
     interrupt: true,
     volume: muted ? 0.0 : 0.5 * volume,
   });
+  const [playClapsSound] = useSound(clapsSound, {
+    interrupt: true,
+    volume: muted ? 0.0 : 1.2 * volume,
+  });
 
   const playMiscSound = useCallback(
     (soundName) => {
@@ -98,6 +103,7 @@ export const useSoundHandler = ({ socket, muted }) => {
       else if (soundName === "chips-collect") playChipsCollectSound();
       else if (soundName === "bell") playBellSound();
       else if (soundName === "door") playDoorSound();
+      else if (soundName === "claps") playClapsSound();
     },
     [
       playCashRegisterSound,
@@ -107,6 +113,7 @@ export const useSoundHandler = ({ socket, muted }) => {
       playChipsCollectSound,
       playBellSound,
       playDoorSound,
+      playClapsSound,
     ]
   );
 
@@ -124,6 +131,7 @@ export const useSoundHandler = ({ socket, muted }) => {
       if (sound === "chipsCollect") playMiscSound("chips-collect");
       if (sound === "playerJoin") playMiscSound("bell");
       if (sound === "playerExit") playMiscSound("door");
+      if (sound === "claps") playMiscSound("claps");
     });
     return () => {
       socket.off("sound_effect");

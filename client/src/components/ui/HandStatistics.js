@@ -28,7 +28,9 @@ export function HandStatistics({ hidden, setHidden }) {
       >
         Close [R]
       </div>
-      {notEnoughInfo && statistics.every((s) => !s) && "(Probability Calculator)"}
+      {notEnoughInfo &&
+        statistics.every((s) => !s) &&
+        "(Probability Calculator)"}
       <SortedRanks statistics={statistics} />
     </div>
   );
@@ -84,6 +86,7 @@ function SortedRanks({ statistics }) {
 }
 
 function Rank({ text, chance = 0 }) {
+  const { darkMode } = useAppContext();
   const percentage = Math.round(chance * 100);
   if (percentage === 0) return null;
   return (
@@ -91,9 +94,17 @@ function Rank({ text, chance = 0 }) {
       <div className="mb-1">
         {text} {percentage}%
       </div>
-      <div className="relative bg-white w-48 h-1 rounded-full">
+      <div
+        className={
+          "relative w-48 h-1 rounded-full " +
+          (darkMode ? " bg-black" : " bg-white")
+        }
+      >
         <div
-          className="bg-cyan-300 h-full transition-all duration-500"
+          className={
+            "h-full transition-all duration-500" +
+            (darkMode ? " bg-cyan-300" : " bg-cyan-300")
+          }
           style={{ width: percentage + "%" }}
         />
       </div>

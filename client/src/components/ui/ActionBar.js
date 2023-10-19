@@ -35,7 +35,12 @@ export function ActionBar() {
   if (autoCheckCall || autoCheckFold) {
     return (
       <div className="w-full flex items-center justify-center pointer-events-auto">
-        <div className="flex items-center justify-center tracking-widest text-2xl text-black opacity-50 m-8 p-4">
+        <div
+          className={
+            "flex items-center justify-center tracking-widest text-2xl opacity-50 m-8 p-4" +
+            (darkMode ? " text-cyan-300" : " text-black")
+          }
+        >
           - YOU ARE AFK {autoCheckCall ? "CHECK/CALL" : "CHECK/FOLD"} -
         </div>
       </div>

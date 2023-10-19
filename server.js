@@ -109,6 +109,9 @@ function playGameSoundFx(sound) {
   if (["showdown_b"].includes(sound)) {
     io.sockets.emit("sound_effect", "winStronger");
   }
+  if (["all_in_claps"].includes(sound)) {
+    io.sockets.emit("sound_effect", "claps");
+  }
   if (["flip"].includes(sound)) {
     io.sockets.emit("sound_effect", "flip");
   }

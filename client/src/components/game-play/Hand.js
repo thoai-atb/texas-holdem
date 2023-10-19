@@ -87,7 +87,7 @@ export function Hand({ style, position }) {
           <div
             className={
               "absolute right-full top-full -translate-y-2/3 translate-x-1/3 rounded-full  overflow-hidden w-12 h-12 bg-gray-600" +
-              (handPlayer.newToTable ? " border-2 border-white" : " border border-black")
+              (handPlayer.newToTable ? " border-2 border-yellow-500" : " border border-black")
             }
           >
             <img src={handPlayer.avatarURL} alt="avatar" />

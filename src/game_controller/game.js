@@ -691,6 +691,9 @@ function createGame(
     })();
 
     onSoundEffect("showdown_" + type);
+    if ((state.allPlayersAllIn && type != "0") || type === "b") {
+      setTimeout(() => onSoundEffect("all_in_claps"), 1000);
+    }
     onUpdate();
     setTimeout(() => postShowDown(), SHOWDOWN_TIME);
   };
