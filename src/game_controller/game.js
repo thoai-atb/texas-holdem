@@ -746,6 +746,7 @@ function createGame(
         player.ready = player.isBot;
         player.cards = [];
         player.folded = false;
+        player.newToTable = false;
       }
     });
 
@@ -786,7 +787,6 @@ function createGame(
     state.players.forEach((player) => {
       if (player) {
         player.folded = false;
-        player.newToTable = false;
       }
     });
     state.winners = [];

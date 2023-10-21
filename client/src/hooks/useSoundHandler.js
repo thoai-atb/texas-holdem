@@ -91,7 +91,7 @@ export const useSoundHandler = ({ socket, muted }) => {
   });
   const [playClapsSound] = useSound(clapsSound, {
     interrupt: true,
-    volume: muted ? 0.0 : 1.2 * volume,
+    volume: muted ? 0.0 : 2 * volume,
   });
 
   const playMiscSound = useCallback(

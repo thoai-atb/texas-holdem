@@ -21,7 +21,7 @@ const BOT_WIN_CHAT = [
 ];
 const BOT_CHECK_CHAT = [
   "random-phrases",
-  0.08, // probability
+  0.05, // probability
   undefined, // delay time
   undefined, // random duration time
   20000, // only chat when silence for

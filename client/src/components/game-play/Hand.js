@@ -42,7 +42,7 @@ export function Hand({ style, position }) {
       <div
         className={
           "flex justify-center items-center flex-col box-border relative overflow-x-visible" +
-          (position === 0 ? " scale-125" : "") +
+          (position === 0 ? " scale-125" : " animate-fade-in-up") +
           (winners.length > 0
             ? winners.some(
                 (winner) =>
@@ -86,8 +86,7 @@ export function Hand({ style, position }) {
         >
           <div
             className={
-              "absolute right-full top-full -translate-y-2/3 translate-x-1/3 rounded-full  overflow-hidden w-12 h-12 bg-gray-600" +
-              (handPlayer.newToTable ? " border-2 border-yellow-500" : " border border-black")
+              "absolute right-full top-full -translate-y-2/3 translate-x-1/3 rounded-full  overflow-hidden w-12 h-12 bg-gray-600 border border-black"
             }
           >
             <img src={handPlayer.avatarURL} alt="avatar" />
