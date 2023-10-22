@@ -120,7 +120,6 @@ export const useSoundHandler = ({ socket, muted }) => {
   useEffect(() => {
     if (!socket || muted) return;
     socket.on("sound_effect", (sound) => {
-      console.log(sound);
       if (sound === "chips") playChips();
       if (sound === "tap") playTap();
       if (sound === "throw") playThrow();

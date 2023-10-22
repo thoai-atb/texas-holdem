@@ -42,7 +42,9 @@ export function Hand({ style, position }) {
       <div
         className={
           "flex justify-center items-center flex-col box-border relative overflow-x-visible" +
-          (position === 0 ? " scale-125" : " animate-fade-in-up") +
+          (position === 0 ? " scale-125" : "") +
+          // animate-fade-in-up will disable (conflict with) opacity-50 and scale-125 so that's why we have condition below
+          (!isPlaying && position !== 0 ? " animate-fade-in-up" : "") +
           (winners.length > 0
             ? winners.some(
                 (winner) =>
@@ -92,7 +94,7 @@ export function Hand({ style, position }) {
             <img src={handPlayer.avatarURL} alt="avatar" />
           </div>
           <PlayerRank player={handPlayer} />
-          <div>
+          <div className="truncate">
             $
             <CountUp
               preserveValue={true}

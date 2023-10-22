@@ -70,8 +70,9 @@ function createGame(
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
     botsDefeated: 0,
-    gamesPlayed: 0,
-    lastChatTimeStamp: 0,
+    roundsPlayed: 0,
+    lastChatTimeStamp: 0, // used to moderate bot chats - only belongs to bots
+    gameCreationTimeStamp: Date.now(), // used for statistics
     starterStack: 1000,
   };
 
@@ -122,6 +123,7 @@ function createGame(
     var timesWorked = name in saved ? saved[name].timesWorked : 0;
     var timesWon = name in saved ? saved[name].timesWon : 0;
     var botsDefeated = name in saved ? saved[name].botsDefeated : 0;
+    var biggestPotWon = name in saved ? saved[name].biggestPotWon : 0;
     state.players[seatIndex] = {
       seatIndex,
       name,
@@ -132,6 +134,7 @@ function createGame(
       timesWorked: timesWorked,
       timesWon: timesWon,
       botsDefeated: botsDefeated,
+      biggestPotWon: biggestPotWon,
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
@@ -176,6 +179,7 @@ function createGame(
       working: false,
       timesWon: 0,
       botsDefeated: 0,
+      biggestPotWon: 0,
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
@@ -213,6 +217,7 @@ function createGame(
       timesWorked: player.timesWorked,
       timesWon: player.timesWon,
       botsDefeated: player.botsDefeated,
+      biggestPotWon: player.biggestPotWon,
     };
     state.players[seatIndex] = null;
     if (!state.playing)
@@ -293,6 +298,12 @@ function createGame(
   const setBlinds = (bigblindSize = 10, bigblindIncrement = 10) => {
     state.bigblindSize = bigblindSize;
     state.bigblindIncrement = bigblindIncrement;
+  };
+
+  const setBlindAllIn = () => {
+    state.bigblindSize = Math.min(
+      ...state.players.filter((p) => p && p.stack > 0).map((p) => p.stack)
+    );
   };
 
   const setStarterStack = (amount) => {
@@ -460,7 +471,9 @@ function createGame(
   const nextQualifiedIndex = (index) => {
     if (
       state.players.every(
-        (player) => !player || player.stack < state.bigblindSize
+        (player) =>
+          !player ||
+          player.stack + state.bets[player.index] < state.bigblindSize
       )
     )
       return -1;
@@ -469,7 +482,7 @@ function createGame(
     } while (
       index < 0 ||
       !state.players[index] ||
-      state.players[index].stack < state.bigblindSize
+      state.players[index].stack + state.bets[index] < state.bigblindSize
     );
     return index;
   };
@@ -731,13 +744,18 @@ function createGame(
     state.playing = false;
     state.bigblindSize += state.bigblindIncrement;
     state.board = [];
-    state.gamesPlayed += 1;
+    state.roundsPlayed += 1;
 
     // Update winners and players
     const winnerIndexes = []; // to update stats
     state.winners.forEach((winner) => {
-      state.players[winner.index].stack += state.winAmount;
-      state.players[winner.index].timesWon += 1;
+      const winnerPlayer = state.players[winner.index];
+      winnerPlayer.stack += state.winAmount;
+      winnerPlayer.timesWon += 1;
+      winnerPlayer.biggestPotWon = Math.max(
+        winnerPlayer.biggestPotWon,
+        state.winAmount
+      );
       winnerIndexes.push(winner.index);
     });
     state.winners = [];
@@ -803,7 +821,7 @@ function createGame(
       tempIndex = nextQualifiedIndex(tempIndex);
     }
     tempIndex = nextQualifiedIndex(tempIndex); // TO SMALL BLIND
-    blind(tempIndex, state.bigblindSize / 2);
+    blind(tempIndex, Math.ceil(state.bigblindSize / 2));
     tempIndex = nextQualifiedIndex(tempIndex); // TO BIG BLIND
     blind(tempIndex, state.bigblindSize);
     tempIndex = nextQualifiedIndex(tempIndex); // TO UTG
@@ -844,6 +862,7 @@ function createGame(
     nextButton,
     randomAvailableSeat,
     setBlinds,
+    setBlindAllIn,
     setStarterStack,
   };
 

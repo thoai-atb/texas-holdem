@@ -111,6 +111,9 @@ function App() {
       if (e.key === "s" || e.key === "S") {
         setAppAction("s_pressed");
       }
+      if (e.key === "w" || e.key === "W") {
+        setAppAction("w_pressed");
+      }
       if (e.key === " ") {
         setAppAction("space_pressed");
       }

@@ -427,7 +427,12 @@ const executeCommand = (command, invoker = "Server") => {
     case playerCommands.SetBlind:
       informCommand = true;
       if (!arg) game.setBlinds(10);
-      else game.setBlinds(parseInt(arg));
+      else if (arg === "max") game.setBlindAllIn();
+      else {
+        const params = arg.split(" ");
+        if (params.length === 1) game.setBlinds(parseInt(params[0]));
+        else game.setBlinds(parseInt(params[0]), parseInt(params[1]));
+      }
       broadcast();
       break;
     default:

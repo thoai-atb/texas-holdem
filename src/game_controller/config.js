@@ -15,8 +15,8 @@ const BOT_FOLD_CHAT = [
 const BOT_WIN_CHAT = [
   "win-phrases",
   0.3,
-  7000, // delay time
-  0, // random duration time
+  6500, // delay time
+  1000, // random duration time
   0, // only chat when silence for
 ];
 const BOT_CHECK_CHAT = [
