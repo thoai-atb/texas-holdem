@@ -6,6 +6,7 @@ import {
   AiOutlineInsertRowBelow,
   AiOutlineLogout,
   AiOutlineAlignLeft,
+  AiOutlineQuestionCircle,
 } from "react-icons/ai";
 import { AppContext } from "../../App";
 import { useSoundContext } from "../../contexts/Sound";
@@ -15,6 +16,7 @@ export default function MenuBar({
   toggleInfo,
   toggleControlPanel,
   toggleStatistics,
+  toggleGameRule,
 }) {
   const { playBubbleClick } = useSoundContext();
   const { setShowSettings, setShowLogout, darkMode } = useContext(AppContext);
@@ -36,7 +38,6 @@ export default function MenuBar({
       >
         <AiOutlineLogout />
       </div>
-      <div className="flex-1"></div>
       <div
         className={"p-4 w-fit " + buttonClassName}
         title="Info"
@@ -44,6 +45,14 @@ export default function MenuBar({
       >
         <AiOutlineInfoCircle />
       </div>
+      <div
+        className={"p-4 w-fit " + buttonClassName}
+        title="Game rule"
+        onClick={handleAction(toggleGameRule)}
+      >
+        <AiOutlineQuestionCircle />
+      </div>
+      <div className="flex-1"></div>
       <div
         className={"p-4 w-fit " + buttonClassName}
         title="Statistics"

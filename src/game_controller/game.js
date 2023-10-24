@@ -155,7 +155,8 @@ function createGame(
 
   const fillBots = () => {
     for (let i = 0; i < 9; i++) {
-      if (state.players[i] === null) addBot(generateBotName());
+      if (state.players[i] === null && state.bigblindSize <= state.starterStack)
+        addBot(generateBotName());
     }
   };
 

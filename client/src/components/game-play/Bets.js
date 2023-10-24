@@ -66,9 +66,10 @@ function Pot() {
     >
       <div
         className={
-          "rounded-lg text-center text-xl w-20 h-10 absolute flex items-center justify-center text-white font-bold border-dotted"
+          "rounded-lg text-center text-xl h-10 absolute flex items-center justify-center text-white font-bold border-dotted"
         }
         style={{
+          minWidth: "5rem",
           borderWidth: "0.28rem",
           borderColor: borderFromAmount(pot),
           boxShadow: "0rem 0.5rem 0.3rem 0.1rem rgba(0, 0, 0, 0.2)",

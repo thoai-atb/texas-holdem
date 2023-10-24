@@ -18,6 +18,7 @@ import { FirstPlayerDialog } from "./components/ui/FirstPlayerDialog";
 import { DebugPanel } from "./components/ui/DebugPanel";
 import { WorkPanel } from "./components/ui/WorkPanel";
 import { Statistics } from "./components/ui/StatisticsPanel";
+import { GameRule } from "./components/ui/GameRule";
 
 export const AppContext = createContext({});
 export const useAppContext = () => useContext(AppContext);
@@ -31,6 +32,7 @@ function App() {
   const [muted, setMuted] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [showGameRule, setShowGameRule] = useState(false);
   const [showControlPanel, setShowControlPanel] = useState(false);
   const [showHandStatistics, setShowHandStatistics] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
@@ -146,6 +148,7 @@ function App() {
       setShowControlPanel(false);
       setShowInfo(false);
       setShowSettings(false);
+      setShowGameRule(false);
     }
   }, [chatHidden]);
 
@@ -165,6 +168,7 @@ function App() {
         showLogout,
         showFirstPlayerDialog,
         showWorkPanel,
+        showGameRule,
         appAction,
         darkMode,
         setAutoCheckCall,
@@ -177,6 +181,7 @@ function App() {
         setShowWorkPanel,
         setAppAction,
         setDarkMode,
+        setShowGameRule,
       }}
     >
       <SoundContext.Provider
@@ -215,6 +220,7 @@ function App() {
                     toggleControlPanel={() =>
                       setShowControlPanel((show) => !show)
                     }
+                    toggleGameRule={() => setShowGameRule((show) => !show)}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
@@ -233,6 +239,12 @@ function App() {
                   <Info
                     hidden={!showInfo}
                     setHidden={(hidden) => setShowInfo(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <GameRule
+                    hidden={!showGameRule}
+                    setHidden={(hidden) => setShowGameRule(!hidden)}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">

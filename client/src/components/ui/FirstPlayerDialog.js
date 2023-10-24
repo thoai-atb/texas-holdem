@@ -8,6 +8,7 @@ export function FirstPlayerDialog() {
     useContext(AppContext);
   const { players } = useGame();
   const { playBubbleClick } = useSoundContext();
+  const numPlayers = players.filter((p) => p).length;
   function handleAction(func) {
     return () => {
       playBubbleClick();
@@ -15,11 +16,10 @@ export function FirstPlayerDialog() {
     };
   }
   useEffect(() => {
-    const numPlayers = players.filter((p) => p).length;
     if (numPlayers === 1) {
       setShowFirstPlayerDialog(true);
     }
-  }, [players, setShowFirstPlayerDialog]);
+  }, [numPlayers, setShowFirstPlayerDialog]);
   if (!showFirstPlayerDialog) return null;
   return (
     <>
