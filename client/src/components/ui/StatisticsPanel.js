@@ -14,8 +14,12 @@ export function Statistics({ hidden, setHidden }) {
     roundsPlayed,
     playersRanking,
     gameCreationTimeStamp,
+    botDefeatedList,
   } = useGame();
   const [gameTime, setGameTime] = useState("");
+  const [timesWonShowExtra, setTimesWonShowExtra] = useState(false);
+  const [biggestPotWonShowExtra, setBiggestPotWonShowExtra] = useState(false);
+  const [botsDefeatedShowExtra, setBotsDefeatedShowExtra] = useState(false);
   useEffect(() => {
     if (appAction === "s_pressed") {
       playBubbleClick();
@@ -79,35 +83,68 @@ export function Statistics({ hidden, setHidden }) {
                 </StatisticItem>
               ))}
           </StatisticHeader>
-          <StatisticHeader title="Times won">
+          <StatisticHeader
+            title="Times won"
+            toggleExtra={() => setTimesWonShowExtra((s) => !s)}
+            extra={timesWonShowExtra}
+          >
             {players
+              .concat(timesWonShowExtra ? botDefeatedList : [])
               .filter((p) => p && (!p.isBot || p.timesWon > 0))
               .sort((a, b) => b.timesWon - a.timesWon)
-              .map((p) => (
-                <StatisticItem key={p.name} value={p.timesWon}>
-                  Times <Name player={p} /> won
-                </StatisticItem>
-              ))}
+              .map((p) =>
+                p.defeated ? (
+                  <StatisticDeadItem key={p.name} value={p.timesWon}>
+                    Times <DeadName player={p} /> won
+                  </StatisticDeadItem>
+                ) : (
+                  <StatisticItem key={p.name} value={p.timesWon}>
+                    Times <Name player={p} /> won
+                  </StatisticItem>
+                )
+              )}
           </StatisticHeader>
-          <StatisticHeader title="Biggest pot won">
+          <StatisticHeader
+            title="Biggest pot won"
+            toggleExtra={() => setBiggestPotWonShowExtra((s) => !s)}
+            extra={biggestPotWonShowExtra}
+          >
             {players
+              .concat(biggestPotWonShowExtra ? botDefeatedList : [])
               .filter((p) => p && (!p.isBot || p.biggestPotWon > 0))
               .sort((a, b) => b.biggestPotWon - a.biggestPotWon)
-              .map((p) => (
-                <StatisticItem key={p.name} value={`$${p.biggestPotWon}`}>
-                  Biggest pot <Name player={p} /> won
-                </StatisticItem>
-              ))}
+              .map((p) =>
+                p.defeated ? (
+                  <StatisticDeadItem key={p.name} value={`$${p.biggestPotWon}`}>
+                    Biggest pot <DeadName player={p} /> won
+                  </StatisticDeadItem>
+                ) : (
+                  <StatisticItem key={p.name} value={`$${p.biggestPotWon}`}>
+                    Biggest pot <Name player={p} /> won
+                  </StatisticItem>
+                )
+              )}
           </StatisticHeader>
-          <StatisticHeader title="Bots defeated by players">
+          <StatisticHeader
+            title="Bots defeated by players"
+            toggleExtra={() => setBotsDefeatedShowExtra((s) => !s)}
+            extra={botsDefeatedShowExtra}
+          >
             {players
+              .concat(botsDefeatedShowExtra ? botDefeatedList : [])
               .filter((p) => p && (!p.isBot || p.botsDefeated > 0))
               .sort((a, b) => b.botsDefeated - a.botsDefeated)
-              .map((p) => (
-                <StatisticItem key={p.name} value={p.botsDefeated}>
-                  Bots defeated by <Name player={p} />
-                </StatisticItem>
-              ))}
+              .map((p) =>
+                p.defeated ? (
+                  <StatisticDeadItem key={p.name} value={p.botsDefeated}>
+                    Bots defeated by <DeadName player={p} />
+                  </StatisticDeadItem>
+                ) : (
+                  <StatisticItem key={p.name} value={p.botsDefeated}>
+                    Bots defeated by <Name player={p} />
+                  </StatisticItem>
+                )
+              )}
           </StatisticHeader>
           <div className="text-center opacity-50 mt-4">~ End ~</div>
         </div>
@@ -116,23 +153,32 @@ export function Statistics({ hidden, setHidden }) {
   );
 }
 
-function Name({ player }) {
-  return (
-    <span className={"italic"}>
-      <span className="relative inline-block rounded-full w-4 h-4 overflow-hidden mr-1 translate-y-0.5">
-        <img src={player.avatarURL} alt="avatar" />
-      </span>
-      <span className={player.isBot ? "" : "text-yellow-500"}>
-        {player.name}
-      </span>
-    </span>
-  );
-}
-
-function StatisticHeader({ title, children }) {
+function StatisticHeader({ title, children, toggleExtra, extra }) {
+  const { playStickClick } = useSoundContext();
+  const handleToggle = () => {
+    if (toggleExtra) {
+      playStickClick();
+      toggleExtra();
+    }
+  };
   return (
     <>
-      <div className="text-base my-2 font-bold">{title}</div>
+      <div
+        className={
+          "text-base select-none my-2 font-bold" +
+          (toggleExtra
+            ? " cursor-pointer hover:text-cyan-500"
+            : " cursor-default")
+        }
+        onClick={handleToggle}
+      >
+        {title}
+        {extra && (
+          <span className="mx-2 opacity-50 font-normal text-white">
+            (extra)
+          </span>
+        )}
+      </div>
       <div className="ml-4">{children}</div>
     </>
   );
@@ -151,5 +197,36 @@ function StatisticItem({ children, value, comment }) {
       <span>{children}: </span>
       <span className="text-cyan-500 mx-2">{value}</span>
     </div>
+  );
+}
+
+function StatisticDeadItem({ children, value }) {
+  return (
+    <div className={"text-lg opacity-60"}>
+      <span>{children}: </span>
+      <span className={"mx-2 text-white"}>{value}</span>
+    </div>
+  );
+}
+
+function Name({ player }) {
+  return (
+    <span className={"italic"}>
+      <span className="relative inline-block rounded-full w-4 h-4 overflow-hidden ml-1 mr-1.5 translate-y-0.5">
+        <img src={player.avatarURL} alt="avatar" />
+      </span>
+      <span className={player.isBot ? "" : "text-yellow-500"}>
+        {player.name}
+      </span>
+    </span>
+  );
+}
+
+function DeadName({ player }) {
+  return (
+    <span className={"italic"}>
+      <span className="w-4 h-4 mr-0.5">☠️</span>
+      <span>{player.name}</span>
+    </span>
   );
 }

@@ -36,6 +36,7 @@ export function GameProvider({ children }) {
   const [botsDefeated, setBotsDefeated] = React.useState(false);
   const [roundsPlayed, setRoundsPlayed] = React.useState(0);
   const [gameCreationTimeStamp, setGameCreationTimeStamp] = React.useState();
+  const [botDefeatedList, setBotDefeatedList] = React.useState();
 
   const MONEY_EFFECT_DURATION = 0.5;
 
@@ -63,6 +64,7 @@ export function GameProvider({ children }) {
       setBotsDefeated(gameState.botsDefeated);
       setRoundsPlayed(gameState.roundsPlayed);
       setGameCreationTimeStamp(gameState.gameCreationTimeStamp);
+      setBotDefeatedList(gameState.botDefeatedList);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
@@ -207,6 +209,7 @@ export function GameProvider({ children }) {
     botsDefeated,
     roundsPlayed,
     gameCreationTimeStamp,
+    botDefeatedList,
     // Game state (end)
 
     takeAction,

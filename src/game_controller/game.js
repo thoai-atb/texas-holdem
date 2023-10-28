@@ -74,6 +74,7 @@ function createGame(
     lastChatTimeStamp: 0, // used to moderate bot chats - only belongs to bots
     gameCreationTimeStamp: Date.now(), // used for statistics
     starterStack: 1000,
+    botDefeatedList: [], // info about bots defeated
   };
 
   const playersLeftTheTable = {
@@ -237,9 +238,19 @@ function createGame(
     const ids = state.players.filter(
       (player) => player && player.isBot && player.stack < state.bigblindSize
     );
-    ids.forEach((id) => {
-      onInfo(`${id.name} was defeated and left the table`);
-      removePlayer(id.seatIndex);
+    ids.forEach((p) => {
+      onInfo(`${p.name} was defeated and left the table`);
+      // For statistics
+      state.botDefeatedList.push({
+        name: p.name,
+        isBot: p.isBot,
+        avatarURL: p.avatarURL,
+        timesWon: p.timesWon,
+        biggestPotWon: p.biggestPotWon,
+        botsDefeated: p.botsDefeated,
+        defeated: true,
+      });
+      removePlayer(p.seatIndex);
     });
     return ids.length; // number of bots defeated in round
   };
