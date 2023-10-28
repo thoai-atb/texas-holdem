@@ -1,5 +1,7 @@
 import React, { useContext } from "react";
 import { AppContext, useAppContext } from "../../App";
+import { CardDisplay } from "../game-play/Card";
+import { useGame } from "../../contexts/Game";
 
 export function GameRule({ hidden, setHidden }) {
   const { darkMode } = useContext(AppContext);
@@ -158,37 +160,15 @@ function HandRank({ title, rank }) {
 }
 
 function HandRankIllustrator({ hand }) {
+  const { gameTheme } = useGame();
   return (
     <div className="w-full justify-around flex gap-2 my-4">
       {hand.map((card) => (
-        <CardImage card={{ value: card[0], suit: card[1] }} />
+        <CardDisplay
+          card={{ value: card[0], suit: card[1] }}
+          theme={gameTheme}
+        />
       ))}
-    </div>
-  );
-}
-
-function CardImage({ card }) {
-  return (
-    <div
-      className={
-        "bg-white border border-black w-16 h-24 m-0.5 flex justify-center items-center select-none rounded-lg relative"
-      }
-    >
-      <div
-        className={
-          ["♥", "♦"].includes(card.suit) ? " text-red-600" : " text-black"
-        }
-      >
-        <div className="absolute top-0.5 left-1">
-          <div className="text-3xl h-6 font-bold font-playing-card">
-            {card.value}
-          </div>
-          <div className="text-3xl h-6 mt-0.5">{card.suit}</div>
-        </div>
-        <div className="absolute bottom-0 right-0 clear-both">
-          <div className="text-6xl">{card.suit}</div>
-        </div>
-      </div>
     </div>
   );
 }

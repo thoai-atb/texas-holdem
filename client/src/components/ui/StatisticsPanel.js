@@ -17,9 +17,9 @@ export function Statistics({ hidden, setHidden }) {
     botDefeatedList,
   } = useGame();
   const [gameTime, setGameTime] = useState("");
-  const [timesWonShowExtra, setTimesWonShowExtra] = useState(false);
-  const [biggestPotWonShowExtra, setBiggestPotWonShowExtra] = useState(false);
-  const [botsDefeatedShowExtra, setBotsDefeatedShowExtra] = useState(false);
+  const [timesWonShowAll, setTimesWonShowAll] = useState(false);
+  const [biggestPotWonShowAll, setBiggestPotWonShowAll] = useState(false);
+  const [botsDefeatedShowAll, setBotsDefeatedShowAll] = useState(false);
   useEffect(() => {
     if (appAction === "s_pressed") {
       playBubbleClick();
@@ -66,7 +66,7 @@ export function Statistics({ hidden, setHidden }) {
                   playersRanking[a.seatIndex] - playersRanking[b.seatIndex]
               )
               .map((p) => (
-                <StatisticItem key={p.name} value={playersRanking[p.seatIndex]}>
+                <StatisticItem key={p.id} value={playersRanking[p.seatIndex]}>
                   Rank of <Name player={p} />
                 </StatisticItem>
               ))}
@@ -78,27 +78,27 @@ export function Statistics({ hidden, setHidden }) {
               .filter((p) => p && !p.isBot)
               .sort((a, b) => b.timesWorked - a.timesWorked)
               .map((p) => (
-                <StatisticItem key={p.name} value={p.timesWorked}>
+                <StatisticItem key={p.id} value={p.timesWorked}>
                   Times <Name player={p} /> worked
                 </StatisticItem>
               ))}
           </StatisticHeader>
           <StatisticHeader
             title="Times won"
-            toggleExtra={() => setTimesWonShowExtra((s) => !s)}
-            extra={timesWonShowExtra}
+            toggleExtra={() => setTimesWonShowAll((s) => !s)}
+            extra={timesWonShowAll}
           >
             {players
-              .concat(timesWonShowExtra ? botDefeatedList : [])
+              .concat(timesWonShowAll ? botDefeatedList : [])
               .filter((p) => p && (!p.isBot || p.timesWon > 0))
               .sort((a, b) => b.timesWon - a.timesWon)
               .map((p) =>
                 p.defeated ? (
-                  <StatisticDeadItem key={p.name} value={p.timesWon}>
+                  <StatisticDeadItem key={p.id} value={p.timesWon}>
                     Times <DeadName player={p} /> won
                   </StatisticDeadItem>
                 ) : (
-                  <StatisticItem key={p.name} value={p.timesWon}>
+                  <StatisticItem key={p.id} value={p.timesWon}>
                     Times <Name player={p} /> won
                   </StatisticItem>
                 )
@@ -106,20 +106,20 @@ export function Statistics({ hidden, setHidden }) {
           </StatisticHeader>
           <StatisticHeader
             title="Biggest pot won"
-            toggleExtra={() => setBiggestPotWonShowExtra((s) => !s)}
-            extra={biggestPotWonShowExtra}
+            toggleExtra={() => setBiggestPotWonShowAll((s) => !s)}
+            extra={biggestPotWonShowAll}
           >
             {players
-              .concat(biggestPotWonShowExtra ? botDefeatedList : [])
+              .concat(biggestPotWonShowAll ? botDefeatedList : [])
               .filter((p) => p && (!p.isBot || p.biggestPotWon > 0))
               .sort((a, b) => b.biggestPotWon - a.biggestPotWon)
               .map((p) =>
                 p.defeated ? (
-                  <StatisticDeadItem key={p.name} value={`$${p.biggestPotWon}`}>
+                  <StatisticDeadItem key={p.id} value={`$${p.biggestPotWon}`}>
                     Biggest pot <DeadName player={p} /> won
                   </StatisticDeadItem>
                 ) : (
-                  <StatisticItem key={p.name} value={`$${p.biggestPotWon}`}>
+                  <StatisticItem key={p.id} value={`$${p.biggestPotWon}`}>
                     Biggest pot <Name player={p} /> won
                   </StatisticItem>
                 )
@@ -127,20 +127,20 @@ export function Statistics({ hidden, setHidden }) {
           </StatisticHeader>
           <StatisticHeader
             title="Bots defeated by players"
-            toggleExtra={() => setBotsDefeatedShowExtra((s) => !s)}
-            extra={botsDefeatedShowExtra}
+            toggleExtra={() => setBotsDefeatedShowAll((s) => !s)}
+            extra={botsDefeatedShowAll}
           >
             {players
-              .concat(botsDefeatedShowExtra ? botDefeatedList : [])
+              .concat(botsDefeatedShowAll ? botDefeatedList : [])
               .filter((p) => p && (!p.isBot || p.botsDefeated > 0))
               .sort((a, b) => b.botsDefeated - a.botsDefeated)
               .map((p) =>
                 p.defeated ? (
-                  <StatisticDeadItem key={p.name} value={p.botsDefeated}>
+                  <StatisticDeadItem key={p.id} value={p.botsDefeated}>
                     Bots defeated by <DeadName player={p} />
                   </StatisticDeadItem>
                 ) : (
-                  <StatisticItem key={p.name} value={p.botsDefeated}>
+                  <StatisticItem key={p.id} value={p.botsDefeated}>
                     Bots defeated by <Name player={p} />
                   </StatisticItem>
                 )
@@ -175,7 +175,7 @@ function StatisticHeader({ title, children, toggleExtra, extra }) {
         {title}
         {extra && (
           <span className="mx-2 opacity-50 font-normal text-white">
-            (extra)
+            (all)
           </span>
         )}
       </div>

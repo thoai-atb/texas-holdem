@@ -46,6 +46,8 @@ var chatLogging = true;
 // Init game
 const game = createGame(
   (onUpdate = broadcast),
+  (onStatisticsUpdate = broadcastStatistics),
+  (onSettingsUpdate = broadcastSettings),
   (onInfo = broadcastInfo),
   (onSoundEffect = playGameSoundFx),
   (onPlayerKicked = kickSocketPlayerEvent),
@@ -57,6 +59,14 @@ const game = createGame(
 // Update game state for all clients
 function broadcast() {
   io.sockets.emit("game_state", game.state);
+}
+
+function broadcastStatistics() {
+  io.sockets.emit("game_statistics", game.statistics);
+}
+
+function broadcastSettings() {
+  io.sockets.emit("game_settings", game.settings);
 }
 
 function broadcastInfo(desc) {
@@ -156,6 +166,8 @@ io.on("connection", (socket) => {
   socket.on("info_request", () => {
     socket.emit("seat_index", seatIndex);
     socket.emit("game_state", game.state);
+    socket.emit("game_statistics", game.statistics);
+    socket.emit("game_settings", game.settings);
   });
 
   // DISCONNECT
@@ -278,11 +290,14 @@ const playerCommands = {
   Kick: "kick",
   SetBlind: "set_blind",
   ToggleAutoFillBots: "auto_fill_bots",
+  SetTheme: "set_theme",
 };
 
 // COMMANDS - DEVELOPERS
 const devCommands = {
   HelpDev: "help_dev",
+  GetState: "state",
+  GetStatistics: "stats",
   Broadcast: "broadcast",
   Connections: "connections",
   Players: "players",
@@ -315,6 +330,10 @@ const executeCommand = (command, invoker = "Server") => {
     // === Execute dev command === //
     case devCommands.HelpDev:
       return "Developer commands: " + Object.values(devCommands).join(", ");
+    case devCommands.GetState:
+      return `Game state: ${JSON.stringify(game.state, null, 2)}`;
+    case devCommands.GetStatistics:
+      return `Game statistics: ${JSON.stringify(game.statistics, null, 2)}`;
     case devCommands.Connections:
       return `Number of connections: ${connections.length}`;
     case devCommands.Players:
@@ -434,6 +453,13 @@ const executeCommand = (command, invoker = "Server") => {
         else game.setBlinds(parseInt(params[0]), parseInt(params[1]));
       }
       broadcast();
+      break;
+    case playerCommands.SetTheme:
+      informCommand = true;
+      if (!arg) game.settings.gameTheme = "default";
+      else game.settings.gameTheme = arg;
+      informResponse = `Game theme is set to ${game.settings.gameTheme}`;
+      broadcastSettings();
       break;
     default:
       console.log(errConsoleString);

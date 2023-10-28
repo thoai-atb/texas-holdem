@@ -37,6 +37,7 @@ export function GameProvider({ children }) {
   const [roundsPlayed, setRoundsPlayed] = React.useState(0);
   const [gameCreationTimeStamp, setGameCreationTimeStamp] = React.useState();
   const [botDefeatedList, setBotDefeatedList] = React.useState();
+  const [gameTheme, setGameTheme] = React.useState("default");
 
   const MONEY_EFFECT_DURATION = 0.5;
 
@@ -61,10 +62,16 @@ export function GameProvider({ children }) {
       setDebugMode(gameState.debugMode);
       setCompleteActionSeat(gameState.completeActionSeat);
       setAllPlayersAllIn(gameState.allPlayersAllIn);
-      setBotsDefeated(gameState.botsDefeated);
-      setRoundsPlayed(gameState.roundsPlayed);
-      setGameCreationTimeStamp(gameState.gameCreationTimeStamp);
-      setBotDefeatedList(gameState.botDefeatedList);
+    });
+    socket.on("game_statistics", (statistics) => {
+      setBotsDefeated(statistics.botsDefeated);
+      setRoundsPlayed(statistics.roundsPlayed);
+      setGameCreationTimeStamp(statistics.gameCreationTimeStamp);
+      setBotDefeatedList(statistics.botDefeatedList);
+    });
+    socket.on("game_settings", (settings) => {
+      console.log("jsidf", settings);
+      setGameTheme(settings.gameTheme);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
@@ -210,6 +217,7 @@ export function GameProvider({ children }) {
     roundsPlayed,
     gameCreationTimeStamp,
     botDefeatedList,
+    gameTheme,
     // Game state (end)
 
     takeAction,
