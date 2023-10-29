@@ -5,7 +5,7 @@ import {
   indexFromPosition,
   positionFromIndex,
 } from "../../utilities/position_converter";
-import { Card } from "./Card";
+import { Card } from "./cards/Card";
 import { ChatBubble } from "./ChatBubble";
 import { PlayerRank } from "./PlayerRank";
 import { useAppContext } from "../../App";

@@ -1,6 +1,6 @@
 import React from "react";
 import { useGame } from "../../contexts/Game";
-import { Card } from "./Card";
+import { Card } from "./cards/Card";
 
 export function Board() {
   const { board, winners } = useGame();

@@ -21,7 +21,7 @@ export function WorkPanel({ hidden, setHidden }) {
   const [confirmResponse, setConfirmResponse] = useState(""); // when receive money
 
   function getDiff() {
-    const pool = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -2, -2, -2, -2, 3, 3];
+    const pool = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 3, 3];
     return pool[Math.floor(Math.random() * pool.length)];
   }
 

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { AppContext, useAppContext } from "../../App";
-import { CardDisplay } from "../game-play/Card";
+import { CardDisplay } from "../game-play/cards/Card";
 import { useGame } from "../../contexts/Game";
 
 export function GameRule({ hidden, setHidden }) {

@@ -20,18 +20,3 @@ export const CardValue = {
   QUEEN: "Q",
   KING: "K",
 };
-
-export function getHalloweenSymbol(cardSuit) {
-  switch (cardSuit) {
-    case CardSuit.SPADE:
-      return "🦇"; // Bat for Spades
-    case CardSuit.HEART:
-      return "🎃"; // Pumpkin for Hearts
-    case CardSuit.DIAMOND:
-      return "🧙"; // Spider for Diamonds
-    case CardSuit.CLUB:
-      return "🕸️"; // Ghost for Clubs
-    default:
-      return "Invalid Suit";
-  }
-}

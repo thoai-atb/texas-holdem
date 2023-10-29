@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { AppContext } from "../App";
 import { useSoundContext } from "./Sound";
-
 const GameContext = React.createContext({});
 
 export function GameProvider({ children }) {
@@ -70,7 +69,6 @@ export function GameProvider({ children }) {
       setBotDefeatedList(statistics.botDefeatedList);
     });
     socket.on("game_settings", (settings) => {
-      console.log("jsidf", settings);
       setGameTheme(settings.gameTheme);
     });
     socket.on("seat_index", (index) => {

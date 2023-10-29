@@ -19,6 +19,7 @@ import { DebugPanel } from "./components/ui/DebugPanel";
 import { WorkPanel } from "./components/ui/WorkPanel";
 import { Statistics } from "./components/ui/StatisticsPanel";
 import { GameRule } from "./components/ui/GameRule";
+import { Decoration } from "./components/ui/decoration/Decoration";
 
 export const AppContext = createContext({});
 export const useAppContext = () => useContext(AppContext);
@@ -206,6 +207,9 @@ function App() {
           {loggedIn && (
             <div>
               <GameProvider>
+                <div className="absolute w-full h-full justify-center items-center flex pb-28 overflow-hidden">
+                  <Decoration />
+                </div>
                 <div className="absolute w-full h-full justify-center items-center flex pb-28">
                   <Table />
                 </div>
