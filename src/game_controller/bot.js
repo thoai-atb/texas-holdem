@@ -27,7 +27,7 @@ const createBot = () => {
       // if (!game.state.players[game.state.turnIndex]) return;
       relativeThinking(game, foldAction, passiveAction, aggressiveAction);
       callback();
-    }, game.state.botSpeed + Math.random() * game.state.botSpeed);
+    }, game.settings.botSpeed + Math.random() * game.settings.botSpeed);
   };
 
   const relativeThinking = (
@@ -36,7 +36,7 @@ const createBot = () => {
     passiveAction,
     aggressiveAction
   ) => {
-    const thinkingOutLoud = game.state.debugMode; // CONSOLE LOG THOUGHT FOR DEBUGGING
+    const thinkingOutLoud = game.settings.debugMode; // CONSOLE LOG THOUGHT FOR DEBUGGING
     const think = (thought) => {
       thinkingOutLoud && console.log(thought);
     };

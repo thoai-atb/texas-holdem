@@ -38,8 +38,6 @@ const io = socket(server, {
 });
 
 const connections = [];
-
-const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const playerData = new Array(9).fill(null);
 var chatLogging = true;
 
@@ -52,7 +50,7 @@ const game = createGame(
   (onSoundEffect = playGameSoundFx),
   (onPlayerKicked = kickSocketPlayerEvent),
   (onChat = chatEvent),
-  (onNewRound = newRoundEvent),
+  (onEndRound = endRoundEvent),
   (gameConfig = config.Game)
 );
 
@@ -96,8 +94,16 @@ function kickSocketPlayerEvent(seatIndex) {
   }
 }
 
-function newRoundEvent() {
+function endRoundEvent() {
   io.sockets.emit("sound_effect", "chipsCollect");
+  if (!fs.existsSync("data")) {
+    fs.mkdirSync("data", { recursive: true });
+  }
+  fs.writeFileSync(
+    `data/${config.Server.SAVE_FILE}`,
+    JSON.stringify(game.getData(), null, 2),
+    "utf8"
+  );
 }
 
 function playGameSoundFx(sound) {
@@ -134,6 +140,9 @@ io.on("connection", (socket) => {
 
   // SELECT SEAT
   var seatIndex = game.randomAvailableSeat();
+  var savedData = game.getHumanPlayerData(name);
+  if (savedData && game.getAvailableSeats().includes(savedData.seatIndex))
+    seatIndex = savedData.seatIndex;
   if (seatIndex === -1) {
     const info = `${name} wanted to join the table but table was full`;
     broadcastInfo(info);
@@ -161,7 +170,7 @@ io.on("connection", (socket) => {
     name,
     socketId: socket.id,
   };
-  game.addPlayer(seatIndex, name);
+  game.addHumanPlayer(seatIndex, name);
   broadcast();
   socket.on("info_request", () => {
     socket.emit("seat_index", seatIndex);
@@ -181,7 +190,6 @@ io.on("connection", (socket) => {
     io.sockets.emit("sound_effect", "playerExit");
     connections.splice(connections.indexOf(socket), 1);
     playerData[seatIndex] = null;
-    availableSeats.push(seatIndex);
     game.removePlayer(seatIndex);
     if (playerData.every((player) => player === null)) {
       console.log("No players left");
@@ -310,6 +318,7 @@ const devCommands = {
   SetMoney: "set_money",
   SetStarterStack: "set_starter",
   Exit: "exit",
+  LoadGame: "load_game",
 };
 
 // Commands execution - returns a string to be displayed on player's chat if exists
@@ -339,7 +348,7 @@ const executeCommand = (command, invoker = "Server") => {
     case devCommands.Players:
       return `Players data: ${JSON.stringify(playerData, null, 2)}`;
     case devCommands.Seats:
-      return `Available seats: ${availableSeats}`;
+      return `Available seats: ${game.getAvailableSeats()}`;
     case devCommands.Broadcast:
       informCommand = true;
       broadcast();
@@ -355,19 +364,19 @@ const executeCommand = (command, invoker = "Server") => {
       break;
     case devCommands.ToggleBotSpeed:
       informCommand = true;
-      game.state.botSpeed = 1000 - game.state.botSpeed;
-      informResponse = `Bot speed is set to ${game.state.botSpeed}`;
+      game.settings.botSpeed = 1000 - game.settings.botSpeed;
+      informResponse = `Bot speed is set to ${game.settings.botSpeed}`;
       break;
     case devCommands.ToggleDebug:
       informCommand = true;
-      game.state.debugMode = !game.state.debugMode;
-      informResponse = `Debug mode is set to ${game.state.debugMode}`;
-      broadcast();
+      game.settings.debugMode = !game.settings.debugMode;
+      informResponse = `Debug mode is set to ${game.settings.debugMode}`;
+      broadcastSettings();
       break;
     case devCommands.ToggleLimit:
       informCommand = true;
-      game.state.limitGame = !game.state.limitGame;
-      informResponse = `Limit game is set to ${game.state.limitGame}`;
+      game.settings.limitGame = !game.settings.limitGame;
+      informResponse = `Limit game is set to ${game.settings.limitGame}`;
       broadcast();
       break;
     case devCommands.SetMoney:
@@ -387,6 +396,18 @@ const executeCommand = (command, invoker = "Server") => {
       informCommand = true;
       broadcast();
       break;
+    case devCommands.LoadGame:
+      try {
+        game.setData(
+          JSON.parse(fs.readFileSync(`data/${config.Server.SAVE_FILE}`))
+        );
+        io.disconnectSockets();
+      } catch (err) {
+        errStr = err.message;
+        console.log(errConsoleString);
+        return errStr;
+      }
+      break;
     case devCommands.Exit:
       process.exit();
 
@@ -405,8 +426,8 @@ const executeCommand = (command, invoker = "Server") => {
       break;
     case playerCommands.ToggleAutoFillBots:
       informCommand = true;
-      game.state.endRoundAutoFillBots = !game.state.endRoundAutoFillBots;
-      informResponse = `Auto fill bots is set to ${game.state.endRoundAutoFillBots}`;
+      game.settings.endRoundAutoFillBots = !game.settings.endRoundAutoFillBots;
+      informResponse = `Auto fill bots is set to ${game.settings.endRoundAutoFillBots}`;
       broadcast();
       break;
     case playerCommands.ClearBots:

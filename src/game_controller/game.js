@@ -1,7 +1,7 @@
 const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
-const { generateBotName, getRandomPhrase } = require("./utils");
+const { generateBotName, getRandomPhrase, replaceObj } = require("./utils");
 const createBot = require("./bot");
 const robohashAvatars = require("robohash-avatars");
 const {
@@ -26,7 +26,7 @@ function createGame(
   onSoundEffect,
   onPlayerKicked,
   onChat,
-  onNewRound,
+  onEndRound,
   gameConfig
 ) {
   /*****************************************************************************
@@ -63,18 +63,15 @@ function createGame(
     bigblindIncrement: 10,
     bigblindSize: 10,
     minRaiseSize: 0,
-    debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
     winAmount: 0,
     showDown: false, // is the game announcing the winner?
     allPlayersAllIn: false, // is all players alled in? - no more actions from here?
-    botSpeed: 1000, // how long should bots think?
-    limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
-    limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
-    endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
     lastChatTimeStamp: 0, // used to moderate bot chats - only belongs to bots
-    starterStack: 1000,
   };
 
+  /**************************************************************************************
+  |  This game statistics will be passed on to client after every ending of a round.    |
+  **************************************************************************************/
   const statistics = {
     botsDefeated: 0,
     roundsPlayed: 0,
@@ -82,19 +79,82 @@ function createGame(
     botDefeatedList: [], // info about bots defeated
   };
 
+  /**************************************************************************************
+  |  This game settings will be passed on to client after a global setting has changed. |
+  **************************************************************************************/
   const settings = {
     gameTheme: "default", // halloween
+    debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
+    botSpeed: 1000, // how long should bots think?
+    limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
+    limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
+    endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
+    starterStack: 1000,
   };
 
-  const playersLeftTheTable = {
+  /**************************************************************************************
+  |  This data is to keep track if human players left the table and then come back.     |
+  **************************************************************************************/
+  const humanPlayersData = {
     /*
       "John": { stack: 200, timesWorked: 1, timesWon: 1000, botsDefeated: 2 }
     */
   };
 
+  const updateHumanPlayerData = (player) => {
+    humanPlayersData[player.name] = {
+      seatIndex: player.seatIndex,
+      stack: player.stack,
+      timesWorked: player.timesWorked,
+      timesWon: player.timesWon,
+      botsDefeated: player.botsDefeated,
+      biggestPotWon: player.biggestPotWon,
+    };
+  };
+
+  const getHumanPlayerData = (name) => {
+    return humanPlayersData[name];
+  };
+
+  // Get data (to be saved in a file)
+  const getData = () => {
+    return {
+      settings,
+      statistics,
+      humanPlayersData,
+      state,
+    };
+  };
+
+  // Load data (from the saved file)
+  const setData = (data) => {
+    replaceObj(settings, data.settings);
+    replaceObj(statistics, data.statistics);
+    replaceObj(humanPlayersData, data.humanPlayersData);
+    replaceObj(state, data.state);
+    for (let i = 0; i < state.players.length; i++) {
+      // remove human players
+      if (state.players[i] && !state.players[i].isBot) {
+        state.players[i] = null;
+      }
+    }
+  };
+
+  /* =======================================
+  |         CREATE BOT PROCESSOR           |
+  ======================================= */
+  const botProcessor = createBot();
+
   /* =======================================
   |         ADD & REMOVE PLAYERS           |
   ======================================= */
+  const getAvailableSeats = () => {
+    const availableSeats = [];
+    for (let i = 0; i < 9; i++) {
+      if (!state.players[i]) availableSeats.push(i);
+    }
+    return availableSeats;
+  };
 
   const randomAvailableSeat = () => {
     const availableSeats = [];
@@ -119,7 +179,7 @@ function createGame(
     return false;
   };
 
-  const addPlayer = (seatIndex, name) => {
+  const addHumanPlayer = (seatIndex, name) => {
     var avatarURL = robohashAvatars.generateAvatar({
       username: name,
       background: robohashAvatars.BackgroundSets.RandomBackground1,
@@ -128,13 +188,13 @@ function createGame(
       width: 400,
     });
     if (state.players[seatIndex]) return false;
-    var saved = playersLeftTheTable;
-    var id = name in saved ? saved[name].id : randomId();
-    var stack = name in saved ? saved[name].stack : game.state.starterStack;
-    var timesWorked = name in saved ? saved[name].timesWorked : 0;
-    var timesWon = name in saved ? saved[name].timesWon : 0;
-    var botsDefeated = name in saved ? saved[name].botsDefeated : 0;
-    var biggestPotWon = name in saved ? saved[name].biggestPotWon : 0;
+    var savedData = getHumanPlayerData(name);
+    var id = savedData ? savedData.id : randomId();
+    var stack = savedData ? savedData.stack : game.settings.starterStack;
+    var timesWorked = savedData ? savedData.timesWorked : 0;
+    var timesWon = savedData ? savedData.timesWon : 0;
+    var botsDefeated = savedData ? savedData.botsDefeated : 0;
+    var biggestPotWon = savedData ? savedData.biggestPotWon : 0;
     state.players[seatIndex] = {
       id,
       seatIndex,
@@ -167,7 +227,7 @@ function createGame(
 
   const fillBots = () => {
     for (let i = 0; i < 9; i++) {
-      if (state.players[i] === null && state.bigblindSize <= state.starterStack)
+      if (state.players[i] === null && state.bigblindSize <= settings.starterStack)
         addBot(generateBotName());
     }
   };
@@ -184,10 +244,9 @@ function createGame(
       id: randomId(),
       seatIndex,
       name,
-      bot: createBot(),
       isBot: true,
       avatarURL,
-      stack: state.starterStack,
+      stack: settings.starterStack,
       ready: true,
       cards: [],
       working: false,
@@ -226,13 +285,7 @@ function createGame(
     }
     if (!state.players[seatIndex]) return;
     var player = state.players[seatIndex];
-    playersLeftTheTable[player.name] = {
-      stack: player.stack,
-      timesWorked: player.timesWorked,
-      timesWon: player.timesWon,
-      botsDefeated: player.botsDefeated,
-      biggestPotWon: player.biggestPotWon,
-    };
+    if (!player.isBot) updateHumanPlayerData(player);
     state.players[seatIndex] = null;
     if (!state.playing)
       state.players.forEach((player) => {
@@ -332,7 +385,7 @@ function createGame(
   };
 
   const setStarterStack = (amount) => {
-    state.starterStack = amount;
+    settings.starterStack = amount;
   };
 
   /* =======================================
@@ -625,7 +678,7 @@ function createGame(
     const lastBet = state.bets[state.turnIndex]; // player's bet already on the table
     const toCall = state.currentBetSize - lastBet;
     const stack = state.players[state.turnIndex].stack; // player's remaining chips
-    const maxLimitMultiplier = state.limitBetMultiplier;
+    const maxLimitMultiplier = settings.limitBetMultiplier;
 
     // FOLD & CALL
     if (toCall > 0 && stack > 0) {
@@ -652,7 +705,7 @@ function createGame(
       stack + lastBet > state.currentBetSize
     ) {
       let maxSize = stack + lastBet - state.currentBetSize; // no-limit
-      if (game.state.limitGame) {
+      if (game.settings.limitGame) {
         maxSize = Math.min(
           Math.max(
             maxLimitMultiplier * state.bigblindSize,
@@ -675,7 +728,7 @@ function createGame(
     // BET
     if (!state.allPlayersAllIn && state.currentBetSize === 0 && stack > 0) {
       let maxSize = stack; // no-limit
-      if (game.state.limitGame) {
+      if (game.settings.limitGame) {
         maxSize = Math.min(
           Math.max(
             maxLimitMultiplier * state.bigblindSize,
@@ -695,8 +748,7 @@ function createGame(
 
     // CHECK FOR BOT TURN
     if (!state.players[state.turnIndex]?.isBot) return;
-    let bot = state.players[state.turnIndex].bot;
-    bot.takeAction(game, onUpdate);
+    botProcessor.takeAction(game, onUpdate);
     onUpdate();
   };
 
@@ -793,7 +845,7 @@ function createGame(
       }
     });
 
-    if (state.endRoundAutoFillBots) fillBots();
+    if (settings.endRoundAutoFillBots) fillBots();
     var botsDefeated = removeBrokeBots();
     if (botsDefeated > 0) {
       statistics.botsDefeated += botsDefeated;
@@ -803,13 +855,17 @@ function createGame(
       }
     }
 
+    // Update data
+    for (var player of state.players)
+      if (player && !player.isBot) updateHumanPlayerData(player);
+
     // Prepare for next round
     updateRankings();
     nextButton();
+    onEndRound();
     checkToStart();
     onUpdate();
     onStatisticsUpdate();
-    onNewRound();
   };
 
   const deal = (seatIndex) => {
@@ -872,7 +928,8 @@ function createGame(
     raise,
     nameExisted,
     checkIsBot,
-    addPlayer,
+    addHumanPlayer,
+    getHumanPlayerData,
     setBot,
     addBot,
     fillBots,
@@ -888,10 +945,13 @@ function createGame(
     setWorking,
     nextTurn,
     nextButton,
+    getAvailableSeats,
     randomAvailableSeat,
     setBlinds,
     setBlindAllIn,
     setStarterStack,
+    getData,
+    setData,
   };
 
   return game;

@@ -42,7 +42,6 @@ export function GameProvider({ children }) {
 
   useEffect(() => {
     socket.on("game_state", (gameState) => {
-      if (gameState.debugMode) console.log("game state update", { gameState });
       setDeck(gameState.deck);
       setPlayers(gameState.players);
       setBets(gameState.bets);
@@ -58,7 +57,6 @@ export function GameProvider({ children }) {
       setAvailableActions(gameState.availableActions);
       setBigblindSize(gameState.bigblindSize);
       setWinners(gameState.winners);
-      setDebugMode(gameState.debugMode);
       setCompleteActionSeat(gameState.completeActionSeat);
       setAllPlayersAllIn(gameState.allPlayersAllIn);
     });
@@ -70,6 +68,7 @@ export function GameProvider({ children }) {
     });
     socket.on("game_settings", (settings) => {
       setGameTheme(settings.gameTheme);
+      setDebugMode(settings.debugMode);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
