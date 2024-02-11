@@ -20,6 +20,7 @@ export function Statistics({ hidden, setHidden }) {
   const [timesWonShowAll, setTimesWonShowAll] = useState(false);
   const [biggestPotWonShowAll, setBiggestPotWonShowAll] = useState(false);
   const [botsDefeatedShowAll, setBotsDefeatedShowAll] = useState(false);
+  const [moneyDonatedShowAll, setMoneyDonatedShowAll] = useState(false);
   useEffect(() => {
     if (appAction === "s_pressed") {
       playBubbleClick();
@@ -142,6 +143,27 @@ export function Statistics({ hidden, setHidden }) {
                 ) : (
                   <StatisticItem key={p.id} value={p.botsDefeated}>
                     Bots defeated by <Name player={p} />
+                  </StatisticItem>
+                )
+              )}
+          </StatisticHeader>
+          <StatisticHeader
+            title="Money donated"
+            toggleExtra={() => setMoneyDonatedShowAll((s) => !s)}
+            extra={moneyDonatedShowAll}
+          >
+            {players
+              .concat(moneyDonatedShowAll ? botDefeatedList : [])
+              .filter((p) => p && (!p.isBot || p.donated !== 0))
+              .sort((a, b) => b.donated - a.donated)
+              .map((p) =>
+                p.defeated ? (
+                  <StatisticDeadItem key={p.id} value={"$" + Math.abs(p.donated)}>
+                    {p.donated < 0 ? "Received by" : "Money donated by"} <DeadName player={p} />
+                  </StatisticDeadItem>
+                ) : (
+                  <StatisticItem key={p.id} value={"$" + Math.abs(p.donated)}>
+                    {p.donated < 0 ? "Received by" : "Money donated by"} <Name player={p} />
                   </StatisticItem>
                 )
               )}

@@ -1,20 +1,13 @@
 import { useContext, useEffect } from "react";
 import { AppContext } from "../../App";
 import { useGame } from "../../contexts/Game";
-import { useSoundContext } from "../../contexts/Sound";
+import { PanelButton } from "./PanelButton";
 
 export function FirstPlayerDialog() {
   const { showFirstPlayerDialog, setShowFirstPlayerDialog, socket } =
     useContext(AppContext);
   const { players } = useGame();
-  const { playBubbleClick } = useSoundContext();
   const numPlayers = players.filter((p) => p).length;
-  function handleAction(func) {
-    return () => {
-      playBubbleClick();
-      func();
-    };
-  }
   useEffect(() => {
     if (numPlayers === 1) {
       setShowFirstPlayerDialog(true);
@@ -37,28 +30,17 @@ export function FirstPlayerDialog() {
         <div className="flex items-center justify-center gap-4">
           <PanelButton
             text="No"
-            onClick={handleAction(() => setShowFirstPlayerDialog(false))}
+            onClick={() => setShowFirstPlayerDialog(false)}
           />
           <PanelButton
             text="Yes"
-            onClick={handleAction(() => {
+            onClick={() => {
               setShowFirstPlayerDialog(false);
               socket.emit("chat_message", "/fill_bots");
-            })}
+            }}
           />
         </div>
       </div>
     </>
-  );
-}
-
-function PanelButton({ text, onClick = () => {} }) {
-  return (
-    <div
-      onClick={onClick}
-      className="flex w-full items-center justify-center rounded-full px-4 py-1 font-bold bg-slate-700 text-cyan-500 h-16 my-4 text-lg whitespace-nowrap hover:bg-slate-800 cursor-pointer active:scale-95"
-    >
-      {text}
-    </div>
   );
 }

@@ -9,6 +9,7 @@ import { Card } from "./cards/Card";
 import { ChatBubble } from "./ChatBubble";
 import { PlayerRank } from "./PlayerRank";
 import { useAppContext } from "../../App";
+import { useSoundContext } from "../../contexts/Sound";
 
 export function Hand({ style, position }) {
   const {
@@ -23,7 +24,8 @@ export function Hand({ style, position }) {
     allPlayersAllIn,
     MONEY_EFFECT_DURATION,
   } = useGame();
-  const { darkMode } = useAppContext();
+  const { darkMode, setDonationSelection } = useAppContext();
+  const { playBubbleClick } = useSoundContext();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
   const handPlayer = players[positionIndex];
@@ -36,7 +38,10 @@ export function Hand({ style, position }) {
   const showCard = showDown || allPlayersAllIn || position === 0;
   return (
     <div
-      className={"w-0 h-0 flex justify-center items-center cursor-pointer"}
+      className={
+        "w-0 h-0 flex justify-center items-center " +
+        (!isPlaying && positionIndex !== seatIndex ? "cursor-pointer" : "")
+      }
       style={style}
     >
       <div
@@ -54,6 +59,12 @@ export function Hand({ style, position }) {
               : " opacity-50"
             : "")
         }
+        onClick={() => {
+          if (!isPlaying && positionIndex !== seatIndex) {
+            playBubbleClick();
+            setDonationSelection(positionIndex);
+          }
+        }}
       >
         {(!handPlayer.folded || position === 0) && (
           <div

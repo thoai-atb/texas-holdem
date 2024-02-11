@@ -131,6 +131,9 @@ function playGameSoundFx(sound) {
   if (["flip"].includes(sound)) {
     io.sockets.emit("sound_effect", "flip");
   }
+  if (["donate"].includes(sound)) {
+    io.sockets.emit("sound_effect", "donate");
+  }
 }
 
 // On connection, assign callbacks to socket to handle events
@@ -247,12 +250,18 @@ io.on("connection", (socket) => {
         game.setWorking(seatIndex, false);
         game.addMoney(name, 1000);
         game.earnTimesWorked(seatIndex);
-        const info = `${name} worked hard and earned $1000`;
-        const response = `${name}: ${action.response}`;
+        var info = `${name} worked hard and earned $1000`;
+        var response = `${name}: ${action.response}`;
         broadcastInfo(info);
         broadcastInfo(response);
         console.log(info);
         console.log(response);
+        broadcast();
+        break;
+      case "donate":
+        var info = game.donate(name, action.target, action.amount);
+        broadcastInfo(info);
+        console.log(info);
         broadcast();
         break;
       default:
@@ -346,7 +355,7 @@ const executeCommand = (command, invoker = "Server") => {
     case devCommands.Connections:
       return `Number of connections: ${connections.length}`;
     case devCommands.Players:
-      return `Players data: ${JSON.stringify(playerData, null, 2)}`;
+      return `Players data: ${JSON.stringify(game.state.players, null, 2)}`;
     case devCommands.Seats:
       return `Available seats: ${game.getAvailableSeats()}`;
     case devCommands.Broadcast:

@@ -128,6 +128,7 @@ export const useSoundHandler = ({ socket, muted }) => {
       if (sound === "winStronger") playWinB();
       if (sound === "flip") playFlip();
       if (sound === "chipsCollect") playMiscSound("chips-collect");
+      if (sound === "donate") playMiscSound("cash-register");
       if (sound === "playerJoin") playMiscSound("bell");
       if (sound === "playerExit") playMiscSound("door");
       if (sound === "claps") playMiscSound("claps");

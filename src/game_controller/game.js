@@ -103,12 +103,14 @@ function createGame(
 
   const updateHumanPlayerData = (player) => {
     humanPlayersData[player.name] = {
+      id: player.id,
       seatIndex: player.seatIndex,
       stack: player.stack,
       timesWorked: player.timesWorked,
       timesWon: player.timesWon,
       botsDefeated: player.botsDefeated,
       biggestPotWon: player.biggestPotWon,
+      donated: player.donated,
     };
   };
 
@@ -195,6 +197,7 @@ function createGame(
     var timesWon = savedData ? savedData.timesWon : 0;
     var botsDefeated = savedData ? savedData.botsDefeated : 0;
     var biggestPotWon = savedData ? savedData.biggestPotWon : 0;
+    var donated = savedData ? savedData.donated : 0;
     state.players[seatIndex] = {
       id,
       seatIndex,
@@ -207,6 +210,7 @@ function createGame(
       timesWon: timesWon,
       botsDefeated: botsDefeated,
       biggestPotWon: biggestPotWon,
+      donated: donated,
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
@@ -227,7 +231,10 @@ function createGame(
 
   const fillBots = () => {
     for (let i = 0; i < 9; i++) {
-      if (state.players[i] === null && state.bigblindSize <= settings.starterStack)
+      if (
+        state.players[i] === null &&
+        state.bigblindSize <= settings.starterStack
+      )
         addBot(generateBotName());
     }
   };
@@ -253,6 +260,7 @@ function createGame(
       timesWon: 0,
       botsDefeated: 0,
       biggestPotWon: 0,
+      donated: 0,
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
@@ -365,6 +373,24 @@ function createGame(
     return state.players[seatIndex].timesWorked;
   };
 
+  const donate = (fromName, toName, amount) => {
+    var amount = Math.max(
+      0,
+      Math.min(parseInt(amount), game.getPlayerByName(fromName).stack)
+    );
+    if (toName === fromName)
+      return `Cannot donate to the same player: ${toName}`;
+    var info = `${fromName} donated $${amount} to ${toName}`;
+    var toPlayer = getPlayerByName(toName);
+    var fromPlayer = getPlayerByName(fromName);
+    toPlayer.stack += amount;
+    fromPlayer.stack -= amount;
+    toPlayer.donated -= amount;
+    fromPlayer.donated += amount;
+    onSoundEffect("donate");
+    return info;
+  };
+
   const setWorking = (seatIndex, working) => {
     state.players[seatIndex].working = working;
   };
@@ -426,6 +452,13 @@ function createGame(
         (player) => player?.cards?.length && !player.folded && player.stack != 0
       ).length <= 1
     );
+  };
+
+  const getPlayerByName = (name) => {
+    const seatIndex = state.players.findIndex(
+      (player) => player && player.name === name
+    );
+    return state.players[seatIndex];
   };
 
   /* =======================================
@@ -934,6 +967,7 @@ function createGame(
     addBot,
     fillBots,
     clearBots,
+    getPlayerByName,
     removePlayerByName,
     removePlayer,
     removeBrokeBots,
@@ -942,6 +976,7 @@ function createGame(
     setMoney,
     addMoney,
     earnTimesWorked,
+    donate,
     setWorking,
     nextTurn,
     nextButton,

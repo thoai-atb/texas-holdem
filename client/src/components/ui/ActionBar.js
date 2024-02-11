@@ -238,8 +238,9 @@ export const ActionButton = ({
   }, [availableAction, currentBetSize, minBetLevel]);
 
   useEffect(() => {
-    if (inputRef?.current) inputRef.current.value = betLevel;
-  }, [betLevel]);
+    if (inputRef?.current)
+      inputRef.current.value = isFinite(betLevel) ? betLevel : minBetLevel;
+  }, [betLevel, minBetLevel]);
 
   return (
     <div

@@ -20,6 +20,7 @@ import { WorkPanel } from "./components/ui/WorkPanel";
 import { Statistics } from "./components/ui/StatisticsPanel";
 import { GameRule } from "./components/ui/GameRule";
 import { Decoration } from "./components/ui/decoration/Decoration";
+import { Donation } from "./components/ui/Donation";
 
 export const AppContext = createContext({});
 export const useAppContext = () => useContext(AppContext);
@@ -45,8 +46,15 @@ function App() {
   const [showWorkPanel, setShowWorkPanel] = useState(false); // work for money, money is life
   const [appAction, setAppAction] = useState(null); // events for app's children - such as keyboard shortcuts
   const [darkMode, setDarkMode] = useState(true);
+  const [donationSelection, setDonationSelection] = useState(-1);
+  const [showDonation, setShowDonation] = useState(false);
   const { localStorage } = window;
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (donationSelection >= 0) setShowDonation(true);
+    else setShowDonation(false);
+  }, [donationSelection]);
 
   const {
     playBubbleClick,
@@ -123,6 +131,9 @@ function App() {
       if (e.key === "Escape") {
         setAppAction("escape_pressed");
       }
+      if (e.key === "Enter") {
+        setAppAction("enter_pressed");
+      }
     };
     document.addEventListener("keydown", keyDown);
     return () => {
@@ -172,6 +183,8 @@ function App() {
         showGameRule,
         appAction,
         darkMode,
+        donationSelection,
+        showDonation,
         setAutoCheckCall,
         setAutoCheckFold,
         setMuted,
@@ -183,6 +196,8 @@ function App() {
         setAppAction,
         setDarkMode,
         setShowGameRule,
+        setDonationSelection,
+        setShowDonation,
       }}
     >
       <SoundContext.Provider
@@ -255,6 +270,12 @@ function App() {
                   <ControlPanel
                     hidden={!showControlPanel}
                     setHidden={(hidden) => setShowControlPanel(!hidden)}
+                  />
+                </div>
+                <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
+                  <Donation
+                    hidden={!showDonation}
+                    setHidden={(hidden) => hidden && setDonationSelection(-1)}
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
