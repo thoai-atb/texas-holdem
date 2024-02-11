@@ -3,6 +3,7 @@ import { useGame } from "../../../contexts/Game";
 import cardBack from "../../../assets/texture/card-back.png";
 import { CardDisplayHalloween } from "./CardDisplayHalloween";
 import { CardDisplayChristmas } from "./CardDisplayChristmas";
+import { CardDisplayTet } from "./CardDisplayTet";
 
 export function Card({ card, hidden }) {
   const { winners, gameTheme } = useGame();
@@ -37,6 +38,15 @@ export function CardDisplay({ card, hidden, showDown, highlight, theme }) {
   if (theme === "christmas")
     return (
       <CardDisplayChristmas
+        card={card}
+        hidden={hidden}
+        showDown={showDown}
+        highlight={highlight}
+      />
+    );
+  if (theme === "tet")
+    return (
+      <CardDisplayTet
         card={card}
         hidden={hidden}
         showDown={showDown}
