@@ -22,9 +22,11 @@ export function Hand({ style, position }) {
     betTypes,
     bigblindSize,
     allPlayersAllIn,
+    coverCard,
     MONEY_EFFECT_DURATION,
   } = useGame();
-  const { darkMode, setDonationSelection } = useAppContext();
+  const { darkMode, setDonationSelection, coverCardMode } =
+    useAppContext();
   const { playBubbleClick } = useSoundContext();
   const positionIndex = indexFromPosition(position, seatIndex);
   if (!players || !players[positionIndex]) return null;
@@ -35,7 +37,10 @@ export function Hand({ style, position }) {
     ? "fold"
     : betTypes[positionIndex];
   const isBroke = !handPlayer.cards?.length && handPlayer.stack < bigblindSize;
-  const showCard = showDown || allPlayersAllIn || position === 0;
+  const showCard =
+    showDown ||
+    allPlayersAllIn ||
+    (position === 0 && (!coverCard || !coverCardMode));
   return (
     <div
       className={

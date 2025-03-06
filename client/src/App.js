@@ -48,6 +48,8 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [donationSelection, setDonationSelection] = useState(-1);
   const [showDonation, setShowDonation] = useState(false);
+  const [coverCardMode, setCoverCardMode] = useState(false); // The mode to hide the player's cards from others sitting nearby the monitor
+
   const { localStorage } = window;
   const containerRef = useRef(null);
 
@@ -60,6 +62,7 @@ function App() {
     playBubbleClick,
     playBubbleChat,
     playStickClick,
+    playFlip,
     playMiscSound,
     volume,
     setVolume,
@@ -125,6 +128,10 @@ function App() {
       if (e.key === "w" || e.key === "W") {
         setAppAction("w_pressed");
       }
+      if (e.key === "c" || e.key === "C") {
+        playStickClick();
+        setCoverCardMode((show) => !show);
+      }
       if (e.key === " ") {
         setAppAction("space_pressed");
       }
@@ -134,10 +141,22 @@ function App() {
       if (e.key === "Enter") {
         setAppAction("enter_pressed");
       }
+      if (e.key === "Shift") {
+        setAppAction("shift_pressed");
+      }
+    };
+    const keyUp = (e) => {
+      if (!loggedIn) return;
+      if (disableShortcuts) return;
+      if (e.key === "Shift") {
+        setAppAction("shift_released");
+      }
     };
     document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
     return () => {
       document.removeEventListener("keydown", keyDown);
+      document.removeEventListener("keyup", keyUp);
     };
   }, [loggedIn, chatHidden, playStickClick, disableShortcuts]);
 
@@ -185,6 +204,7 @@ function App() {
         darkMode,
         donationSelection,
         showDonation,
+        coverCardMode,
         setAutoCheckCall,
         setAutoCheckFold,
         setMuted,
@@ -198,6 +218,7 @@ function App() {
         setShowGameRule,
         setDonationSelection,
         setShowDonation,
+        setCoverCardMode,
       }}
     >
       <SoundContext.Provider
@@ -205,6 +226,7 @@ function App() {
           playBubbleClick,
           playBubbleChat,
           playStickClick,
+          playFlip,
           playMiscSound,
           volume,
           setVolume,

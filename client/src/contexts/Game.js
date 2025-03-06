@@ -11,8 +11,9 @@ export function GameProvider({ children }) {
     appAction,
     setAppAction,
     setShowWorkPanel,
+    coverCardMode,
   } = useContext(AppContext);
-  const { playBubbleClick } = useSoundContext();
+  const { playBubbleClick, playFlip } = useSoundContext();
   const [deck, setDeck] = React.useState([]);
   const [players, setPlayers] = React.useState([]);
   const [bets, setBets] = React.useState([]);
@@ -37,6 +38,7 @@ export function GameProvider({ children }) {
   const [gameCreationTimeStamp, setGameCreationTimeStamp] = React.useState();
   const [botDefeatedList, setBotDefeatedList] = React.useState();
   const [gameTheme, setGameTheme] = React.useState("default");
+  const [coverCard, setCoverCard] = React.useState(true); // The actual state of the cover card
 
   const MONEY_EFFECT_DURATION = 0.5;
 
@@ -173,6 +175,16 @@ export function GameProvider({ children }) {
           }
         }
     }
+    if (appAction === "shift_pressed") {
+      setAppAction(null);
+      if (coverCardMode)
+        playFlip();
+      setCoverCard(false);
+    }
+    if (appAction === "shift_released") {
+      setAppAction(null);
+      setCoverCard(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     appAction,
@@ -181,7 +193,7 @@ export function GameProvider({ children }) {
     availableActions,
     bigblindSize,
     isPlaying,
-    playBubbleClick,
+    playFlip,
     players,
     seatIndex,
     setShowWorkPanel,
@@ -217,6 +229,7 @@ export function GameProvider({ children }) {
     gameTheme,
     // Game state (end)
 
+    coverCard,
     takeAction,
     MONEY_EFFECT_DURATION,
   };

@@ -33,7 +33,7 @@ export function Donation({ hidden, setHidden }) {
   });
 
   useEffect(() => {
-    if (appAction === "enter_pressed") {
+    if (appAction === "enter_pressed" && !hidden) {
       setAppAction("");
       donate();
     }

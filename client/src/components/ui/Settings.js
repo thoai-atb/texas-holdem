@@ -18,6 +18,8 @@ export function Settings() {
     setAutoCheckFold,
     darkMode,
     setDarkMode,
+    coverCardMode,
+    setCoverCardMode,
   } = useContext(AppContext);
   const { playStickClick } = useSoundContext();
   if (!showSettings) return null;
@@ -54,6 +56,12 @@ export function Settings() {
           shortcut="R"
           active={showHandStatistics}
           onToggle={handleAction(() => setShowHandStatistics((s) => !s))}
+        />
+        <ToggleField
+          label="Cover card with Shift"
+          shortcut="C"
+          active={coverCardMode}
+          onToggle={handleAction(() => setCoverCardMode((s) => !s))}
         />
         <ToggleField
           label="AFK mode (check/call)"
