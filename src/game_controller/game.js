@@ -89,7 +89,7 @@ function createGame(
     limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
-    starterStack: 1000,
+    starterStack: 2000,
   };
 
   /**************************************************************************************

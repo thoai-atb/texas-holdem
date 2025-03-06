@@ -400,7 +400,7 @@ const executeCommand = (command, invoker = "Server") => {
       broadcast();
       break;
     case devCommands.SetStarterStack:
-      if (!arg) game.setStarterStack(1000);
+      if (!arg) game.setStarterStack(2000);
       else game.setStarterStack(parseInt(arg));
       informCommand = true;
       broadcast();
@@ -460,11 +460,11 @@ const executeCommand = (command, invoker = "Server") => {
         console.log(errConsoleString);
         return errStr;
       }
-      if (game.state.playing) {
-        errStr = "This command can only be used while not playing";
-        console.log(errConsoleString);
-        return errStr;
-      }
+      // if (game.state.playing) {
+      //   errStr = "This command can only be used while not playing";
+      //   console.log(errConsoleString);
+      //   return errStr;
+      // }
       if (!game.removePlayerByName(arg)) {
         errStr = `Could not kick player with name ${arg}`;
         console.log(errConsoleString);
