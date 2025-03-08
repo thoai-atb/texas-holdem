@@ -345,7 +345,7 @@ function App() {
               (darkMode ? " text-cyan-300" : " text-slate-700")
             }
           >
-            @ 2022 Thoai Ly. All Rights Reserved.
+            &copy; 2022 Thoai Ly
           </div>
         </div>
       </SoundContext.Provider>
