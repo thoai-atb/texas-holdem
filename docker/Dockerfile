@@ -15,14 +15,11 @@ RUN npm install -g react-scripts
 # Clone the Texas Hold'em repository
 RUN git clone https://github.com/thoai-atb/texas-holdem.git
 
-# Get the latest Git commit short hash and set it as an ENV variable
-WORKDIR /app/texas-holdem
-RUN git rev-parse --short HEAD > .git_commit
-ARG GIT_COMMIT=$(cat .git_commit)
-ENV GIT_COMMIT=$GIT_COMMIT
-
 # Replace package.json with package.linux.json from the build folder
 COPY package.linux.json /app/texas-holdem/package.json
+
+# Set the working directory
+WORKDIR /app/texas-holdem
 
 # Install dependencies and build the project
 RUN npm run install-deps && npm run build
@@ -33,6 +30,6 @@ RUN chmod +x /app/texas-holdem/build/start.sh
 # Expose ports
 EXPOSE 40143
 
-# Start the application from the correct directory
+# Start the application from the build directory
 WORKDIR /app/texas-holdem/build
 CMD ["./start.sh"]
