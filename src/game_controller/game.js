@@ -88,10 +88,10 @@ function createGame(
     debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
     botSpeed: 1000, // how long should bots think?
     limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
-    limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
+    limitBetMultiplier: parseInt(gameConfig.LIMIT_BET_MULTIPLIER), // if limit bet size is true, this limit multiplier is used
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
-    starterStack: gameConfig.STARTER_STACK,
-    timeWaitToStart: gameConfig.TIME_WAIT_TO_START, // time wait to start the game after enough players are ready
+    starterStack: parseInt(gameConfig.STARTER_STACK),
+    timeWaitToStart: parseInt(gameConfig.TIME_WAIT_TO_START), // time wait to start the game after enough players are ready
   };
 
   /**************************************************************************************

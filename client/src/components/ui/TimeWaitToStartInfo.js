@@ -18,7 +18,8 @@ export function TimeWaitToStartInfo() {
   }, [gameStartTimeStamp, timeWaitToStart]);
 
   return (
-    gameStartTimeStamp && timeLeft >= 0 && (
+    gameStartTimeStamp &&
+    timeLeft >= 0 && (
       <div
         className={
           "opacity-30 tracking-wider text-2xl absolute top-20 text-center px-6 py-4 rounded-lg" +
