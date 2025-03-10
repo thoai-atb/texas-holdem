@@ -67,6 +67,7 @@ function createGame(
     showDown: false, // is the game announcing the winner?
     allPlayersAllIn: false, // is all players alled in? - no more actions from here?
     lastChatTimeStamp: 0, // used to moderate bot chats - only belongs to bots
+    gameStartTimeStamp: null, // when enough players are ready, after some time, force starting the game
   };
 
   /**************************************************************************************
@@ -83,13 +84,14 @@ function createGame(
   |  This game settings will be passed on to client after a global setting has changed. |
   **************************************************************************************/
   const settings = {
-    gameTheme: "default", // halloween
+    gameTheme: "default", // halloween, tet, christmas
     debugMode: gameConfig.DEBUG_MODE, // client also uses this for debugging
     botSpeed: 1000, // how long should bots think?
     limitGame: gameConfig.LIMIT_GAME, // boolean - leave false for no limit
     limitBetMultiplier: gameConfig.LIMIT_BET_MULTIPLIER, // if limit bet size is true, this limit multiplier is used
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
-    starterStack: 2000,
+    starterStack: gameConfig.STARTER_STACK,
+    timeWaitToStart: gameConfig.TIME_WAIT_TO_START, // time wait to start the game after enough players are ready
   };
 
   /**************************************************************************************
@@ -214,10 +216,6 @@ function createGame(
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
-    if (!state.playing)
-      state.players.forEach((player) => {
-        if (player && !player.isBot) player.ready = false;
-      });
     return true;
   };
 
@@ -264,10 +262,6 @@ function createGame(
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
-    if (!state.playing)
-      state.players.forEach((player) => {
-        if (player && !player.isBot) player.ready = false;
-      });
   };
 
   const clearBots = () => {
@@ -427,7 +421,19 @@ function createGame(
       ) &&
       !state.playing
     )
-      startGame();
+      startGame(); // Start the game if all players are ready
+    // Set timer to start the game if two or more players are ready
+    else if (countReadyPlayers() >= 2 && !state.playing) {
+      if (!state.gameStartTimeStamp) {
+        // Begin the timer
+        state.gameStartTimeStamp = Date.now();
+        setTimeout(() => checkToStart(), settings.timeWaitToStart);
+      } else if (
+        Date.now() - state.gameStartTimeStamp >=
+        settings.timeWaitToStart
+      )
+        startGame(); // Start the game after fixed amount of time has passed
+    } else state.gameStartTimeStamp = null;
   };
 
   const countPlayers = () => {
@@ -444,6 +450,10 @@ function createGame(
     return state.players.filter(
       (player) => player && player.stack >= state.bigblindSize
     ).length;
+  };
+
+  const countReadyPlayers = () => {
+    return state.players.filter((player) => player && player.ready).length;
   };
 
   const isAllPlayersAlledIn = () => {
@@ -593,6 +603,7 @@ function createGame(
     } while (
       index < 0 ||
       !state.players[index] ||
+      !state.players[index].ready ||
       state.players[index].stack + state.bets[index] < state.bigblindSize
     );
     return index;
@@ -925,14 +936,16 @@ function createGame(
     state.winners = [];
     state.showDown = false;
     state.round = 0;
-    if (state.buttonIndex < 0 || !isQualified(state.buttonIndex)) nextButton();
+    state.gameStartTimeStamp = null;
+    if (state.buttonIndex < 0 || !isQualified(state.buttonIndex)) nextButton(); // Move button to next qualified player
+    const isPlayerJoining = (tempIndex) =>
+      state.players[tempIndex].stack >= state.bigblindSize &&
+      state.players[tempIndex].ready;
     let tempIndex = state.buttonIndex;
-    if (state.players[tempIndex].stack >= state.bigblindSize)
-      deal(tempIndex, 2);
+    if (isPlayerJoining(tempIndex)) deal(tempIndex, 2);
     tempIndex = nextQualifiedIndex(tempIndex);
     while (tempIndex != state.buttonIndex) {
-      if (state.players[tempIndex].stack >= state.bigblindSize)
-        deal(tempIndex, 2);
+      if (isPlayerJoining(tempIndex)) deal(tempIndex, 2);
       tempIndex = nextQualifiedIndex(tempIndex);
     }
     tempIndex = nextQualifiedIndex(tempIndex); // TO SMALL BLIND

@@ -58,7 +58,7 @@ export function Settings() {
           onToggle={handleAction(() => setShowHandStatistics((s) => !s))}
         />
         <ToggleField
-          label="Cover card with Shift"
+          label="Uncover card with Shift"
           shortcut="C"
           active={coverCardMode}
           onToggle={handleAction(() => setCoverCardMode((s) => !s))}

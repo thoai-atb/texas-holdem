@@ -38,7 +38,8 @@
     "express": "^4.17.2",
     "ini": "^4.1.1",
     "robohash-avatars": "^1.0.1",
-    "socket.io": "^4.4.1"
+    "socket.io": "^4.4.1",
+    "texas-holdem": "file:"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
