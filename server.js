@@ -51,6 +51,7 @@ const game = createGame(
   (onPlayerKicked = kickSocketPlayerEvent),
   (onChat = chatEvent),
   (onEndRound = endRoundEvent),
+  (onGameStartCountDown = gameStartCountDownEvent),
   (gameConfig = config.Game)
 );
 
@@ -104,6 +105,10 @@ function endRoundEvent() {
     JSON.stringify(game.getData(), null, 2),
     "utf8"
   );
+}
+
+function gameStartCountDownEvent(seconds) {
+  io.sockets.emit("game_start_count_down", seconds);
 }
 
 function playGameSoundFx(sound) {

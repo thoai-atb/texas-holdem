@@ -27,6 +27,7 @@ function createGame(
   onPlayerKicked,
   onChat,
   onEndRound,
+  onGameStartCountDown,
   gameConfig
 ) {
   /*****************************************************************************
@@ -67,7 +68,7 @@ function createGame(
     showDown: false, // is the game announcing the winner?
     allPlayersAllIn: false, // is all players alled in? - no more actions from here?
     lastChatTimeStamp: 0, // used to moderate bot chats - only belongs to bots
-    gameStartTimeStamp: null, // when enough players are ready, after some time, force starting the game
+    gameStartCountDown: -1, // when enough players are ready, after some time, force starting the game
   };
 
   /**************************************************************************************
@@ -91,7 +92,7 @@ function createGame(
     limitBetMultiplier: parseInt(gameConfig.LIMIT_BET_MULTIPLIER), // if limit bet size is true, this limit multiplier is used
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
     starterStack: parseInt(gameConfig.STARTER_STACK),
-    timeWaitToStart: parseInt(gameConfig.TIME_WAIT_TO_START), // time wait to start the game after enough players are ready
+    secondsWaitToStart: parseInt(gameConfig.SECONDS_WAIT_TO_START), // time wait to start the game after enough players are ready
   };
 
   /**************************************************************************************
@@ -424,16 +425,17 @@ function createGame(
       startGame(); // Start the game if all players are ready
     // Set timer to start the game if two or more players are ready
     else if (countReadyPlayers() >= 2 && !state.playing) {
-      if (!state.gameStartTimeStamp) {
+      if (state.gameStartCountDown < 0) {
         // Begin the timer
-        state.gameStartTimeStamp = Date.now();
-        setTimeout(() => checkToStart(), settings.timeWaitToStart);
-      } else if (
-        Date.now() - state.gameStartTimeStamp >=
-        settings.timeWaitToStart
-      )
-        startGame(); // Start the game after fixed amount of time has passed
-    } else state.gameStartTimeStamp = null;
+        for (let i = 0; i < settings.secondsWaitToStart; i++) {
+          setTimeout(() => {
+            state.gameStartCountDown = settings.secondsWaitToStart - i;
+            onGameStartCountDown(state.gameStartCountDown);
+          }, i * 1000);
+        }
+        setTimeout(() => startGame(), settings.secondsWaitToStart * 1000);
+      }
+    }
   };
 
   const countPlayers = () => {
@@ -936,7 +938,11 @@ function createGame(
     state.winners = [];
     state.showDown = false;
     state.round = 0;
-    state.gameStartTimeStamp = null;
+
+    // Reset the count down timer
+    state.gameStartCountDown = -1;
+    onGameStartCountDown(state.gameStartCountDown);
+
     if (state.buttonIndex < 0 || !isQualified(state.buttonIndex)) nextButton(); // Move button to next qualified player
     const isPlayerJoining = (tempIndex) =>
       state.players[tempIndex].stack >= state.bigblindSize &&

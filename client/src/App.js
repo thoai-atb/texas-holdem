@@ -21,7 +21,7 @@ import { Statistics } from "./components/ui/StatisticsPanel";
 import { GameRule } from "./components/ui/GameRule";
 import { Decoration } from "./components/ui/decoration/Decoration";
 import { Donation } from "./components/ui/Donation";
-import { TimeWaitToStartInfo } from "./components/ui/TimeWaitToStartInfo";
+import { GameStartCountDown } from "./components/ui/GameStartCountDown";
 
 export const AppContext = createContext({});
 export const useAppContext = () => useContext(AppContext);
@@ -326,7 +326,7 @@ function App() {
                   />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-center items-center pointer-events-none">
-                  <TimeWaitToStartInfo />
+                  <GameStartCountDown />
                 </div>
                 <div className="absolute w-full h-full flex flex-col justify-end pointer-events-none">
                   <Settings />

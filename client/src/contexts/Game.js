@@ -38,8 +38,7 @@ export function GameProvider({ children }) {
   const [gameCreationTimeStamp, setGameCreationTimeStamp] = React.useState();
   const [botDefeatedList, setBotDefeatedList] = React.useState();
   const [gameTheme, setGameTheme] = React.useState("default");
-  const [gameStartTimeStamp, setGameStartTimeStamp] = React.useState(null);
-  const [timeWaitToStart, setTimeWaitToStart] = React.useState(0);
+  const [gameStartCountDown, setGameStartCountDown] = React.useState(-1);
   const [coverCard, setCoverCard] = React.useState(true); // The actual state of the cover card
 
   const MONEY_EFFECT_DURATION = 0.5;
@@ -63,7 +62,6 @@ export function GameProvider({ children }) {
       setWinners(gameState.winners);
       setCompleteActionSeat(gameState.completeActionSeat);
       setAllPlayersAllIn(gameState.allPlayersAllIn);
-      setGameStartTimeStamp(gameState.gameStartTimeStamp);
     });
     socket.on("game_statistics", (statistics) => {
       setBotsDefeated(statistics.botsDefeated);
@@ -74,7 +72,9 @@ export function GameProvider({ children }) {
     socket.on("game_settings", (settings) => {
       setGameTheme(settings.gameTheme);
       setDebugMode(settings.debugMode);
-      setTimeWaitToStart(settings.timeWaitToStart);
+    });
+    socket.on("game_start_count_down", (seconds) => {
+      setGameStartCountDown(seconds);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
@@ -231,8 +231,7 @@ export function GameProvider({ children }) {
     gameCreationTimeStamp,
     botDefeatedList,
     gameTheme,
-    gameStartTimeStamp,
-    timeWaitToStart,
+    gameStartCountDown,
     // Game state & settings (end)
 
     coverCard,
