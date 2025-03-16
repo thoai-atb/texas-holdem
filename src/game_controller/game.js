@@ -430,7 +430,8 @@ function createGame(
         for (let i = 0; i < settings.secondsWaitToStart; i++) {
           setTimeout(() => {
             state.gameStartCountDown = settings.secondsWaitToStart - i;
-            onGameStartCountDown(state.gameStartCountDown);
+            if (!state.playing)
+              onGameStartCountDown(state.gameStartCountDown);
           }, i * 1000);
         }
         setTimeout(() => startGame(), settings.secondsWaitToStart * 1000);

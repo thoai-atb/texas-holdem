@@ -1,0 +1,17 @@
+{
+  "name": "client_cli",
+  "version": "1.0.0",
+  "main": "texas.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "description": "",
+  "dependencies": {
+    "client_cli": "file:",
+    "socket.io-client": "^4.8.1"
+  }
+}
