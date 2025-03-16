@@ -6,30 +6,39 @@ class CommandExecutor {
   }
 
   printHelp() {
-    console.log(`Commands:
-    help: Print this help message.
-    ready: Ready up for the game.
-    check: Check if no one has bet.
-    call: Match the current bet.
-    bet <amount>|min|max: Bet the specified amount.
-    raise <amount>|min|max: Raise the current bet by the specified amount.
-    allin: Bet all your money.
-    fold: Fold your hand.
-    exit: Exit the game.
-    fill_bots: Fill the room with bots.
-    start: Force starting the game.
-    chat <message>: Send a message to the chat.`);
+    const commands = [
+      ["h | help", "Show this help message"],
+      ["r | ready", "Ready up for the game"],
+      ["c | check", "Check if no one has bet"],
+      ["c | call", "Match the current bet"],
+      ["b | bet <amount>", "Place a bet (use 'min' or 'max' for limits)"],
+      ["r | raise <amount>", "Raise the bet (use 'min' or 'max' for limits)"],
+      ["a | allin", "Go all in with your money"],
+      ["f | fold", "Fold your hand"],
+      ["e | exit", "Exit the game"],
+      ["t | chat <message>", "Send a message in chat"],
+      ["fill_bots", "Fill the room with bots"],
+      ["add_bot", "Add a bot to the room"],
+      ["start", "Force start the game"],
+      ["color", "Toggle colorful mode"],
+    ];
+
+    console.log("Commands:");
+    commands.forEach(([cmd, desc]) => {
+      console.log(`  ${cmd.padEnd(20)} - ${desc}`);
+    });
+
     this.rl.prompt();
   }
 
   printAvailableActions() {
-    const { availableActions } = this.gameState;
+    const { availableActions, currentBetSize } = this.gameState;
     console.log("Available actions:");
     availableActions.forEach((action) => {
       if (action.type === "raise" || action.type === "bet") {
-        console.log(
-          `- ${action.type}: min ${action.minSize}, max ${action.maxSize}`
-        );
+        const minSize = action.minSize + currentBetSize;
+        const maxSize = action.maxSize + currentBetSize;
+        console.log(`- ${action.type}: min ${minSize}, max ${maxSize}`);
       } else {
         console.log(`- ${action.type}`);
       }
@@ -37,8 +46,33 @@ class CommandExecutor {
   }
 
   execute(input) {
-    const [cmd, ...args] = input.split(" ");
+    let [cmd, ...args] = input.split(" ");
     const { gameState, rl, socket } = this;
+
+    // READY (short R) - as it will turn into (r)aise
+    if (cmd === "r" && !gameState.isPlaying) {
+      if (gameState.getHero().ready) {
+        console.log("You are already ready.");
+        rl.prompt();
+        return;
+      }
+      socket.emit("player_action", { type: "ready" });
+      return;
+    }
+
+    // Convert short CMDs to full length
+    if (cmd.length === 1) {
+      cmd = {
+        h: "help",
+        c: "check/call",
+        b: "bet",
+        r: "raise",
+        a: "allin",
+        f: "fold",
+        e: "exit",
+        t: "chat",
+      }[cmd];
+    }
 
     // HELP
     if (cmd === "help") {
@@ -46,7 +80,7 @@ class CommandExecutor {
       return;
     }
 
-    // READY
+    // READY (full CMD)
     if (cmd === "ready") {
       if (gameState.isPlaying) {
         console.log("You are already in a game.");
@@ -63,22 +97,26 @@ class CommandExecutor {
     }
 
     // CHECK / CALL
-    if (cmd === "check" || cmd === "call") {
+    if (cmd === "check" || cmd === "call" || cmd === "check/call") {
       if (!gameState.isHeroTurn()) {
         console.log("It is not your turn.");
         rl.prompt();
         return;
       }
-      const matchingAction = gameState.availableActions.find(
+      let matchingAction = gameState.availableActions.find(
         (action) => action.type === cmd
       );
+      if (cmd === "check/call")
+        matchingAction = gameState.availableActions.find(
+          (action) => action.type === "check" || action.type === "call"
+        );
       if (!matchingAction) {
         console.log("Invalid action.");
         this.printAvailableActions();
         rl.prompt();
         return;
       }
-      socket.emit("player_action", { type: cmd });
+      socket.emit("player_action", { type: matchingAction.type });
       return;
     }
 
@@ -89,12 +127,6 @@ class CommandExecutor {
         rl.prompt();
         return;
       }
-      const amount = args[0];
-      if (!amount) {
-        console.log("Please provide an amount.");
-        rl.prompt();
-        return;
-      }
       const matchingAction = gameState.availableActions.find(
         (action) => action.type === cmd
       );
@@ -104,8 +136,20 @@ class CommandExecutor {
         rl.prompt();
         return;
       }
+      let amount = args[0];
       const minSize = matchingAction.minSize + gameState.currentBetSize;
       const maxSize = matchingAction.maxSize + gameState.currentBetSize;
+      if (!amount) {
+        if (minSize === maxSize)
+          amount = minSize;
+        else {
+          console.log(
+            `Provide an amount between min=${minSize} and max=${maxSize}.`
+          );
+          rl.prompt();
+          return;
+        }
+      }
       if (amount === "min") {
         socket.emit("player_action", {
           type: cmd,
@@ -122,15 +166,18 @@ class CommandExecutor {
       }
       if (isNaN(amount)) {
         console.log(
-          `Amount must be between ${minSize} and ${maxSize}.`
+          `Amount must be between min=${minSize} and max=${maxSize}.`
         );
         rl.prompt();
         return;
       }
       const convertedAmount = parseInt(amount) - gameState.currentBetSize;
-      if (convertedAmount < matchingAction.minSize || convertedAmount > matchingAction.maxSize) {
+      if (
+        convertedAmount < matchingAction.minSize ||
+        convertedAmount > matchingAction.maxSize
+      ) {
         console.log(
-          `Amount must be between ${minSize} and ${maxSize}.`
+          `Amount must be between min=${minSize} and max=${maxSize}.`
         );
         rl.prompt();
         return;
@@ -188,7 +235,7 @@ class CommandExecutor {
     }
 
     // DIRECT COMMANDS
-    if (cmd === "fill_bots" || cmd === "start") {
+    if (cmd === "add_bot" || cmd === "fill_bots" || cmd === "start") {
       socket.emit("chat_message", `/${cmd}`);
       return;
     }
@@ -197,6 +244,13 @@ class CommandExecutor {
     if (cmd === "exit") {
       rl.close();
       socket.disconnect();
+      return;
+    }
+
+    if (cmd === "color") {
+      gameState.colorful = !gameState.colorful;
+      console.log(`Colorful mode is set to ${gameState.colorful}`)
+      rl.prompt();
       return;
     }
 

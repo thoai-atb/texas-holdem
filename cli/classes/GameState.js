@@ -1,10 +1,12 @@
 import { capitalize, getAlignedTable } from "../utils.js";
+import chalk from "chalk";
 
 class GameState {
   constructor() {
     this.printedState = "";
     this.heroIndex = undefined;
     this.message = ""; // message to display
+    this.colorful = true; // cards have color?
   }
 
   updateState(gameState) {
@@ -48,14 +50,14 @@ class GameState {
 
   getPrintedAction(idx) {
     // if (this.players[idx]?.folded) return "Fold";
-    if (this.turnIndex === idx) return "...";
+    if (this.turnIndex === idx) return "Pending";
     if (this.players[idx].folded) return "";
     if (this.betTypes[idx]) return capitalize(this.betTypes[idx]);
     return "";
   }
 
   getPrintedAmount(idx) {
-    if (this.bets[idx]) return this.bets[idx];
+    if (this.bets[idx]) return `${this.bets[idx]}`;
     return "";
   }
 
@@ -72,7 +74,35 @@ class GameState {
   }
 
   getPrintedCards(cards) {
-    return cards.map((card) => card.value + card.suit).join(" ");
+    return cards
+      .map((card) => {
+        let cardStr = card.value + card.suit;
+        if (this.colorful) {
+          if (["♥", "♦"].includes(card.suit))
+            cardStr = chalk.red(cardStr);
+          else
+            cardStr = chalk.green(cardStr);
+        }
+        return cardStr;
+      })
+      .join(" ");
+  }
+
+  getPrintedOptions() {
+    const actions = [];
+    this.availableActions.forEach((action) => {
+      if (action.type === "raise" || action.type === "bet") {
+        const minSize = action.minSize + this.currentBetSize;
+        const maxSize = action.maxSize + this.currentBetSize;
+        if (minSize === maxSize) actions.push(`${action.type} (${minSize})`);
+        else actions.push(`${action.type} (${minSize}-${maxSize})`);
+      } else if (action.type === "call") {
+        actions.push(`${action.type} (${this.currentBetSize})`);
+      } else {
+        actions.push(`${action.type}`);
+      }
+    });
+    return actions.join(", ");
   }
 
   getPrintedState() {
@@ -99,28 +129,38 @@ class GameState {
             result.type.toUpperCase() +
             " " +
             this.getPrintedCards(result.cards);
-        } else playerData.action = "";
+          playerData.amount = `+${Math.round(this.pot / this.winners.length)}`;
+        } else {
+          playerData.action = "";
+          playerData.amount = "";
+        }
       } else {
         playerData.action = this.getPrintedAction(idx);
         playerData.amount = this.getPrintedAmount(idx);
       }
-      playerData.stack = player.stack;
+      playerData.stack = `${player.stack}`;
       playerData.rank = this.playersRanking[idx] || "";
 
-      if (heroFound)
-        playersToDisplayAfterHero.push(playerData)
+      if (heroFound) playersToDisplayAfterHero.push(playerData);
       else {
-        if (idx === this.heroIndex)
-          heroFound = true;
+        if (idx === this.heroIndex) heroFound = true;
         playersToDisplayHeroAndBefore.push(playerData);
       }
     });
-    const playersToDisplay = [...playersToDisplayAfterHero, ...playersToDisplayHeroAndBefore];
+    const playersToDisplay = [
+      ...playersToDisplayAfterHero,
+      ...playersToDisplayHeroAndBefore,
+    ];
     const playerTable = getAlignedTable(playersToDisplay);
     const board = this.board.length ? this.getPrintedCards(this.board) : "-";
     const blind = `${this.bigblindSize / 2}/${this.bigblindSize}`;
     const pot = this.pot;
-    return `\n\n${playerTable}\n\nBoard: ${board}\nBlind: ${blind} | Pot: ${pot} | Message: ${this.message || "-"}`;
+    const optionsIfExist = this.isHeroTurn()
+      ? `YOUR TURN: ${this.getPrintedOptions()} | `
+      : "";
+    return `\n\n${playerTable}\n\nBoard: ${board}\n${optionsIfExist}Blind: ${blind} | Pot: ${pot} | Info: ${
+      this.message || "-"
+    }`;
   }
 
   updatePrintedState() {

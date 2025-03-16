@@ -3,7 +3,7 @@ import { getSocket } from "./socket.js";
 import readline from "readline";
 import CommandExecutor from "./classes/CommandExecutor.js";
 
-const serverAddr = "http://localhost:40143";
+const serverAddr = process.env.TEXAS_SERVER || "http://localhost:40143";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -53,7 +53,7 @@ const initSocket = (playerName, serverAddr) => {
 
   socket.on("game_start_count_down", (time) => {
     if (time < 0) gameState.updateMessage("");
-    else gameState.updateMessage(`Game will start in ${time} second(s)`);
+    else gameState.updateMessage(`GAME START: ${time}`);
     if (gameState.updatePrintedState()) {
       console.log(gameState.printedState);
       rl.prompt(true);

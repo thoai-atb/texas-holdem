@@ -496,6 +496,7 @@ function createGame(
   const check = () => {
     if (!state.availableActions.find((action) => action.type === "check"))
       return false;
+    const player = state.players[state.turnIndex];
     state.betTypes[state.turnIndex] = "check";
     if (state.round !== RIVER_ROUND)
       ifBotThenConsiderChat(state.turnIndex, ...BOT_CHECK_CHAT);
@@ -511,8 +512,9 @@ function createGame(
     if (!callAction) return false;
     const toCall = callAction.size;
     state.bets[state.turnIndex] += toCall;
-    state.betTypes[state.turnIndex] = "call";
-    state.players[state.turnIndex].stack -= toCall;
+    const player = state.players[state.turnIndex];
+    player.stack -= toCall;
+    state.betTypes[state.turnIndex] = player.stack === 0 ? "all-in" : "call";
     nextTurn();
     onSoundEffect("call");
     return true;
@@ -526,11 +528,12 @@ function createGame(
     if (!betSize) return false;
     if (betSize > betAction.maxSize) return false;
     if (betSize < betAction.minSize) return false;
-    state.players[state.turnIndex].stack -= betSize;
+    const player = state.players[state.turnIndex];
+    player.stack -= betSize;
     state.currentBetSize = betSize;
     state.bets[state.turnIndex] = betSize;
     state.minRaiseSize = betSize;
-    state.betTypes[state.turnIndex] = "bet";
+    state.betTypes[state.turnIndex] = player.stack === 0 ? "all-in" : "bet";
     state.completeActionSeat = state.turnIndex;
     ifBotThenConsiderChat(state.turnIndex, ...BOT_BET_CHAT);
     nextTurn();
@@ -547,9 +550,10 @@ function createGame(
     if (raiseSize > raiseAction.maxSize) return false;
     if (raiseSize < raiseAction.minSize) return false;
     const toCall = state.currentBetSize - state.bets[state.turnIndex];
-    state.players[state.turnIndex].stack -= raiseSize + toCall;
+    const player = state.players[state.turnIndex];
+    player.stack -= raiseSize + toCall;
     state.bets[state.turnIndex] += raiseSize + toCall;
-    state.betTypes[state.turnIndex] = "raise";
+    state.betTypes[state.turnIndex] = player.stack === 0 ? "all-in" : "raise";
     state.currentBetSize += raiseSize;
     state.minRaiseSize = raiseSize;
     state.completeActionSeat = state.turnIndex;
@@ -564,7 +568,7 @@ function createGame(
     const blindSize = size;
     state.players[position].stack -= blindSize;
     state.bets[position] = blindSize;
-    state.betTypes[position] = "blind";
+    state.betTypes[position] = state.players[position].stack === 0 ? "all-in" : "blind";
     state.currentBetSize = Math.max(state.currentBetSize, blindSize);
     state.minRaiseSize = size;
     return true;

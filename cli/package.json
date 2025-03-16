@@ -11,6 +11,7 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "chalk": "^5.4.1",
     "client_cli": "file:",
     "socket.io-client": "^4.8.1"
   }
