@@ -146,18 +146,6 @@ io.on("connection", (socket) => {
   // NAME
   const name = socket.handshake.query.name;
 
-  // SELECT SEAT
-  var seatIndex = game.randomAvailableSeat();
-  var savedData = game.getHumanPlayerData(name);
-  if (savedData && game.getAvailableSeats().includes(savedData.seatIndex))
-    seatIndex = savedData.seatIndex;
-  if (seatIndex === -1) {
-    const info = `${name} wanted to join the table but table was full`;
-    broadcastInfo(info);
-    console.log(info);
-    socket.emit("disconnect_reason", "Table was full");
-    return;
-  }
   if (game.nameExisted(name)) {
     socket.emit(
       "disconnect_reason",
@@ -166,8 +154,27 @@ io.on("connection", (socket) => {
     return;
   }
 
+  // SELECT SEAT
+  var seatIndex = game.randomAvailableSeat();
+  var savedData = game.getHumanPlayerData(name);
+  if (savedData && game.getAvailableSeats().includes(savedData.seatIndex))
+    seatIndex = savedData.seatIndex;
+  var appendedInfo = "";
+  if (seatIndex === -1) {
+    const removedBot = game.removeBotForNewPlayerJoin();
+    if (removedBot === null) {
+      const info = `${name} wanted to join the table but table was full`;
+      broadcastInfo(info);
+      console.log(info);
+      socket.emit("disconnect_reason", "Table was full");
+      return;
+    }
+    seatIndex = removedBot.seatIndex;
+    appendedInfo = ` by kicking out bot ${removedBot.name}`;
+  }
+
   // CONNECTION
-  const info = `${name} joined the table`;
+  let info = `${name} joined the table${appendedInfo}`;
   broadcastInfo(info);
   io.sockets.emit("sound_effect", "playerJoin");
   console.log(info);

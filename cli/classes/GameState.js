@@ -78,10 +78,8 @@ class GameState {
       .map((card) => {
         let cardStr = card.value + card.suit;
         if (this.colorful) {
-          if (["♥", "♦"].includes(card.suit))
-            cardStr = chalk.red(cardStr);
-          else
-            cardStr = chalk.green(cardStr);
+          if (["♥", "♦"].includes(card.suit)) cardStr = chalk.red(cardStr);
+          else cardStr = chalk.green(cardStr);
         }
         return cardStr;
       })
@@ -94,15 +92,15 @@ class GameState {
       if (action.type === "raise" || action.type === "bet") {
         const minSize = action.minSize + this.currentBetSize;
         const maxSize = action.maxSize + this.currentBetSize;
-        if (minSize === maxSize) actions.push(`${action.type} (${minSize})`);
-        else actions.push(`${action.type} (${minSize}-${maxSize})`);
+        if (minSize === maxSize) actions.push(`${action.type} ${minSize}`);
+        else actions.push(`${action.type} ${minSize}-${maxSize}`);
       } else if (action.type === "call") {
-        actions.push(`${action.type} (${this.currentBetSize})`);
+        actions.push(`${action.type} ${this.currentBetSize}`);
       } else {
         actions.push(`${action.type}`);
       }
     });
-    return actions.join(", ");
+    return actions.map(action => `${action}`).join(" / ");
   }
 
   getPrintedState() {
@@ -155,12 +153,9 @@ class GameState {
     const board = this.board.length ? this.getPrintedCards(this.board) : "-";
     const blind = `${this.bigblindSize / 2}/${this.bigblindSize}`;
     const pot = this.pot;
-    const optionsIfExist = this.isHeroTurn()
-      ? `YOUR TURN: ${this.getPrintedOptions()} | `
-      : "";
-    return `\n\n${playerTable}\n\nBoard: ${board}\n${optionsIfExist}Blind: ${blind} | Pot: ${pot} | Info: ${
-      this.message || "-"
-    }`;
+    const optionsIfExist = this.isHeroTurn() ? `Options: ${this.getPrintedOptions()}` : "";
+    const pressEnterToReady = !this.isPlaying && !this.getHero()?.ready ? "Press Enter to ready" : ""; 
+    return `${playerTable}\n\nBoard: ${board}\nPot: ${pot}\nBlind: ${blind}\nMessage: ${this.message || "-"}\n${optionsIfExist}${pressEnterToReady}`;
   }
 
   updatePrintedState() {

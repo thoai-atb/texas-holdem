@@ -217,6 +217,10 @@ function createGame(
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
+    if (!state.playing)
+      state.players.forEach((player) => {
+        if (player && !player.isBot) player.ready = false;
+      });
     return true;
   };
 
@@ -263,6 +267,10 @@ function createGame(
       newToTable: true,
     };
     state.playersRanking[seatIndex] = 0;
+    if (!state.playing)
+      state.players.forEach((player) => {
+        if (player && !player.isBot) player.ready = false;
+      });
   };
 
   const clearBots = () => {
@@ -331,6 +339,20 @@ function createGame(
     ids.forEach((id) => {
       removePlayer(id.seatIndex);
     });
+  };
+
+  const removeBotForNewPlayerJoin = () => {
+    const noCardBots = state.players.filter(
+      (player) =>
+        player && player.isBot && (!player.cards?.length || player.folded)
+    );
+    if (noCardBots.length === 0) return null;
+    const selected = noCardBots.reduce((min, bot) =>
+      bot.stack < min.stack ? bot : min
+    );
+    let seatIndex = selected.seatIndex;
+    removePlayer(seatIndex);
+    return selected;
   };
 
   const fillMoney = (name) => {
@@ -430,8 +452,7 @@ function createGame(
         for (let i = 0; i < settings.secondsWaitToStart; i++) {
           setTimeout(() => {
             state.gameStartCountDown = settings.secondsWaitToStart - i;
-            if (!state.playing)
-              onGameStartCountDown(state.gameStartCountDown);
+            if (!state.playing) onGameStartCountDown(state.gameStartCountDown);
           }, i * 1000);
         }
         setTimeout(() => startGame(), settings.secondsWaitToStart * 1000);
@@ -568,7 +589,8 @@ function createGame(
     const blindSize = size;
     state.players[position].stack -= blindSize;
     state.bets[position] = blindSize;
-    state.betTypes[position] = state.players[position].stack === 0 ? "all-in" : "blind";
+    state.betTypes[position] =
+      state.players[position].stack === 0 ? "all-in" : "blind";
     state.currentBetSize = Math.max(state.currentBetSize, blindSize);
     state.minRaiseSize = size;
     return true;
@@ -996,6 +1018,7 @@ function createGame(
     removePlayer,
     removeBrokeBots,
     removeBrokePlayers,
+    removeBotForNewPlayerJoin,
     fillMoney,
     setMoney,
     addMoney,

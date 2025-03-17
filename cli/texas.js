@@ -38,6 +38,7 @@ const initSocket = (playerName, serverAddr) => {
   socket.on("game_state", (state) => {
     gameState.updateState(state);
     if (gameState.updatePrintedState()) {
+      rl.output.write('\x1b[2J\x1b[H');
       console.log(gameState.printedState);
       rl.prompt(true);
     }
@@ -46,6 +47,7 @@ const initSocket = (playerName, serverAddr) => {
   socket.on("chat_message", (msg) => {
     gameState.updateMessage(msg.desc);
     if (gameState.updatePrintedState()) {
+      rl.output.write('\x1b[2J\x1b[H');
       console.log(gameState.printedState);
       rl.prompt(true);
     }
@@ -55,6 +57,7 @@ const initSocket = (playerName, serverAddr) => {
     if (time < 0) gameState.updateMessage("");
     else gameState.updateMessage(`GAME START: ${time}`);
     if (gameState.updatePrintedState()) {
+      rl.output.write('\x1b[2J\x1b[H');
       console.log(gameState.printedState);
       rl.prompt(true);
     }

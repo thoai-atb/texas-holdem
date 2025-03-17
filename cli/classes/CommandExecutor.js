@@ -8,7 +8,6 @@ class CommandExecutor {
   printHelp() {
     const commands = [
       ["h | help", "Show this help message"],
-      ["r | ready", "Ready up for the game"],
       ["c | check", "Check if no one has bet"],
       ["c | call", "Match the current bet"],
       ["b | bet <amount>", "Place a bet (use 'min' or 'max' for limits)"],
@@ -50,7 +49,7 @@ class CommandExecutor {
     const { gameState, rl, socket } = this;
 
     // READY (short R) - as it will turn into (r)aise
-    if (cmd === "r" && !gameState.isPlaying) {
+    if ((cmd === "") && !gameState.isPlaying) {
       if (gameState.getHero().ready) {
         console.log("You are already ready.");
         rl.prompt();
@@ -77,22 +76,6 @@ class CommandExecutor {
     // HELP
     if (cmd === "help") {
       this.printHelp();
-      return;
-    }
-
-    // READY (full CMD)
-    if (cmd === "ready") {
-      if (gameState.isPlaying) {
-        console.log("You are already in a game.");
-        rl.prompt();
-        return;
-      }
-      if (gameState.getHero().ready) {
-        console.log("You are already ready.");
-        rl.prompt();
-        return;
-      }
-      socket.emit("player_action", { type: "ready" });
       return;
     }
 
