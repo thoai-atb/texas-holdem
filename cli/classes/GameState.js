@@ -95,7 +95,9 @@ class GameState {
         if (minSize === maxSize) actions.push(`${action.type} ${minSize}`);
         else actions.push(`${action.type} ${minSize}-${maxSize}`);
       } else if (action.type === "call") {
-        actions.push(`${action.type} ${this.currentBetSize}`);
+        actions.push(`${action.type} ${this.currentBetSize} (Enter)`);
+      } else if (action.type === "check") {
+        actions.push(`${action.type} (Enter)`);
       } else {
         actions.push(`${action.type}`);
       }
@@ -154,7 +156,7 @@ class GameState {
     const blind = `${this.bigblindSize / 2}/${this.bigblindSize}`;
     const pot = this.pot;
     const optionsIfExist = this.isHeroTurn() ? `Options: ${this.getPrintedOptions()}` : "";
-    const pressEnterToReady = !this.isPlaying && !this.getHero()?.ready ? "Press Enter to ready" : ""; 
+    const pressEnterToReady = !this.isPlaying && !this.getHero()?.ready ? "Press Enter to ready" : "";
     return `${playerTable}\n\nBoard: ${board}\nPot: ${pot}\nBlind: ${blind}\nMessage: ${this.message || "-"}\n${optionsIfExist}${pressEnterToReady}`;
   }
 

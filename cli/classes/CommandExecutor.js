@@ -8,8 +8,8 @@ class CommandExecutor {
   printHelp() {
     const commands = [
       ["h | help", "Show this help message"],
-      ["c | check", "Check if no one has bet"],
-      ["c | call", "Match the current bet"],
+      ["(empty) | c | check", "Check if no one has bet"],
+      ["(empty) | c | call", "Match the current bet"],
       ["b | bet <amount>", "Place a bet (use 'min' or 'max' for limits)"],
       ["r | raise <amount>", "Raise the bet (use 'min' or 'max' for limits)"],
       ["a | allin", "Go all in with your money"],
@@ -48,7 +48,7 @@ class CommandExecutor {
     let [cmd, ...args] = input.split(" ");
     const { gameState, rl, socket } = this;
 
-    // READY (short R) - as it will turn into (r)aise
+    // READY (empty)
     if ((cmd === "") && !gameState.isPlaying) {
       if (gameState.getHero().ready) {
         console.log("You are already ready.");
@@ -80,7 +80,7 @@ class CommandExecutor {
     }
 
     // CHECK / CALL
-    if (cmd === "check" || cmd === "call" || cmd === "check/call") {
+    if (cmd === "check" || cmd === "call" || cmd === "check/call" || cmd === "") {
       if (!gameState.isHeroTurn()) {
         console.log("It is not your turn.");
         rl.prompt();
@@ -89,7 +89,7 @@ class CommandExecutor {
       let matchingAction = gameState.availableActions.find(
         (action) => action.type === cmd
       );
-      if (cmd === "check/call")
+      if (cmd === "check/call" | cmd === "")
         matchingAction = gameState.availableActions.find(
           (action) => action.type === "check" || action.type === "call"
         );
