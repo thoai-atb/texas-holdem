@@ -12,12 +12,14 @@ class CommandExecutor {
       ["(empty) | c | call", "Match the current bet"],
       ["b | bet <amount>", "Place a bet (use 'min' or 'max' for limits)"],
       ["r | raise <amount>", "Raise the bet (use 'min' or 'max' for limits)"],
-      ["a | allin", "Go all in with your money"],
+      ["a | all", "Go all-in with your money (or maximum raise / bet)"],
       ["f | fold", "Fold your hand"],
       ["e | exit", "Exit the game"],
       ["t | chat <message>", "Send a message in chat"],
       ["fill_bots", "Fill the room with bots"],
       ["add_bot", "Add a bot to the room"],
+      ["set_blind <big blind> <increment>", "Set the big blind and increment"],
+      ["set_starter <amount>", "Set the starter stack (for new players that join the table)"],
       ["start", "Force start the game"],
       ["color", "Toggle colorful mode"],
     ];
@@ -170,7 +172,7 @@ class CommandExecutor {
     }
 
     // ALLIN
-    if (cmd === "allin") {
+    if (cmd === "all") {
       if (!gameState.isHeroTurn()) {
         console.log("It is not your turn.");
         rl.prompt();
@@ -218,8 +220,9 @@ class CommandExecutor {
     }
 
     // DIRECT COMMANDS
-    if (cmd === "add_bot" || cmd === "fill_bots" || cmd === "start") {
-      socket.emit("chat_message", `/${cmd}`);
+    const directCmds = ["add_bot", "fill_bots", "start", "set_blind", "set_starter"]
+    if (directCmds.includes(cmd)) {
+      socket.emit("chat_message", `/${cmd} ${args.join(" ")}`);
       return;
     }
 

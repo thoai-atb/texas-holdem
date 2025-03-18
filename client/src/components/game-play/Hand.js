@@ -10,6 +10,7 @@ import { ChatBubble } from "./ChatBubble";
 import { PlayerRank } from "./PlayerRank";
 import { useAppContext } from "../../App";
 import { useSoundContext } from "../../contexts/Sound";
+import { monetary } from "../../utilities/number";
 
 export function Hand({ style, position }) {
   const {
@@ -113,6 +114,7 @@ export function Hand({ style, position }) {
           <div className="truncate">
             $
             <CountUp
+              formattingFn={monetary}
               preserveValue={true}
               end={handPlayer.stack}
               duration={MONEY_EFFECT_DURATION}

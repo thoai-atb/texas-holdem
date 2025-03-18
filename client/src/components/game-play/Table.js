@@ -6,6 +6,7 @@ import { DealerButton } from "./DealerButton";
 import { Hand } from "./Hand";
 import dotPattern from "../../assets/texture/dot-pattern.png";
 import { AppContext } from "../../App";
+import { monetary } from "../../utilities/number";
 
 export function Table() {
   const { bigblindSize } = useGame();
@@ -41,7 +42,7 @@ export function Table() {
         }}
       >
         <div className="w-full text-center text-slate-700">
-          BLIND LEVEL: {bigblindSize / 2}/{bigblindSize}
+          BLIND LEVEL: {monetary(bigblindSize / 2)} / {monetary(bigblindSize)}
         </div>
       </div>
       <Board />

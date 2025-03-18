@@ -53,8 +53,14 @@ function replaceObj(obj, newObj) {
   });
 }
 
+function monetary(number) {
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(number);
+};
+
+
 module.exports = {
   generateBotName,
   getRandomPhrase,
   replaceObj,
+  monetary
 };

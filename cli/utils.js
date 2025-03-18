@@ -50,4 +50,9 @@ const capitalize = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-export { capitalize, getAlignedTable };
+const monetary = (number) => {
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(number);
+};
+
+
+export { capitalize, getAlignedTable, monetary };

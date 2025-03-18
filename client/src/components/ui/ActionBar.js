@@ -7,6 +7,7 @@ import {
 import { AppContext, useAppContext } from "../../App";
 import { useGame } from "../../contexts/Game";
 import { useSoundContext } from "../../contexts/Sound";
+import { monetary } from "../../utilities/number";
 
 export function ActionBar() {
   const {
@@ -104,7 +105,7 @@ export function ActionBar() {
               key={index}
               availableAction={action}
               takeAction={takeAction}
-              title={action.type + (displaySize ? ` $${displaySize}` : "")}
+              title={action.type + (displaySize ? ` $${monetary(displaySize)}` : "")}
               className={className}
               stack={thisPlayer.stack}
               betOnTable={betOnTable}

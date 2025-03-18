@@ -3,6 +3,7 @@ import { useGame } from "../../contexts/Game";
 import { indexFromPosition } from "../../utilities/position_converter";
 import { AiOutlineCheckCircle } from "react-icons/ai";
 import CountUp from "react-countup";
+import { monetary } from "../../utilities/number";
 
 export function Bets() {
   return (
@@ -44,7 +45,7 @@ function Bet({ style, position }) {
             backgroundColor: colorFromAmount(amount),
           }}
         >
-          $<CountUp end={amount} preserveValue={true} duration={MONEY_EFFECT_DURATION} />
+          $<CountUp formattingFn={monetary} end={amount} preserveValue={true} duration={MONEY_EFFECT_DURATION} />
         </div>
       )}
       {betType === "check" && amount === 0 && (
@@ -76,7 +77,7 @@ function Pot() {
           backgroundColor: colorFromAmount(pot),
         }}
       >
-        $<CountUp end={pot} preserveValue={true} duration={MONEY_EFFECT_DURATION} />
+        $<CountUp formattingFn={monetary} end={pot} preserveValue={true} duration={MONEY_EFFECT_DURATION} />
       </div>
     </div>
   );

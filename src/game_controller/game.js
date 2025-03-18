@@ -1,7 +1,7 @@
 const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
-const { generateBotName, getRandomPhrase, replaceObj } = require("./utils");
+const { generateBotName, getRandomPhrase, replaceObj, monetary } = require("./utils");
 const createBot = require("./bot");
 const robohashAvatars = require("robohash-avatars");
 const {
@@ -835,7 +835,7 @@ function createGame(
     for (let winner of state.winners) {
       const info = `${
         state.players[winner.index].name
-      } won $${winAmount} with ${winner.type.toUpperCase()} ${winner.cards
+      } won $${monetary(winAmount)} with ${winner.type.toUpperCase()} ${winner.cards
         .map((c) => c.value + c.suit)
         .join(" ")}`;
       if (!onInfo) {

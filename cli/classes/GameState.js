@@ -1,4 +1,4 @@
-import { capitalize, getAlignedTable } from "../utils.js";
+import { capitalize, getAlignedTable, monetary } from "../utils.js";
 import chalk from "chalk";
 
 class GameState {
@@ -48,6 +48,10 @@ class GameState {
     return this.players[this.heroIndex];
   }
 
+  getHeroBet() {
+    return this.bets[this.heroIndex];
+  }
+
   getPrintedAction(idx) {
     // if (this.players[idx]?.folded) return "Fold";
     if (this.turnIndex === idx) return "Pending";
@@ -57,7 +61,7 @@ class GameState {
   }
 
   getPrintedAmount(idx) {
-    if (this.bets[idx]) return `${this.bets[idx]}`;
+    if (this.bets[idx]) return `${monetary(this.bets[idx])}`;
     return "";
   }
 
@@ -92,10 +96,11 @@ class GameState {
       if (action.type === "raise" || action.type === "bet") {
         const minSize = action.minSize + this.currentBetSize;
         const maxSize = action.maxSize + this.currentBetSize;
-        if (minSize === maxSize) actions.push(`${action.type} ${minSize}`);
-        else actions.push(`${action.type} ${minSize}-${maxSize}`);
+        if (minSize === maxSize) actions.push(`${action.type} ${monetary(minSize)}`);
+        else actions.push(`${action.type} ${monetary(minSize)} - ${monetary(maxSize)}`);
       } else if (action.type === "call") {
-        actions.push(`${action.type} ${this.currentBetSize} (Enter)`);
+        const toCall = Math.min(this.currentBetSize, this.getHero().stack + this.getHeroBet());
+        actions.push(`${action.type} ${monetary(toCall)} (Enter)`);
       } else if (action.type === "check") {
         actions.push(`${action.type} (Enter)`);
       } else {
@@ -129,7 +134,7 @@ class GameState {
             result.type.toUpperCase() +
             " " +
             this.getPrintedCards(result.cards);
-          playerData.amount = `+${Math.round(this.pot / this.winners.length)}`;
+          playerData.amount = `+${monetary(Math.round(this.pot / this.winners.length))}`;
         } else {
           playerData.action = "";
           playerData.amount = "";
@@ -138,7 +143,7 @@ class GameState {
         playerData.action = this.getPrintedAction(idx);
         playerData.amount = this.getPrintedAmount(idx);
       }
-      playerData.stack = `${player.stack}`;
+      playerData.stack = `${monetary(player.stack)}`;
       playerData.rank = this.playersRanking[idx] || "";
 
       if (heroFound) playersToDisplayAfterHero.push(playerData);
@@ -153,8 +158,8 @@ class GameState {
     ];
     const playerTable = getAlignedTable(playersToDisplay);
     const board = this.board.length ? this.getPrintedCards(this.board) : "-";
-    const blind = `${this.bigblindSize / 2}/${this.bigblindSize}`;
-    const pot = this.pot;
+    const blind = `${monetary(this.bigblindSize / 2)} / ${monetary(this.bigblindSize)}`;
+    const pot = monetary(this.pot);
     const optionsIfExist = this.isHeroTurn() ? `Options: ${this.getPrintedOptions()}` : "";
     const pressEnterToReady = !this.isPlaying && !this.getHero()?.ready ? "Press Enter to ready" : "";
     return `${playerTable}\n\nBoard: ${board}\nPot: ${pot}\nBlind: ${blind}\nMessage: ${this.message || "-"}\n${optionsIfExist}${pressEnterToReady}`;
