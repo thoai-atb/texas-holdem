@@ -36,10 +36,10 @@ function createGame(
   *****************************************************************************/
   const state = {
     id: randomId(), // to identify different games when resetting
-    players: new Array(9).fill(null),
-    bets: new Array(9).fill(0), // amount of bets for each seat
-    betTypes: new Array(9).fill(null), // "check" | "call" | "raise"
-    playersRanking: new Array(9).fill(0), // players ranking are updated after each round
+    players: new Array(gameConfig.MAX_PLAYERS).fill(null),
+    bets: new Array(gameConfig.MAX_PLAYERS).fill(0), // amount of bets for each seat
+    betTypes: new Array(gameConfig.MAX_PLAYERS).fill(null), // "check" | "call" | "raise"
+    playersRanking: new Array(gameConfig.MAX_PLAYERS).fill(0), // players ranking are updated after each round
     deck: [],
     board: [],
     pot: 0,
@@ -155,7 +155,7 @@ function createGame(
   ======================================= */
   const getAvailableSeats = () => {
     const availableSeats = [];
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < gameConfig.MAX_PLAYERS; i++) {
       if (!state.players[i]) availableSeats.push(i);
     }
     return availableSeats;
@@ -163,7 +163,7 @@ function createGame(
 
   const randomAvailableSeat = () => {
     const availableSeats = [];
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < gameConfig.MAX_PLAYERS; i++) {
       if (!state.players[i]) availableSeats.push(i);
     }
     if (availableSeats.length === 0) return -1;
@@ -233,7 +233,7 @@ function createGame(
   };
 
   const fillBots = () => {
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < gameConfig.MAX_PLAYERS; i++) {
       if (
         state.players[i] === null &&
         state.bigblindSize <= settings.starterStack

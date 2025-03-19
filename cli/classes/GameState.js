@@ -67,10 +67,7 @@ class GameState {
 
   getPrintedPlayerHand(idx) {
     if (this.players[idx].folded) return "";
-    if (this.showDown) {
-      return this.getPrintedCards(this.players[idx].cards);
-    }
-    if (this.heroIndex === idx) {
+    if (this.showDown || this.heroIndex === idx || this.allPlayersAllIn) {
       return this.getPrintedCards(this.players[idx].cards);
     }
     if (this.players[idx].cards.length) return "XX XX";

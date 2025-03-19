@@ -8,10 +8,12 @@ const path = require("path");
 const { randomId } = require("./src/utils/random_id");
 const fs = require("fs");
 const ini = require("ini");
+const { parseIniStringToNumber } = require("./src/utils/ini_converter");
 
 // Read the INI configuration file
 const configFile = path.join(__dirname, "./server.ini");
 const config = ini.parse(fs.readFileSync(configFile, "utf-8"));
+parseIniStringToNumber(config);
 
 // Express app
 const app = express();
@@ -38,7 +40,7 @@ const io = socket(server, {
 });
 
 const connections = [];
-const playerData = new Array(9).fill(null);
+const playerData = new Array(config.Game.MAX_PLAYERS).fill(null);
 var chatLogging = true;
 
 // Init game
