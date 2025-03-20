@@ -7,6 +7,8 @@ class GameState {
     this.heroIndex = undefined;
     this.message = ""; // message to display
     this.colorful = true; // cards have color?
+    this.earlyFold = false; // hero wants to fold before his turn?
+    this.earlyReady = false; // hero wants to ready before round end?
   }
 
   updateState(gameState) {
@@ -40,8 +42,24 @@ class GameState {
     }, 3000);
   }
 
+  updatePrintedState() {
+    const printedState = this.getPrintedState();
+    if (this.printedState === printedState) return false;
+    this.printedState = printedState;
+    return true;
+  }
+
+  getAvailableAction(...actionTypes) {
+    return this.availableActions.find(action => actionTypes.includes(action.type));
+  }
+
   isHeroTurn() {
     return this.heroIndex === this.turnIndex;
+  }
+
+  isHeroPlaying() {
+    const hero = this.getHero();
+    return hero.cards.length > 0 && !hero.folded;
   }
 
   getHero() {
@@ -53,7 +71,6 @@ class GameState {
   }
 
   getPrintedAction(idx) {
-    // if (this.players[idx]?.folded) return "Fold";
     if (this.turnIndex === idx) return "Pending";
     if (this.players[idx].folded) return "";
     if (this.betTypes[idx]) return capitalize(this.betTypes[idx]);
@@ -160,13 +177,6 @@ class GameState {
     const optionsIfExist = this.isHeroTurn() ? `Options: ${this.getPrintedOptions()}` : "";
     const pressEnterToReady = !this.isPlaying && !this.getHero()?.ready ? "Press Enter to ready" : "";
     return `${playerTable}\n\nBoard: ${board}\nPot: ${pot}\nBlind: ${blind}\nMessage: ${this.message || "-"}\n${optionsIfExist}${pressEnterToReady}`;
-  }
-
-  updatePrintedState() {
-    const printedState = this.getPrintedState();
-    if (this.printedState === printedState) return false;
-    this.printedState = printedState;
-    return true;
   }
 }
 
