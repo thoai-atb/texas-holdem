@@ -1,7 +1,12 @@
 const { findWinners, HandRank } = require("../texas_holdem/evaluator");
 const { generateDeck, dealCards } = require("../texas_holdem/generator");
 const { randomId } = require("../utils/random_id");
-const { generateBotName, getRandomPhrase, replaceObj, monetary } = require("./utils");
+const {
+  generateBotName,
+  getRandomPhrase,
+  replaceObj,
+  monetary,
+} = require("./utils");
 const createBot = require("./bot");
 const robohashAvatars = require("robohash-avatars");
 const {
@@ -451,11 +456,15 @@ function createGame(
         // Begin the timer
         for (let i = 0; i < settings.secondsWaitToStart; i++) {
           setTimeout(() => {
-            state.gameStartCountDown = settings.secondsWaitToStart - i;
-            if (!state.playing) onGameStartCountDown(state.gameStartCountDown);
+            if (!state.playing) {
+              state.gameStartCountDown = settings.secondsWaitToStart - i;
+              onGameStartCountDown(state.gameStartCountDown);
+            }
           }, i * 1000);
         }
-        setTimeout(() => startGame(), settings.secondsWaitToStart * 1000);
+        setTimeout(() => {
+          if (!state.playing) startGame();
+        }, settings.secondsWaitToStart * 1000);
       }
     }
   };
@@ -833,9 +842,9 @@ function createGame(
     state.winAmount = winAmount;
 
     for (let winner of state.winners) {
-      const info = `${
-        state.players[winner.index].name
-      } won $${monetary(winAmount)} with ${winner.type.toUpperCase()} ${winner.cards
+      const info = `${state.players[winner.index].name} won $${monetary(
+        winAmount
+      )} with ${winner.type.toUpperCase()} ${winner.cards
         .map((c) => c.value + c.suit)
         .join(" ")}`;
       if (!onInfo) {
