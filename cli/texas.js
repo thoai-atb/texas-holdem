@@ -83,6 +83,14 @@ const initSocket = (playerName, serverAddr) => {
     }
   });
 
+  socket.on("turn_time_out_count_down", (time) => {
+    if (time < 0) gameState.updateMessage("");
+    else gameState.updateMessage(`TURN END IN: ${time}`);
+    if (gameState.updatePrintedState()) {
+      printCurrentBoard(gameState);
+    }
+  });
+
   socket.on("seat_index", (index) => {
     gameState.updateHeroIndex(index);
   });

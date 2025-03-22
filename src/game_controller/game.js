@@ -33,6 +33,7 @@ function createGame(
   onChat,
   onEndRound,
   onGameStartCountDown,
+  onTurnTimeOutCountDown,
   gameConfig
 ) {
   /*****************************************************************************
@@ -73,7 +74,8 @@ function createGame(
     showDown: false, // is the game announcing the winner?
     allPlayersAllIn: false, // is all players alled in? - no more actions from here?
     lastChatTimeStamp: 0, // used to moderate bot chats - only belongs to bots
-    gameStartCountDown: -1, // when enough players are ready, after some time, force starting the game
+    gameStartCountDownId: null, // when enough players are ready, after some time, force starting the game
+    turnTimeOutCountDownId: null, // when a player's turn is started, after some time, force the player to fold
   };
 
   /**************************************************************************************
@@ -98,6 +100,7 @@ function createGame(
     endRoundAutoFillBots: gameConfig.END_ROUND_AUTO_FILL_BOTS,
     starterStack: parseInt(gameConfig.STARTER_STACK),
     secondsWaitToStart: parseInt(gameConfig.SECONDS_WAIT_TO_START), // time wait to start the game after enough players are ready
+    secondsWaitBetweenTurns: parseInt(gameConfig.SECONDS_WAIT_BETWEEN_TURNS), // time wait between turns
   };
 
   /**************************************************************************************
@@ -450,22 +453,25 @@ function createGame(
       !state.playing
     )
       startGame(); // Start the game if all players are ready
+
     // Set timer to start the game if two or more players are ready
     else if (countReadyPlayers() >= 2 && !state.playing) {
-      if (state.gameStartCountDown < 0) {
-        // Begin the timer
-        for (let i = 0; i < settings.secondsWaitToStart; i++) {
-          setTimeout(() => {
-            if (!state.playing) {
-              state.gameStartCountDown = settings.secondsWaitToStart - i;
-              onGameStartCountDown(state.gameStartCountDown);
-            }
-          }, i * 1000);
-        }
+      // SETUP TIMER TO START THE GAME
+      const timeOutId = Date.now();
+      state.gameStartCountDownId = timeOutId;
+      for (let i = 0; i < settings.secondsWaitToStart; i++) {
         setTimeout(() => {
-          if (!state.playing) startGame();
-        }, settings.secondsWaitToStart * 1000);
+          if (state.gameStartCountDownId === timeOutId && !state.playing) {
+            onGameStartCountDown(settings.secondsWaitToStart - i);
+          }
+        }, i * 1000);
       }
+      setTimeout(() => {
+        if (state.gameStartCountDownId === timeOutId && !state.playing) {
+          onGameStartCountDown(-1);
+          startGame();
+        }
+      }, settings.secondsWaitToStart * 1000);
     }
   };
 
@@ -826,6 +832,23 @@ function createGame(
       });
     }
     state.availableActions = availableActions;
+
+    // SETUP TURN TIMEOUT
+    const timeOutId = Date.now();
+    state.turnTimeOutCountDownId = timeOutId;
+    for (let i = 0; i < Math.min(settings.secondsWaitBetweenTurns, 10); i++) {
+      setTimeout(() => {
+        if (state.turnTimeOutCountDownId === timeOutId && state.turnIndex > -1) {
+          onTurnTimeOutCountDown(i);
+        }
+      }, (settings.secondsWaitBetweenTurns - i) * 1000);
+    }
+    setTimeout(() => {
+      if (state.turnTimeOutCountDownId === timeOutId && state.turnIndex > -1) {
+        fold() || check();
+        onTurnTimeOutCountDown(-1);
+      }
+    }, settings.secondsWaitBetweenTurns * 1000);
     onUpdate();
 
     // CHECK FOR BOT TURN
@@ -836,6 +859,7 @@ function createGame(
 
   const showDown = () => {
     state.turnIndex = -1;
+    state.availableActions = [];
     state.showDown = true;
     state.winners = findWinners(state.players, state.board);
     const winAmount = Math.floor(state.pot / state.winners.length);
@@ -974,10 +998,6 @@ function createGame(
     state.winners = [];
     state.showDown = false;
     state.round = 0;
-
-    // Reset the count down timer
-    state.gameStartCountDown = -1;
-    onGameStartCountDown(state.gameStartCountDown);
 
     if (state.buttonIndex < 0 || !isQualified(state.buttonIndex)) nextButton(); // Move button to next qualified player
     const isPlayerJoining = (tempIndex) =>

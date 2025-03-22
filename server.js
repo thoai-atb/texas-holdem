@@ -54,6 +54,7 @@ const game = createGame(
   (onChat = chatEvent),
   (onEndRound = endRoundEvent),
   (onGameStartCountDown = gameStartCountDownEvent),
+  (onTurnTimeOutCountDown = turnTimeOutCountDownEvent),
   (gameConfig = config.Game)
 );
 
@@ -111,6 +112,10 @@ function endRoundEvent() {
 
 function gameStartCountDownEvent(seconds) {
   io.sockets.emit("game_start_count_down", seconds);
+}
+
+function turnTimeOutCountDownEvent(seconds) {
+  io.sockets.emit("turn_time_out_count_down", seconds);
 }
 
 function playGameSoundFx(sound) {
