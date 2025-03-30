@@ -38,7 +38,7 @@ function evaluate(hand, board) {
   const wrappedResult = {
     ...result,
     strength:
-      HandRank[result.type] * 100000000 +
+      HandRank[result.type] * 100000000000 +
       result.strength * 1000000 +
       (valueToIndex(sortedHand[0].value) + 1) * 100 +
       (valueToIndex(sortedHand[1].value) + 1),
@@ -154,7 +154,7 @@ function evalutateRaw(hand, board) {
     for (let i = suit.length - 1; i > 0; i--) {
       if (suit[i] === 1) {
         count++;
-        score += i + 1;
+        score += 2 ** i;
         flushCards.push(getCard(matrix.indexOf(suit), i));
         if (count === 5) {
           flush = score;
