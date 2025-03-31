@@ -39,6 +39,7 @@ export function GameProvider({ children }) {
   const [botDefeatedList, setBotDefeatedList] = React.useState();
   const [gameTheme, setGameTheme] = React.useState("default");
   const [gameStartCountDown, setGameStartCountDown] = React.useState(-1);
+  const [gameTurnTimeOutCountDown, setGameTurnTimeOutCountDown] = React.useState(-1);
   const [coverCard, setCoverCard] = React.useState(true); // The actual state of the cover card
 
   const MONEY_EFFECT_DURATION = 0.5;
@@ -75,6 +76,9 @@ export function GameProvider({ children }) {
     });
     socket.on("game_start_count_down", (seconds) => {
       setGameStartCountDown(seconds);
+    });
+    socket.on("turn_time_out_count_down", (seconds) => {
+      setGameTurnTimeOutCountDown(seconds);
     });
     socket.on("seat_index", (index) => {
       setSeatIndex(index);
@@ -232,6 +236,7 @@ export function GameProvider({ children }) {
     botDefeatedList,
     gameTheme,
     gameStartCountDown,
+    gameTurnTimeOutCountDown,
     // Game state & settings (end)
 
     coverCard,

@@ -468,7 +468,6 @@ function createGame(
       }
       setTimeout(() => {
         if (state.gameStartCountDownId === timeOutId && !state.playing) {
-          onGameStartCountDown(-1);
           startGame();
         }
       }, settings.secondsWaitToStart * 1000);
@@ -836,6 +835,7 @@ function createGame(
     // SETUP TURN TIMEOUT
     const timeOutId = Date.now();
     state.turnTimeOutCountDownId = timeOutId;
+    onTurnTimeOutCountDown(-1);
     for (let i = 0; i < Math.min(settings.secondsWaitBetweenTurns, 10); i++) {
       setTimeout(() => {
         if (state.turnTimeOutCountDownId === timeOutId && state.turnIndex > -1) {
@@ -846,7 +846,6 @@ function createGame(
     setTimeout(() => {
       if (state.turnTimeOutCountDownId === timeOutId && state.turnIndex > -1) {
         fold() || check();
-        onTurnTimeOutCountDown(-1);
       }
     }, settings.secondsWaitBetweenTurns * 1000);
     onUpdate();
@@ -864,6 +863,7 @@ function createGame(
     state.winners = findWinners(state.players, state.board);
     const winAmount = Math.floor(state.pot / state.winners.length);
     state.winAmount = winAmount;
+    onTurnTimeOutCountDown(-1);
 
     for (let winner of state.winners) {
       const info = `${state.players[winner.index].name} won $${monetary(
@@ -1018,6 +1018,7 @@ function createGame(
     state.turnIndex = tempIndex;
     state.completeActionSeat = tempIndex;
     onSoundEffect("flip");
+    onGameStartCountDown(-1);
     prepareTurn();
   };
 

@@ -22,6 +22,7 @@ class CommandExecutor {
       ["add_bot", "Add a bot to the room"],
       ["set_blind <big blind> <increment>", "Set the big blind and increment"],
       ["set_starter <amount>", "Set the starter stack (for new players that join the table)"],
+      ["bot_speed", "Toggle bot speed"],
       ["start", "Force start the game"],
       ["color", "Toggle colorful mode"],
     ];
@@ -240,6 +241,7 @@ class CommandExecutor {
       "start",
       "set_blind",
       "set_starter",
+      "bot_speed",
     ];
     if (directCmds.includes(cmd)) {
       socket.emit("chat_message", `/${cmd} ${args.join(" ")}`);

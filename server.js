@@ -151,7 +151,7 @@ function playGameSoundFx(sound) {
 // On connection, assign callbacks to socket to handle events
 io.on("connection", (socket) => {
   // NAME
-  const name = socket.handshake.query.name;
+  const name = socket.handshake.query.name.trim();
 
   if (game.nameExisted(name)) {
     socket.emit(

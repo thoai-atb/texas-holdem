@@ -1,5 +1,8 @@
 const { CardSuit, CardValue } = require("./enum");
 
+const HAND_STRENGTH_MULTIPLIER = 10000;
+const HIGH_CARD_STRENGTH_ADJUSTMENT = 2; // Duece = 2, Three = 3, ..., Ace = 14
+
 // eslint-disable-next-line no-extend-native
 Array.prototype.count = function (filter) {
   let count = 0;
@@ -38,10 +41,8 @@ function evaluate(hand, board) {
   const wrappedResult = {
     ...result,
     strength:
-      HandRank[result.type] * 100000000000 +
-      result.strength * 1000000 +
-      (valueToIndex(sortedHand[0].value) + 1) * 100 +
-      (valueToIndex(sortedHand[1].value) + 1),
+      // XX (hand rank) YYYY (primary strength) ZZZZ (secondary strength) - Each letter represents a digit
+      HandRank[result.type] * HAND_STRENGTH_MULTIPLIER * HAND_STRENGTH_MULTIPLIER + result.strength
   };
   return wrappedResult;
 }
@@ -69,12 +70,13 @@ function evalutateRaw(hand, board) {
         count = 0;
       }
     }
-    if (straightFlush >= 0) break;
+    if (straightFlush > 0) break;
   }
-  if (straightFlush >= 0) {
+  if (straightFlush > 0) {
+    const primaryStrength = adjustIndexToStrength(straightFlush); // YYYY (primary strength)
     const result = {
       type: "straight flush",
-      strength: straightFlush + 1,
+      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER, // YYYY (primary strength)
       cards: straightFlushCards,
     };
     return result;
@@ -93,17 +95,30 @@ function evalutateRaw(hand, board) {
       break;
     }
   }
-  if (fourOfAKind >= 0) {
+  if (fourOfAKind > 0) {
+    const primaryStrength = adjustIndexToStrength(fourOfAKind); // YYYY (primary strength)
+    let secondaryStrength = 0; // ZZZZ (secondary strength)
+    // find kicker card
+    let kickerCard = null;
+    for (let i = matrix[0].length - 1; i > 0; i--) {
+      for (let j = 0; j < matrix.length; j++) {
+        if (matrix[j][i] === 1 && i !== fourOfAKind) {
+          kickerCard = getCard(j, i);
+          secondaryStrength = adjustIndexToStrength(i); // ZZZZ (secondary strength)
+          break;
+        }
+      }
+      if (kickerCard) break;
+    }
     const result = {
       type: "four of a kind",
-      strength: fourOfAKind + 1,
-      cards: fourOfAKindCards,
+      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
+      cards: [...fourOfAKindCards, kickerCard],
     };
     return result;
   }
 
   // check for full house
-  let fullHouse = -1;
   let threeOfAKind = -1;
   let threeOfAKindCards = [];
   for (let i = matrix[0].length - 1; i > 0; i--) {
@@ -118,7 +133,7 @@ function evalutateRaw(hand, board) {
       break;
     }
   }
-  if (threeOfAKind >= 0) {
+  if (threeOfAKind > 0) {
     let pairOtherThanThreeOfAKind = -1;
     let pairOtherThanThreeOfAKindCards = [];
     for (let i = matrix[0].length - 1; i > 0; i--) {
@@ -133,11 +148,12 @@ function evalutateRaw(hand, board) {
         break;
       }
     }
-    if (pairOtherThanThreeOfAKind >= 0) {
-      fullHouse = threeOfAKind + 1 + (pairOtherThanThreeOfAKind + 1) * 0.01;
+    if (pairOtherThanThreeOfAKind > 0) {
+      const primaryStrength = adjustIndexToStrength(threeOfAKind); // YYYY (primary strength)
+      const secondaryStrength = adjustIndexToStrength(pairOtherThanThreeOfAKind); // ZZZZ (secondary strength)
       const result = {
         type: "full house",
-        strength: fullHouse,
+        strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
         cards: [...threeOfAKindCards, ...pairOtherThanThreeOfAKindCards],
       };
       return result;
@@ -154,7 +170,7 @@ function evalutateRaw(hand, board) {
     for (let i = suit.length - 1; i > 0; i--) {
       if (suit[i] === 1) {
         count++;
-        score += 2 ** i;
+        score += 2 ** i; // Binary representation based on largest card value to smallest card value
         flushCards.push(getCard(matrix.indexOf(suit), i));
         if (count === 5) {
           flush = score;
@@ -167,7 +183,7 @@ function evalutateRaw(hand, board) {
   if (flush >= 0) {
     const result = {
       type: "flush",
-      strength: flush,
+      strength: flush * HAND_STRENGTH_MULTIPLIER, // YYYY (primary strength)
       cards: flushCards,
     };
     return result;
@@ -183,6 +199,7 @@ function evalutateRaw(hand, board) {
       for (let j = 0; j < matrix.length; j++) {
         if (matrix[j][i] === 1) {
           straightCards.push(getCard(j, i));
+          break;
         }
       }
       if (count === 5) {
@@ -194,10 +211,10 @@ function evalutateRaw(hand, board) {
       straightCards = [];
     }
   }
-  if (straight >= 0) {
+  if (straight > 0) {
     const result = {
       type: "straight",
-      strength: straight + 1,
+      strength: adjustIndexToStrength(straight) * HAND_STRENGTH_MULTIPLIER, // YYYY (primary strength)
       cards: straightCards,
     };
     return result;
@@ -205,10 +222,24 @@ function evalutateRaw(hand, board) {
 
   // check for three of a kind
   if (threeOfAKind >= 0) {
+    // get all kicker cards
+    let kickerCards = [];
+    let kickerScore = 0;
+    for (let i = matrix[0].length - 1; i > 0; i--) {
+      for (let j = 0; j < matrix.length; j++) {
+        if (matrix[j][i] === 1 && i !== threeOfAKind) {
+          kickerCards.push(getCard(j, i));
+          kickerScore += 2 ** i; // Binary representation based on largest card value to smallest card value
+        }
+      }
+      if (kickerCards.length === 2) break;
+    }
+    const primaryStrength = adjustIndexToStrength(threeOfAKind); // YYYY (primary strength)
+    const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
     const result = {
       type: "three of a kind",
-      strength: threeOfAKind + 1,
-      cards: threeOfAKindCards,
+      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
+      cards: [...threeOfAKindCards, ...kickerCards],
     };
     return result;
   }
@@ -228,7 +259,7 @@ function evalutateRaw(hand, board) {
       break;
     }
   }
-  if (highPair >= 0) {
+  if (highPair > 0) {
     let secondPair = -1;
     let secondPairCards = [];
     for (let i = matrix[0].length - 1; i > 0; i--) {
@@ -243,46 +274,89 @@ function evalutateRaw(hand, board) {
         break;
       }
     }
-    if (secondPair >= 0) {
+    if (secondPair > 0) {
+      // get kicker card
+      let kickerCard = null;
+      let kickerScore = 0;
+      for (let i = matrix[0].length - 1; i > 0; i--) {
+        for (let j = 0; j < matrix.length; j++) {
+          if (matrix[j][i] === 1 && i !== highPair && i !== secondPair) {
+            kickerCard = getCard(j, i);
+            kickerScore = adjustIndexToStrength(i); // ZZZZ (secondary strength)
+            break;
+          }
+          if (kickerCard) break;
+        }
+        if (kickerCard) break;
+      }
+      const primaryStrength = adjustIndexToStrength(highPair) * 100 + adjustIndexToStrength(secondPair); // YYYY (primary strength)
+      const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
       const result = {
         type: "two pair",
-        strength: highPair + 1 + (secondPair + 1) * 0.01,
-        cards: [...highPairCards, ...secondPairCards],
+        strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
+        cards: [...highPairCards, ...secondPairCards, kickerCard],
       };
       return result;
     }
   }
 
   // check for pair
-  if (highPair >= 0) {
+  if (highPair > 0) {
+    // get kicker cards
+    let kickerCards = [];
+    let kickerScore = 0;
+    for (let i = matrix[0].length - 1; i > 0; i--) {
+      for (let j = 0; j < matrix.length; j++) {
+        if (matrix[j][i] === 1 && i !== highPair) {
+          kickerCards.push(getCard(j, i));
+          kickerScore += 2 ** i; // Binary representation based on largest card value to smallest card value
+        }
+      }
+      if (kickerCards.length === 3) break;
+    }
+    const primaryStrength = adjustIndexToStrength(highPair); // YYYY (primary strength)
+    const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
     const result = {
       type: "pair",
-      strength: highPair + 1,
-      cards: highPairCards,
+      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
+      cards: [...highPairCards, ...kickerCards],
     };
     return result;
   }
 
   // check for high card
   let highCard = -1;
-  let highCardCards = [];
+  let highCardCard = null;
   for (let i = matrix[0].length - 1; i > 0; i--) {
     for (let j = 0; j < matrix.length; j++) {
       if (matrix[j][i] === 1) {
         highCard = i;
-        highCardCards.push(getCard(j, i));
+        highCardCard = getCard(j, i);
         break;
       }
     }
-    if (highCard >= 0) {
+    if (highCard > 0) {
       break;
     }
   }
-  if (highCard >= 0) {
+  if (highCard > 0) {
+    let kickerCards = [];
+    let kickerScore = 0;
+    for (let i = matrix[0].length - 1; i > 0; i--) {
+      for (let j = 0; j < matrix.length; j++) {
+        if (matrix[j][i] === 1 && i !== highCard) {
+          kickerCards.push(getCard(j, i));
+          kickerScore += 2 ** i; // Binary representation based on largest card value to smallest card value
+        }
+      }
+      if (kickerCards.length === 4) break;
+    }
+    const primaryStrength = adjustIndexToStrength(highCard); // YYYY (primary strength)
+    const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
     const result = {
       type: "high card",
-      strength: highCard + 1,
-      cards: highCardCards,
+      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
+      cards: [highCardCard, ...kickerCards],
     };
     return result;
   }
@@ -306,6 +380,10 @@ const HandRank = {
   "four of a kind": 8,
   "straight flush": 9,
 };
+
+const adjustIndexToStrength = (index) => {
+  return index + HIGH_CARD_STRENGTH_ADJUSTMENT;
+}
 
 const getCard = (suitIndex, valueIndex) => {
   return {
