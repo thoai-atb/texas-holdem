@@ -1,7 +1,7 @@
 const { CardSuit, CardValue } = require("./enum");
 
-const HAND_STRENGTH_MULTIPLIER = 10000;
-const HIGH_CARD_STRENGTH_ADJUSTMENT = 2; // Duece = 2, Three = 3, ..., Ace = 14
+const HAND_STRENGTH_MULTIPLIER = 100000;
+const HIGH_CARD_STRENGTH_ADJUSTMENT = 1; // Duece = 2, Three = 3, ..., Ace = 14
 
 // eslint-disable-next-line no-extend-native
 Array.prototype.count = function (filter) {
@@ -41,7 +41,7 @@ function evaluate(hand, board) {
   const wrappedResult = {
     ...result,
     strength:
-      // XX (hand rank) YYYY (primary strength) ZZZZ (secondary strength) - Each letter represents a digit
+      // XX (hand rank) YYYYY (primary strength) ZZZZZ (secondary strength) - Each letter represents a digit
       HandRank[result.type] * HAND_STRENGTH_MULTIPLIER * HAND_STRENGTH_MULTIPLIER + result.strength
   };
   return wrappedResult;
@@ -73,10 +73,10 @@ function evalutateRaw(hand, board) {
     if (straightFlush > 0) break;
   }
   if (straightFlush > 0) {
-    const primaryStrength = adjustIndexToStrength(straightFlush); // YYYY (primary strength)
+    const primaryStrength = adjustIndexToStrength(straightFlush); // YYYYY (primary strength)
     const result = {
       type: "straight flush",
-      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER, // YYYY (primary strength)
+      strength: primaryStrength * HAND_STRENGTH_MULTIPLIER, // YYYYY (primary strength)
       cards: straightFlushCards,
     };
     return result;
@@ -96,15 +96,15 @@ function evalutateRaw(hand, board) {
     }
   }
   if (fourOfAKind > 0) {
-    const primaryStrength = adjustIndexToStrength(fourOfAKind); // YYYY (primary strength)
-    let secondaryStrength = 0; // ZZZZ (secondary strength)
+    const primaryStrength = adjustIndexToStrength(fourOfAKind); // YYYYY (primary strength)
+    let secondaryStrength = 0; // ZZZZZ (secondary strength)
     // find kicker card
     let kickerCard = null;
     for (let i = matrix[0].length - 1; i > 0; i--) {
       for (let j = 0; j < matrix.length; j++) {
         if (matrix[j][i] === 1 && i !== fourOfAKind) {
           kickerCard = getCard(j, i);
-          secondaryStrength = adjustIndexToStrength(i); // ZZZZ (secondary strength)
+          secondaryStrength = adjustIndexToStrength(i); // ZZZZZ (secondary strength)
           break;
         }
       }
@@ -149,8 +149,8 @@ function evalutateRaw(hand, board) {
       }
     }
     if (pairOtherThanThreeOfAKind > 0) {
-      const primaryStrength = adjustIndexToStrength(threeOfAKind); // YYYY (primary strength)
-      const secondaryStrength = adjustIndexToStrength(pairOtherThanThreeOfAKind); // ZZZZ (secondary strength)
+      const primaryStrength = adjustIndexToStrength(threeOfAKind); // YYYYY (primary strength)
+      const secondaryStrength = adjustIndexToStrength(pairOtherThanThreeOfAKind); // ZZZZZ (secondary strength)
       const result = {
         type: "full house",
         strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
@@ -183,7 +183,7 @@ function evalutateRaw(hand, board) {
   if (flush >= 0) {
     const result = {
       type: "flush",
-      strength: flush * HAND_STRENGTH_MULTIPLIER, // YYYY (primary strength)
+      strength: flush * HAND_STRENGTH_MULTIPLIER, // YYYYY (primary strength)
       cards: flushCards,
     };
     return result;
@@ -214,7 +214,7 @@ function evalutateRaw(hand, board) {
   if (straight > 0) {
     const result = {
       type: "straight",
-      strength: adjustIndexToStrength(straight) * HAND_STRENGTH_MULTIPLIER, // YYYY (primary strength)
+      strength: adjustIndexToStrength(straight) * HAND_STRENGTH_MULTIPLIER, // YYYYY (primary strength)
       cards: straightCards,
     };
     return result;
@@ -234,8 +234,8 @@ function evalutateRaw(hand, board) {
       }
       if (kickerCards.length === 2) break;
     }
-    const primaryStrength = adjustIndexToStrength(threeOfAKind); // YYYY (primary strength)
-    const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
+    const primaryStrength = adjustIndexToStrength(threeOfAKind); // YYYYY (primary strength)
+    const secondaryStrength = kickerScore; // ZZZZZ (secondary strength)
     const result = {
       type: "three of a kind",
       strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
@@ -282,15 +282,15 @@ function evalutateRaw(hand, board) {
         for (let j = 0; j < matrix.length; j++) {
           if (matrix[j][i] === 1 && i !== highPair && i !== secondPair) {
             kickerCard = getCard(j, i);
-            kickerScore = adjustIndexToStrength(i); // ZZZZ (secondary strength)
+            kickerScore = adjustIndexToStrength(i); // ZZZZZ (secondary strength)
             break;
           }
           if (kickerCard) break;
         }
         if (kickerCard) break;
       }
-      const primaryStrength = adjustIndexToStrength(highPair) * 100 + adjustIndexToStrength(secondPair); // YYYY (primary strength)
-      const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
+      const primaryStrength = adjustIndexToStrength(highPair) * 100 + adjustIndexToStrength(secondPair); // YYYYY (primary strength)
+      const secondaryStrength = kickerScore; // ZZZZZ (secondary strength)
       const result = {
         type: "two pair",
         strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
@@ -314,8 +314,8 @@ function evalutateRaw(hand, board) {
       }
       if (kickerCards.length === 3) break;
     }
-    const primaryStrength = adjustIndexToStrength(highPair); // YYYY (primary strength)
-    const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
+    const primaryStrength = adjustIndexToStrength(highPair); // YYYYY (primary strength)
+    const secondaryStrength = kickerScore; // ZZZZZ (secondary strength)
     const result = {
       type: "pair",
       strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,
@@ -351,8 +351,8 @@ function evalutateRaw(hand, board) {
       }
       if (kickerCards.length === 4) break;
     }
-    const primaryStrength = adjustIndexToStrength(highCard); // YYYY (primary strength)
-    const secondaryStrength = kickerScore; // ZZZZ (secondary strength)
+    const primaryStrength = adjustIndexToStrength(highCard); // YYYYY (primary strength)
+    const secondaryStrength = kickerScore; // ZZZZZ (secondary strength)
     const result = {
       type: "high card",
       strength: primaryStrength * HAND_STRENGTH_MULTIPLIER + secondaryStrength,

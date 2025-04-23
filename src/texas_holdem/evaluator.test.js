@@ -25,7 +25,12 @@ function getStrengthDelta(hand1, hand2, board) {
   const parsedHand2 = hand2.map(parseCard);
   const parsedBoard = board.map(parseCard);
 
-  return evaluate(parsedHand1, parsedBoard).strength - evaluate(parsedHand2, parsedBoard).strength;
+  const hand1Strength = evaluate(parsedHand1, parsedBoard).strength;
+  const hand2Strength = evaluate(parsedHand2, parsedBoard).strength;
+  // console.log("Hand 1: %s, Hand 2: %s", hand1, hand2);
+  // console.log("Board: %s", board);
+  // console.log("Hand 1 Strength: %d, Hand 2 Strength: %d\n", hand1Strength, hand2Strength);
+  return hand1Strength - hand2Strength;
 }
 
 test('High Card no Kicker = High Card no Kicker', () => {
@@ -37,7 +42,7 @@ test('Higher High Card > Lower High Card', () => {
 });
 
 test('Pair > High Card', () => {
-  expect(getStrengthDelta(['8♦', '2♣'], ['A♥', 'K♠'], ['10♥', 'J♠', '2♦', '9♣', '7♥'])).toBeGreaterThan(0);
+  expect(getStrengthDelta(['K♦', '2♣'], ['A♥', 'K♠'], ['10♥', 'J♠', '2♦', '9♣', '7♥'])).toBeGreaterThan(0);
 });
 
 test('Higher Pair > Lower Pair', () => {
@@ -82,6 +87,11 @@ test('Ace-high flush > King-Queen flush', () => {
 
 test('Full House > Flush', () => {
   expect(getStrengthDelta(['Q♥', 'Q♦'], ['4♥', '9♥'], ['Q♠', '5♥', '5♦', 'K♥', '3♥'])).toBeGreaterThan(0);
+});
+
+test('Full House > Flush (big flush)', () => {
+  console.log("Full House > Flush (2)");
+  expect(getStrengthDelta(['Q♣', 'Q♠'], ['5♠', '2♠'], ['Q♥', 'A♠', 'K♠', '8♥', '8♠'])).toBeGreaterThan(0);
 });
 
 test('Bigger Full House > Smaller Full House', () => {
