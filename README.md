@@ -2,6 +2,8 @@
 
 This is a place you can quickly play poker with your friends.
 
+![Screenshot](./screenshot.png)
+
 ## Usage
 
 Install dependencies for server and client with:
